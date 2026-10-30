@@ -55,6 +55,8 @@ if (typeof document !== "undefined") {
     setupAfterFloodGuide();
     setupPreferencesView();
     setupMapDownloader();
+    setupFirstRunModal();
+    setupSlmToast();
 
     // Load saved location profile if stored
     const savedDistrict = await getSetting("user_district");
@@ -176,6 +178,9 @@ export function switchTab(tab) {
   if (tab === "sos") renderSosContacts();
   if (tab === "preferences") renderPreferencesView();
   if (tab === "downloads") renderDownloadsView();
+
+  // Notify other systems of tab change (e.g. SLM toast)
+  window.dispatchEvent(new CustomEvent("floodsaathi:tab_changed", { detail: { tab } }));
 }
 
 // ==========================================
@@ -448,6 +453,19 @@ function setupAskSaathi() {
     });
   });
 
+  // Download Model shortcut button on Ask Saathi warning bar
+  document.getElementById("btn-saathi-download-model")?.addEventListener("click", () => {
+    switchTab("downloads");
+    setTimeout(() => {
+      const slmCard = document.querySelector("#view-downloads .plugins-grid .plugin-card:nth-child(2)");
+      if (slmCard) {
+        slmCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        slmCard.style.outline = "3px solid var(--red)";
+        setTimeout(() => { slmCard.style.outline = "none"; }, 2500);
+      }
+    }, 300);
+  });
+
   // Speech Recognition (Web Speech API)
   if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -524,6 +542,14 @@ async function submitChatQuery(query) {
       </div>
     ` : "";
 
+    const slmDownloaded = await getSetting("slm_model_downloaded", false);
+    const slmNoticeHtml = !slmDownloaded ? `
+      <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--mut); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
+        <span>⚠️ SLM model not downloaded · Running in offline emergency core</span>
+        <button class="link-to-slm-download" style="background:transparent; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;">Download Model (340 MB) →</button>
+      </div>
+    ` : "";
+
     botDiv.innerHTML = `
       <div class="bot-avatar">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
@@ -536,6 +562,7 @@ async function submitChatQuery(query) {
           <span>Source: ${response.source || "Official Disaster Guidelines"}</span>
           <span style="color:var(--green); font-weight:700;">Verified &check;</span>
         </div>
+        ${slmNoticeHtml}
       </article>
     `;
   } else {
@@ -552,6 +579,21 @@ async function submitChatQuery(query) {
 
   thread.appendChild(botDiv);
   thread.scrollTop = thread.scrollHeight;
+
+  botDiv.querySelectorAll(".link-to-slm-download").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      switchTab("downloads");
+      setTimeout(() => {
+        const slmCard = document.querySelector("#view-downloads .plugins-grid .plugin-card:nth-child(2)");
+        if (slmCard) {
+          slmCard.scrollIntoView({ behavior: "smooth", block: "center" });
+          slmCard.style.outline = "3px solid var(--red)";
+          setTimeout(() => { slmCard.style.outline = "none"; }, 2500);
+        }
+      }, 300);
+    });
+  });
 }
 
 // ==========================================
@@ -1221,6 +1263,51 @@ export async function renderDownloadsView() {
   if (hiBtn) {
     hiBtn.textContent = hiDownloaded ? "Re-cache (3.9 MB)" : "Download (3.9 MB)";
   }
+
+  // 4. Sync Global Storage Summary Dashboard
+  const packs = getDownloadedMapPacks();
+  const mapsMB = packs.reduce((acc, p) => acc + (p.sizeMB || 0), 0);
+  const langsMB = (paDownloaded ? 4.2 : 0) + (hiDownloaded ? 3.9 : 0);
+  const slmMB = slmDownloaded ? 340 : 0;
+  const totalCachedMB = Math.round((mapsMB + langsMB + slmMB) * 10) / 10;
+
+  const storageTotalText = document.getElementById("storage-summary-total-text");
+  if (storageTotalText) {
+    storageTotalText.textContent = `${totalCachedMB} MB Cached`;
+    storageTotalText.className = totalCachedMB > 0 ? "plugin-badge active" : "plugin-badge";
+  }
+
+  const legendMaps = document.getElementById("legend-maps-val");
+  const legendLangs = document.getElementById("legend-langs-val");
+  const legendSlm = document.getElementById("legend-slm-val");
+
+  if (legendMaps) legendMaps.textContent = mapsMB > 0 ? `${Math.round(mapsMB)} MB` : "0 MB";
+  if (legendLangs) legendLangs.textContent = langsMB > 0 ? `${langsMB.toFixed(1)} MB` : "0 MB";
+  if (legendSlm) legendSlm.textContent = slmDownloaded ? "340 MB (Cached)" : "Not Downloaded";
+
+  const barMaps = document.getElementById("storage-bar-maps");
+  const barLangs = document.getElementById("storage-bar-langs");
+  const barSlm = document.getElementById("storage-bar-slm");
+
+  if (barMaps) barMaps.style.width = mapsMB > 0 ? `${Math.max(10, Math.min(45, Math.round(mapsMB)))}%` : "0%";
+  if (barLangs) barLangs.style.width = langsMB > 0 ? `${Math.max(8, Math.min(25, Math.round(langsMB * 2)))}%` : "0%";
+  if (barSlm) barSlm.style.width = slmDownloaded ? "65%" : "0%";
+
+  // 5. Sync Ask Saathi Chat Model Status
+  const saathiMissingBar = document.getElementById("saathi-slm-missing-bar");
+  const saathiModeBadge = document.getElementById("saathi-mode-badge");
+  if (saathiMissingBar) {
+    saathiMissingBar.style.display = slmDownloaded ? "none" : "flex";
+  }
+  if (saathiModeBadge) {
+    if (slmDownloaded && slmEnabled) {
+      saathiModeBadge.className = "plugin-badge active";
+      saathiModeBadge.textContent = "On-Device SLM (Active)";
+    } else {
+      saathiModeBadge.className = "plugin-badge";
+      saathiModeBadge.textContent = "M5 Offline Core";
+    }
+  }
 }
 
 export function setupDownloadsView() {
@@ -1528,6 +1615,157 @@ export function setupDownloadsView() {
     await downloadLangPack("hi", "noto_devanagari_TuG7UUFzXI5FBtUq5a8bjKYTZjtRU6Sgv3NaV_SNmI0b8QQCQmHN5DV_.woff2", "hi.json", "Hindi Devanagari");
     await initI18n();
     renderDownloadsView();
+  });
+}
+
+// ==========================================
+// FIRST-RUN LANGUAGE PICKER MODAL
+// Shown once on fresh install — picks lang, auto-downloads pack
+// ==========================================
+async function setupFirstRunModal() {
+  const modal = document.getElementById("first-run-modal");
+  if (!modal) return;
+
+  // Only show once
+  const seen = await getSetting("first_run_complete");
+  if (seen) return;
+
+  modal.style.display = "flex";
+
+  const labels = {
+    en: document.getElementById("frm-lang-en"),
+    hi: document.getElementById("frm-lang-hi"),
+    pa: document.getElementById("frm-lang-pa")
+  };
+  const radios = modal.querySelectorAll("input[name='frm-lang']");
+
+  const highlightSelected = () => {
+    const selected = modal.querySelector("input[name='frm-lang']:checked")?.value || "en";
+    for (const [code, label] of Object.entries(labels)) {
+      if (!label) continue;
+      label.style.borderColor = code === selected ? "var(--red)" : "var(--line)";
+      label.style.background = code === selected ? "#fff9f9" : "#f8fafc";
+    }
+  };
+  radios.forEach(r => r.addEventListener("change", highlightSelected));
+  highlightSelected();
+
+  const btn = document.getElementById("frm-continue-btn");
+  const progressWrap = document.getElementById("frm-progress-wrap");
+  const progressFill = document.getElementById("frm-progress-fill");
+  const progressMsg = document.getElementById("frm-progress-msg");
+  const progressPct = document.getElementById("frm-progress-pct");
+
+  btn?.addEventListener("click", async () => {
+    const chosenLang = modal.querySelector("input[name='frm-lang']:checked")?.value || "en";
+    btn.disabled = true;
+    btn.textContent = "Setting up offline translation packs…";
+    btn.style.opacity = "0.75";
+
+    await setLanguage(chosenLang);
+
+    // Auto-download language packs (Hindi & Punjabi)
+    if (progressWrap) progressWrap.style.display = "block";
+
+    const packsToDownload = chosenLang === "pa" 
+      ? ["pa", "hi"] 
+      : chosenLang === "hi" 
+        ? ["hi", "pa"] 
+        : ["pa", "hi"];
+
+    const PACK_INFO = {
+      hi: {
+        font: "noto_devanagari_TuG7UUFzXI5FBtUq5a8bjKYTZjtRU6Sgv3NaV_SNmI0b8QQCQmHN5DV_.woff2",
+        json: "hi.json",
+        name: "Hindi"
+      },
+      pa: {
+        font: "noto_gurmukhi_w8gyH3EvQP81sInb43inmyN9zZ7hb7ATbSWo4q8dJ74a3cVrSlgXnw.woff2",
+        json: "pa.json",
+        name: "Punjabi"
+      }
+    };
+
+    try {
+      let cache = null;
+      if (typeof caches !== "undefined") {
+        cache = await caches.open("floodsaathi-lang-packs-v1");
+      }
+
+      for (let pIdx = 0; pIdx < packsToDownload.length; pIdx++) {
+        const pKey = packsToDownload[pIdx];
+        const pInfo = PACK_INFO[pKey];
+        const assets = [`./fonts/${pInfo.font}`, `./i18n/${pInfo.json}`, "./corpus/cards/cards.json"];
+
+        if (progressMsg) progressMsg.textContent = `Downloading ${pInfo.name} pack (${pIdx + 1}/2)…`;
+
+        for (let aIdx = 0; aIdx < assets.length; aIdx++) {
+          const url = assets[aIdx];
+          try {
+            const res = await fetch(url);
+            if (res && res.ok && cache) await cache.put(url, res.clone());
+          } catch {}
+        }
+        await setSetting(`lang_pack_${pKey}_downloaded`, true);
+        const pct = Math.round(((pIdx + 1) / packsToDownload.length) * 100);
+        if (progressFill) progressFill.style.width = `${pct}%`;
+        if (progressPct) progressPct.textContent = `${pct}%`;
+      }
+
+      if (progressMsg) {
+        progressMsg.style.color = "#16a34a";
+        progressMsg.textContent = "Language packs ready offline ✓";
+      }
+    } catch {
+      if (progressMsg) {
+        progressMsg.style.color = "#ef1c24";
+        progressMsg.textContent = "Language packs cached with defaults.";
+      }
+    }
+
+    await new Promise(r => setTimeout(r, 600));
+    await setSetting("first_run_complete", true);
+    modal.style.display = "none";
+    applyTranslations();
+    renderDownloadsView();
+  });
+}
+
+// ==========================================
+// SLM NOT-DOWNLOADED TOAST
+// Shown when user opens Ask Saathi and model is not yet downloaded
+// ==========================================
+async function setupSlmToast() {
+  const toast = document.getElementById("slm-missing-toast");
+  if (!toast) return;
+
+  window.addEventListener("floodsaathi:tab_changed", async (e) => {
+    if (e.detail?.tab !== "saathi") return;
+    const downloaded = await getSetting("slm_model_downloaded", false);
+    if (downloaded) return;
+    if (sessionStorage.getItem("slm_toast_dismissed")) return;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 8000);
+  });
+
+  document.getElementById("slm-toast-dismiss-btn")?.addEventListener("click", () => {
+    toast.style.display = "none";
+    sessionStorage.setItem("slm_toast_dismissed", "1");
+  });
+
+  document.getElementById("slm-toast-download-btn")?.addEventListener("click", () => {
+    toast.style.display = "none";
+    sessionStorage.setItem("slm_toast_dismissed", "1");
+    switchTab("downloads");
+    setTimeout(() => {
+      const slmCard = document.querySelector("#view-downloads .plugins-grid .plugin-card:nth-child(2)");
+      if (slmCard) {
+        slmCard.scrollIntoView({ behavior: "smooth", block: "center" });
+        slmCard.style.outline = "3px solid var(--red)";
+        slmCard.style.transition = "outline 0.3s";
+        setTimeout(() => { slmCard.style.outline = "none"; }, 2500);
+      }
+    }, 300);
   });
 }
 

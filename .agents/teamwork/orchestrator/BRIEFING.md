@@ -1,4 +1,4 @@
-# BRIEFING — 2026-10-30T16:45:00Z
+# BRIEFING — 2026-10-30T18:35:00Z
 
 ## Mission
 Build a production-ready Downloads & Plugins interface for offline maps, AI model, Python runtime, and regional language packs, implement GPS re-sync and telemetry proximity indicators, and establish the local AI model training and data ingestion pipeline for FloodSaathi rooted in D:\FloodSaathi_AI\.
@@ -29,11 +29,11 @@ Build a production-ready Downloads & Plugins interface for offline maps, AI mode
   1. Survey and architecture mapping [done]
   2. E2E Testing Track setup [done]
   3. Milestone 1: Downloads and Plugins Navigation and Management UI (R1) [done]
-  4. Milestone 2: GPS Re-sync and Proximity Telemetry Display (R2) [iteration 2: gate evaluation]
-  5. Milestone 3: AI Model Ingestion and Fine-Tuning Pipeline (R3) [pending]
+  4. Milestone 2: GPS Re-sync and Proximity Telemetry Display (R2) [done]
+  5. Milestone 3: AI Model Ingestion and Fine-Tuning Pipeline (R3) [in-progress: exploration phase]
   6. Final Milestone: 100% E2E test suite pass + Adversarial hardening (R4) [pending]
-- **Current phase**: 2B (Iteration Loop - Milestone 2 Iteration 2 Gate)
-- **Current focus**: Evaluating Gate Iteration 2 (Reviewers, Challengers, Forensic Auditor)
+- **Current phase**: 2B (Iteration Loop - Milestone 3 Exploration)
+- **Current focus**: Mapping AI Model Ingestion and Fine-Tuning Pipeline (R3) rooted in `D:\FloodSaathi_AI\`
 
 ## 🔒 Key Constraints
 - NEVER write, modify, or create source code files directly.
@@ -47,27 +47,26 @@ Build a production-ready Downloads & Plugins interface for offline maps, AI mode
 
 ## Current Parent
 - Conversation ID: df6f2f94-a0fb-4239-a733-26618858c606
-- Updated: 2026-10-30T16:45:00Z
+- Updated: 2026-10-30T18:35:00Z
 
 ## Key Decisions Made
-- Milestone 2 Iteration 1 feedback remediated by Worker M2 Iteration 2.
-- Due to default model individual quota, gate subagents dispatched using `flash` / `flash_lite` models.
-- All 5 gate subagents are actively evaluating Milestone 2 Iteration 2.
+- Milestone 2 is complete and passed all quality, adversarial, and integrity gates. Marked DONE in PROJECT.md.
+- Milestone 3 initiated with 3 parallel Explorers:
+  - Explorer 1: Disaster guideline compiler script and dataset architecture.
+  - Explorer 2: LoRA fine-tuning and ONNX/GGUF export engine rooted in D:\FloodSaathi_AI\.
+  - Explorer 3: Google Translate Preferences UI and pytest verification suite.
 
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
-| worker_m2_iter2 | teamwork_worker | Worker M2 Iteration 2 Remediation | completed | 44b27080-04ec-4cd0-adf1-5a254e0dc5ac |
-| reviewer_m2_iter2_1 | teamwork_reviewer | Reviewer 1 M2 Iter2 | in-progress | 17db60f5-6a58-4b42-b5e8-5de4654b4ac3 |
-| reviewer_m2_iter2_2 | teamwork_reviewer | Reviewer 2 M2 Iter2 | in-progress | 536b7dfc-5bde-4ad9-943e-c9a3cf92d22a |
-| challenger_m2_iter2_1 | teamwork_challenger | Challenger 1 M2 Iter2 | in-progress | e18dc71c-c10e-4eea-8ebf-0fa1e7fbdf70 |
-| challenger_m2_iter2_2 | teamwork_challenger | Challenger 2 M2 Iter2 | in-progress | 429734ac-c3a0-49fe-8f8f-fd68173055c8 |
-| auditor_m2_iter2 | teamwork_auditor | Forensic Auditor M2 Iter2 | in-progress | 52002b4b-e154-4e84-85e4-5bcaf3805061 |
+| explorer_m3_1 | teamwork_explorer | Disaster guideline compiler & dataset | in-progress | 912231ce-164f-4a83-9ed4-dae3be42a0d6 |
+| explorer_m3_2 | teamwork_explorer | LoRA fine-tuning & ONNX/GGUF export | in-progress | e8acc0f8-3a00-4fc4-b882-a64c6b0d9f83 |
+| explorer_m3_3 | teamwork_explorer | Preferences UI & pytest test suite | in-progress | 02ba2f8e-0fd3-4156-9a9e-e03ec4933660 |
 
 ## Succession Status
 - Succession required: no
-- Cumulative Spawns: 42 / 128
-- Pending subagents: 5 active gate subagents
+- Cumulative Spawns: 50 / 128
+- Pending subagents: 3 active explorers
 
 ## Active Timers
 - Heartbeat cron: 9cc25926-f064-4a11-b0f8-934dad82bf28/task-471

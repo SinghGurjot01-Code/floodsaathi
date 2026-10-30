@@ -1483,6 +1483,76 @@ body {
 /* =========================================================
    DOWNLOADS & PLUGINS VIEW (R1)
    ========================================================= */
+/* Storage Summary Dashboard Bar in Downloads */
+.storage-summary-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.storage-summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.storage-bar-multi {
+  height: 10px;
+  background: #f1f5f9;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+
+.storage-bar-seg {
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+.storage-bar-seg.seg-maps {
+  background: #2563eb;
+}
+
+.storage-bar-seg.seg-langs {
+  background: #16a34a;
+}
+
+.storage-bar-seg.seg-slm {
+  background: #7c3aed;
+}
+
+.storage-legend-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--mut);
+}
+
+.storage-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.dot-maps { background: #2563eb; }
+.legend-dot.dot-langs { background: #16a34a; }
+.legend-dot.dot-slm { background: #7c3aed; }
+.legend-dot.dot-free { background: #94a3b8; }
+
 .downloads-container {
   padding: 20px;
   overflow-y: auto;

@@ -395,12 +395,26 @@
 
           <!-- Chat Application Window -->
           <div class="chat-app">
-            <div class="chat-header">
-              <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
-              <div>
-                <h2 style="font-size: 16px; font-weight: 700;">Ask Saathi</h2>
-                <p style="font-size: 12px; color: var(--muted);">Offline Disaster & Safety Guide</p>
+            <div class="chat-header" style="display:flex; align-items:center; justify-content:space-between;">
+              <div style="display:flex; align-items:center; gap:10px;">
+                <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
+                <div>
+                  <h2 style="font-size: 16px; font-weight: 700;">Ask Saathi</h2>
+                  <p style="font-size: 12px; color: var(--muted);">Offline Disaster & Safety Guide</p>
+                </div>
               </div>
+              <div id="saathi-model-status-indicator">
+                <span class="plugin-badge" id="saathi-mode-badge" style="font-size:11px;">M5 Offline Core</span>
+              </div>
+            </div>
+
+            <!-- SLM Missing Advisory Notification Bar -->
+            <div id="saathi-slm-missing-bar" style="display:none; background:#fffbeb; border-bottom:1px solid #fef3c7; padding:10px 16px; font-size:12.5px; color:#92400e; align-items:center; justify-content:space-between; gap:10px;">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:16px;">⚠️</span>
+                <span><strong>AI Model not downloaded:</strong> Running in verified offline disaster mode (M5 cards).</span>
+              </div>
+              <button id="btn-saathi-download-model" style="background:var(--red); color:#fff; border:none; border-radius:8px; padding:6px 12px; font-size:12px; font-weight:700; cursor:pointer; white-space:nowrap;">Download SLM (340 MB)</button>
             </div>
 
             <!-- Conversational Message Thread -->
@@ -654,6 +668,28 @@
             <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45; margin-top: 4px;">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs directly to device cache for 100% offline emergency preparedness.</p>
           </div>
 
+          <!-- Storage Usage Dashboard Bar -->
+          <div class="storage-summary-card">
+            <div class="storage-summary-top">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <strong style="font-size:14.5px; color:var(--navy);">Offline Cache Storage</strong>
+              </div>
+              <span id="storage-summary-total-text" class="plugin-badge" style="font-size:12px;">Calculating...</span>
+            </div>
+            <div class="storage-bar-multi">
+              <div class="storage-bar-seg seg-maps" id="storage-bar-maps" style="width: 25%;" title="Map Packs"></div>
+              <div class="storage-bar-seg seg-langs" id="storage-bar-langs" style="width: 15%;" title="Language Packs"></div>
+              <div class="storage-bar-seg seg-slm" id="storage-bar-slm" style="width: 0%;" title="SLM Model"></div>
+            </div>
+            <div class="storage-legend-row">
+              <span class="storage-legend-item"><span class="legend-dot dot-maps"></span>Maps: <strong id="legend-maps-val">Ready to cache</strong></span>
+              <span class="storage-legend-item"><span class="legend-dot dot-langs"></span>Languages: <strong id="legend-langs-val">Ready to cache</strong></span>
+              <span class="storage-legend-item"><span class="legend-dot dot-slm"></span>SLM AI: <strong id="legend-slm-val">Not Downloaded</strong></span>
+              <span class="storage-legend-item" style="margin-left:auto;"><span class="legend-dot dot-free"></span>Offline Cache Ready</span>
+            </div>
+          </div>
+
           <div class="plugins-grid">
             <!-- 1. Offline Map Pack (RECOMMENDED) -->
             <div class="plugin-card recommended">
@@ -901,6 +937,132 @@ python relay/run.py --out app/data/latest/</pre>
 
   </div>
 
-  <script type="module" src="./js/main.js?v=1.6.0"></script>
+  <!-- =============================================
+       FIRST-RUN LANGUAGE PICKER MODAL (auto-shown)
+       ============================================= -->
+  <div id="first-run-modal" role="dialog" aria-modal="true" aria-labelledby="frm-title" style="
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(18,23,43,0.72); backdrop-filter:blur(4px);
+    justify-content:center; align-items:center; padding:20px;
+  ">
+    <div style="
+      background:#fff; border-radius:24px; max-width:400px; width:100%;
+      box-shadow:0 24px 80px rgba(18,23,43,0.28); overflow:hidden;
+    ">
+      <!-- Header -->
+      <div style="background:var(--red); padding:24px 24px 20px; text-align:center;">
+        <img src="./icons/icon.svg" alt="FloodSaathi" style="width:52px; height:52px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.25); margin-bottom:12px;">
+        <div style="font-size:22px; font-weight:800; color:#fff; letter-spacing:-0.02em;">Welcome to FloodSaathi</div>
+        <div style="font-size:13px; color:rgba(255,255,255,0.82); margin-top:4px;">ਫਲੱਡਸਾਥੀ ਵਿੱਚ ਜੀ ਆਇਆਂ &nbsp;·&nbsp; फ्लडसाथी में आपका स्वागत है</div>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:24px;">
+        <p id="frm-title" style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:6px;">Choose your language</p>
+        <p style="font-size:12.5px; color:var(--mut); margin-bottom:18px; line-height:1.5;">
+          Select your preferred language. Font and translation packs will be downloaded automatically if you're online.
+        </p>
+
+        <!-- Language Options -->
+        <div style="display:flex; flex-direction:column; gap:10px;" id="frm-lang-options">
+          <!-- English -->
+          <label id="frm-lang-en" style="
+            display:flex; align-items:center; gap:14px; padding:14px 16px;
+            border:2px solid var(--red); border-radius:14px; cursor:pointer;
+            background:#fff9f9; transition:all 0.15s;
+          ">
+            <input type="radio" name="frm-lang" value="en" checked style="width:20px;height:20px;accent-color:var(--red);">
+            <div>
+              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇬🇧 English</div>
+              <div style="font-size:12px; color:var(--mut);">Built-in · No download needed</div>
+            </div>
+            <span style="margin-left:auto; font-size:11px; font-weight:700; background:var(--green); color:#fff; padding:3px 8px; border-radius:6px;">Default</span>
+          </label>
+
+          <!-- Hindi -->
+          <label id="frm-lang-hi" style="
+            display:flex; align-items:center; gap:14px; padding:14px 16px;
+            border:2px solid var(--line); border-radius:14px; cursor:pointer;
+            background:#f8fafc; transition:all 0.15s;
+          ">
+            <input type="radio" name="frm-lang" value="hi" style="width:20px;height:20px;accent-color:var(--red);">
+            <div>
+              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇮🇳 हिन्दी (Hindi)</div>
+              <div style="font-size:12px; color:var(--mut);">~3.9 MB · Noto Sans Devanagari</div>
+            </div>
+          </label>
+
+          <!-- Punjabi -->
+          <label id="frm-lang-pa" style="
+            display:flex; align-items:center; gap:14px; padding:14px 16px;
+            border:2px solid var(--line); border-radius:14px; cursor:pointer;
+            background:#f8fafc; transition:all 0.15s;
+          ">
+            <input type="radio" name="frm-lang" value="pa" style="width:20px;height:20px;accent-color:var(--red);">
+            <div>
+              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇮🇳 ਪੰਜਾਬੀ (Punjabi)</div>
+              <div style="font-size:12px; color:var(--mut);">~4.2 MB · Noto Sans Gurmukhi</div>
+            </div>
+          </label>
+        </div>
+
+        <!-- Download progress bar (shown during pack download) -->
+        <div id="frm-progress-wrap" style="display:none; margin-top:16px;">
+          <div style="background:#e9ecf1; border-radius:8px; height:8px; overflow:hidden;">
+            <div id="frm-progress-fill" style="background:var(--red); height:100%; width:0%; border-radius:8px; transition:width 0.3s;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:12px; color:var(--mut);">
+            <span id="frm-progress-msg">Downloading language pack…</span>
+            <span id="frm-progress-pct">0%</span>
+          </div>
+        </div>
+
+        <!-- CTA Button -->
+        <button id="frm-continue-btn" style="
+          margin-top:20px; width:100%; min-height:52px; font-size:16px; font-weight:800;
+          background:var(--red); color:#fff; border:none; border-radius:14px;
+          cursor:pointer; letter-spacing:0.01em;
+          box-shadow:0 4px 16px rgba(239,28,36,0.28); transition:background 0.15s;
+        ">Get Started →</button>
+
+        <p style="font-size:11.5px; color:var(--mut); text-align:center; margin-top:10px; line-height:1.4;">
+          You can change language anytime in Settings. App works 100% offline after setup.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       SLM NOT DOWNLOADED TOAST / WARNING BANNER
+       ============================================= -->
+  <div id="slm-missing-toast" role="alert" aria-live="polite" style="
+    display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+    z-index:8000; max-width:340px; width:calc(100% - 32px);
+    background:#1e293b; color:#fff; border-radius:14px;
+    padding:14px 16px; box-shadow:0 8px 30px rgba(18,23,43,0.35);
+    font-size:13.5px; line-height:1.5;
+  ">
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+      <span style="font-size:22px; flex:none; margin-top:1px;">🤖</span>
+      <div style="flex:1;">
+        <div style="font-weight:700; margin-bottom:3px; color:#f1f5f9;">AI Model Not Downloaded</div>
+        <div style="color:#94a3b8; font-size:12.5px;">
+          Ask Saathi is running on verified offline cards. Download the SLM model for full AI responses.
+        </div>
+        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+          <button id="slm-toast-download-btn" style="
+            background:var(--red); color:#fff; border:none; border-radius:8px;
+            padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer;
+          ">Download Model (340 MB)</button>
+          <button id="slm-toast-dismiss-btn" style="
+            background:rgba(255,255,255,0.1); color:#e2e8f0; border:none; border-radius:8px;
+            padding:7px 10px; font-size:12px; cursor:pointer;
+          ">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./js/main.js?v=1.7.0"></script>
 </body>
 </html>
