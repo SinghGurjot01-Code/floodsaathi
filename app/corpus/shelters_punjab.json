@@ -1,0 +1,121 @@
+{
+  "schema": "floodsaathi.shelters.v1",
+  "source": "OpenStreetMap & Punjab State Disaster Management Authority (SDMA) Relief Centers",
+  "last_verified": "2026-10-30",
+  "shelters": [
+    {
+      "id": "sh-jal-001",
+      "name": {
+        "en": "Government Model Senior Secondary School, Jalandhar",
+        "hi": "राजकीय मॉडल वरिष्ठ माध्यमिक विद्यालय, जालंधर",
+        "pa": "ਸਰਕਾਰੀ ਮਾਡਲ ਸੀਨੀਅਰ ਸੈਕੰਡਰੀ ਸਕੂਲ, ਜਲੰਧਰ"
+      },
+      "type": "relief_camp",
+      "district": "Jalandhar",
+      "tehsil": "Jalandhar-1",
+      "lat": 31.326,
+      "lon": 75.576,
+      "capacity": 850,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 232.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "separate_toilets", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-asr-002",
+      "name": {
+        "en": "Khalsa College Relief Center, Amritsar",
+        "hi": "खालसा कॉलेज राहत केंद्र, अमृतसर",
+        "pa": "ਖ਼ਾਲਸਾ ਕਾਲਜ ਰਾਹਤ ਕੇਂਦਰ, ਅੰਮ੍ਰਿਤਸਰ"
+      },
+      "type": "relief_camp",
+      "district": "Amritsar",
+      "tehsil": "Amritsar-1",
+      "lat": 31.642,
+      "lon": 74.832,
+      "capacity": 1200,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 234.0,
+      "amenities": ["drinking_water", "doctor_on_site", "power_backup", "food_ration", "blankets"],
+      "verified": true
+    },
+    {
+      "id": "sh-kpt-003",
+      "name": {
+        "en": "Civil Hospital Relief Camp, Kapurthala",
+        "hi": "सिविल अस्पताल राहत शिविर, कपूरथला",
+        "pa": "ਸਿਵਲ ਹਸਪਤਾਲ ਰਾਹਤ ਕੈਂਪ, ਕਪੂਰਥਲਾ"
+      },
+      "type": "medical_relief",
+      "district": "Kapurthala",
+      "tehsil": "Sultanpur Lodhi",
+      "lat": 31.222,
+      "lon": 75.198,
+      "capacity": 600,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 220.0,
+      "amenities": ["emergency_ward", "drinking_water", "ambulance", "power_backup"],
+      "verified": true
+    },
+    {
+      "id": "sh-frz-004",
+      "name": {
+        "en": "Government Polytechnic College, Firozpur",
+        "hi": "राजकीय पॉलिटेक्निक कॉलेज, फिरोजपुर",
+        "pa": "ਸਰਕਾਰੀ ਪੌਲੀਟੈਕਨਿਕ ਕਾਲਜ, ਫ਼ਿਰੋਜ਼ਪੁਰ"
+      },
+      "type": "relief_camp",
+      "district": "Firozpur",
+      "tehsil": "Firozpur",
+      "lat": 30.923,
+      "lon": 74.613,
+      "capacity": 950,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 198.0,
+      "amenities": ["drinking_water", "food_ration", "sanitation", "power_backup"],
+      "verified": true
+    },
+    {
+      "id": "sh-hsp-005",
+      "name": {
+        "en": "Red Cross Community Center, Hoshiarpur",
+        "hi": "रेड क्रॉस सामुदायिक केंद्र, होशियारपुर",
+        "pa": "ਰੈੱਡ ਕਰਾਸ ਕਮਿਊਨਿਟੀ ਸੈਂਟਰ, ਹੁਸ਼ਿਆਰਪੁਰ"
+      },
+      "type": "relief_camp",
+      "district": "Hoshiarpur",
+      "tehsil": "Dasuya",
+      "lat": 31.815,
+      "lon": 75.658,
+      "capacity": 700,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 255.0,
+      "amenities": ["drinking_water", "first_aid", "toilets", "food_supply"],
+      "verified": true
+    },
+    {
+      "id": "sh-rup-006",
+      "name": {
+        "en": "Nehru Stadium Evacuation Camp, Rupnagar (Ropar)",
+        "hi": "नेहरू स्टेडियम निकासी शिविर, रूपनगर (रोपड़)",
+        "pa": "ਨਹਿਰੂ ਸਟੇਡੀਅਮ ਨਿਕਾਸੀ ਕੈਂਪ, ਰੂਪਨਗਰ (ਰੋਪੜ)"
+      },
+      "type": "evacuation_shelter",
+      "district": "Rupnagar",
+      "tehsil": "Rupnagar",
+      "lat": 30.966,
+      "lon": 76.527,
+      "capacity": 1500,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 260.0,
+      "amenities": ["drinking_water", "ndrf_station", "medical_post", "power_backup", "blankets"],
+      "verified": true
+    }
+  ]
+}

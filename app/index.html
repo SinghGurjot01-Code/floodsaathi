@@ -8,20 +8,74 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <title>FloodSaathi – Offline Flood Early-Warning</title>
-  <link rel="stylesheet" href="./css/main.css">
-  <link rel="stylesheet" href="./css/status.css">
+  <link rel="stylesheet" href="./css/main.css?v=1.4.0">
+  <link rel="stylesheet" href="./css/status.css?v=1.4.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        for (const reg of regs) {
+          reg.update();
+        }
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!window._swReloading) {
+          window._swReloading = true;
+          window.location.reload();
+        }
+      });
+    }
+  </script>
 </head>
 <body>
 
   <div class="app-shell">
 
-    <!-- Top App Header -->
+    <!-- Top App Header (Responsive for Mobile & Desktop) -->
     <header class="app-header">
       <div class="brand-wrap">
         <img src="./icons/icon.svg" alt="FloodSaathi Logo" class="brand-icon">
-        <span class="brand-title" data-i18n="app_name">FloodSaathi</span>
+        <div class="brand-text-wrap">
+          <span class="brand-title" data-i18n="app_name">FloodSaathi</span>
+          <span class="brand-sub">Punjab Early-Warning</span>
+        </div>
       </div>
+
+      <!-- Desktop Navigation Menu (Visible on PC/Tablet >= 768px) -->
+      <nav class="desktop-nav" aria-label="Desktop Navigation">
+        <button class="nav-tab-btn active" data-tab="home">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L3 11h2.5v9.5h5v-6h3v6h5V11H21z"/></svg>
+          <span data-i18n="nav.home">Home</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="map">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>
+          <span data-i18n="nav.map">Map</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="saathi">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="14" r="5.5"/><circle cx="19" cy="6" r="2.2"/><path d="M8 13v1M12 13v1M8 16.5q2 1.5 4 0"/></svg>
+          <span data-i18n="nav.saathi">Saathi</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="alerts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg>
+          <span data-i18n="nav.alerts">Alerts</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="shelters">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Shelters</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="after-flood">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Guide</span>
+        </button>
+        <button class="nav-tab-btn" data-tab="preferences">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>Preferences</span>
+        </button>
+        <button class="nav-tab-btn desktop-sos-tab-btn" data-tab="sos">
+          <span>SOS</span>
+        </button>
+      </nav>
+
       <div class="header-right">
         <!-- Language Switcher: EN / हिं / ਪੰ -->
         <div class="lang-switcher" role="group" aria-label="Language selector">
@@ -54,114 +108,165 @@
            TAB 1: HOME DASHBOARD (F1, F2, F8)
            ========================================= -->
       <section class="view-section active" id="view-home">
-        <!-- Hero Status Banner (Matches FloodSaathi Home UI) -->
-        <div class="home-hero loading" id="home-hero">
-          <div class="location-bar">
-            <div class="location-text">
-              <svg viewBox="0 0 24 28" fill="none"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="#ef1c24"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
-              <div>
-                <div class="location-name" id="loc-village-name">Taman, Jalandhar</div>
-                <div class="location-sub" id="loc-state-name">Punjab (Beas Basin)</div>
+        <div class="home-layout-grid">
+          <!-- Left Column (Status Hero, Arrival Banner, Actions) -->
+          <div class="home-hero-col">
+            <!-- Hero Status Banner (Matches FloodSaathi Home UI) -->
+            <div class="home-hero loading" id="home-hero">
+              <div class="location-bar">
+                <div class="location-text">
+                  <svg viewBox="0 0 24 28" fill="none"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="#ef1c24"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
+                  <div>
+                    <div class="location-name" id="loc-village-name">Taman, Jalandhar</div>
+                    <div class="location-sub" id="loc-state-name">Punjab (Beas Basin)</div>
+                  </div>
+                </div>
+                <button class="bell-btn" id="btn-hero-bell" aria-label="Alerts Notification"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg><i id="alerts-count-badge">0</i></button>
               </div>
-            </div>
-            <button class="bell-btn" id="btn-hero-bell" aria-label="Alerts Notification"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg><i id="alerts-count-badge">0</i></button>
-          </div>
 
-          <div class="status-headline-wrap">
-            <div class="status-hero-word" id="status-word">LOADING...</div>
-            <div class="status-hero-sub" id="status-reason">Loading live flood and hydrologic telemetry...</div>
-          </div>
-
-          <div class="status-badge-row">
-            <span class="badge-tag" id="status-age-badge">Data from just now</span>
-            <span class="badge-tag estimated" id="status-offline-badge" style="display:none;">Estimated Range</span>
-          </div>
-
-          <!-- Time-to-water arrival banner (F2) -->
-          <div id="estimate-container"></div>
-        </div>
-
-        <!-- Metrics Sheet (Matches UI) -->
-        <div class="metrics-sheet">
-          <div class="metrics-grid">
-            <!-- Metric 1: River Gauge -->
-            <div class="metric-card">
-              <div class="metric-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 9.5a4 4 0 017 0M12 4.5v2.5"/><path d="M3.5 13.5c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0M3.5 18c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0"/></svg>
+              <div class="status-headline-wrap">
+                <div class="status-hero-word" id="status-word">LOADING...</div>
+                <div class="status-hero-sub" id="status-reason">Loading live flood and hydrologic telemetry...</div>
               </div>
-              <div class="metric-info">
-                <span class="metric-label" id="metric-gauge-name">River Beas</span>
-                <span class="metric-value" id="metric-gauge-level">-- m</span>
-                <span class="metric-sub" id="metric-gauge-trend">Trend: Stable</span>
-                <span class="metric-status-ok" id="metric-gauge-status">Checking...</span>
+
+              <div class="status-badge-row">
+                <span class="badge-tag" id="status-age-badge">Data from just now</span>
+                <span class="badge-tag estimated" id="status-offline-badge" style="display:none;">Estimated Range</span>
               </div>
+
+              <!-- Time-to-water arrival banner (F2) -->
+              <div id="estimate-container"></div>
             </div>
 
-            <!-- Metric 2: Rain Forecast -->
-            <div class="metric-card">
-              <div class="metric-icon">
-                <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7.5 15.5a4.5 4.5 0 01-.6-8.9 6 6 0 0111.3 1.6 3.7 3.7 0 01-.9 7.3z" fill="#3b82f6"/><path d="M8.5 18.5l-1 2.5M12.5 18.5l-1 2.5M16.5 18.5l-1 2.5" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/></svg>
-              </div>
-              <div class="metric-info">
-                <span class="metric-label">Rain Forecast</span>
-                <span class="metric-value" id="metric-rain-value">12 mm</span>
-                <span class="metric-sub">Next 24 hours</span>
-                <span class="metric-status-ok">Light showers</span>
-              </div>
+            <!-- User Action Reporting Buttons (PRD 8.2) -->
+            <div class="reporting-actions">
+              <button class="action-report-btn" id="btn-water-reached">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#ef1c24" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span data-i18n="actions.water_reached">Water reached my street</span>
+              </button>
+              <button class="action-report-btn" id="btn-water-receding">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                <span data-i18n="actions.water_receding">Water is receding</span>
+              </button>
             </div>
+
+            <button class="btn-refresh" id="btn-refresh-data" data-i18n="actions.refresh">Refresh Live Telemetry</button>
           </div>
 
-          <div class="divider-line"></div>
+          <!-- Right Column (Telemetry Metrics, Bulletins, Quick Tools) -->
+          <div class="home-metrics-col">
+            <!-- Metrics Sheet (Matches UI) -->
+            <div class="metrics-sheet">
+              <div class="metrics-grid">
+                <!-- Metric 1: River Gauge -->
+                <div class="metric-card">
+                  <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 9.5a4 4 0 017 0M12 4.5v2.5"/><path d="M3.5 13.5c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0M3.5 18c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0"/></svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label" id="metric-gauge-name">River Beas</span>
+                    <span class="metric-value" id="metric-gauge-level">-- m</span>
+                    <span class="metric-sub" id="metric-gauge-trend">Trend: Stable</span>
+                    <span class="metric-status-ok" id="metric-gauge-status">Checking...</span>
+                  </div>
+                </div>
 
-          <div class="metrics-grid">
-            <!-- Metric 3: Elevation -->
-            <div class="metric-card">
-              <div class="metric-icon gray">
-                <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2.5 20L9.5 7.5l3.7 6.5 2.3-3.5L21.5 20z" fill="currentColor"/><path d="M9.5 7.5l1.8 3.2-1.8-.9-1.8.9z" fill="#fff"/></svg>
+                <!-- Metric 2: Rain Forecast -->
+                <div class="metric-card">
+                  <div class="metric-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7.5 15.5a4.5 4.5 0 01-.6-8.9 6 6 0 0111.3 1.6 3.7 3.7 0 01-.9 7.3z" fill="#3b82f6"/><path d="M8.5 18.5l-1 2.5M12.5 18.5l-1 2.5M16.5 18.5l-1 2.5" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Rain Forecast</span>
+                    <span class="metric-value" id="metric-rain-value">12 mm</span>
+                    <span class="metric-sub">Next 24 hours</span>
+                    <span class="metric-status-ok">Light showers</span>
+                  </div>
+                </div>
               </div>
-              <div class="metric-info">
-                <span class="metric-label">Elevation</span>
-                <span class="metric-value" id="metric-elevation-value">246 m</span>
-                <span class="metric-sub">above sea level</span>
+
+              <div class="divider-line"></div>
+
+              <div class="metrics-grid">
+                <!-- Metric 3: Elevation -->
+                <div class="metric-card">
+                  <div class="metric-icon gray">
+                    <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2.5 20L9.5 7.5l3.7 6.5 2.3-3.5L21.5 20z" fill="currentColor"/><path d="M9.5 7.5l1.8 3.2-1.8-.9-1.8.9z" fill="#fff"/></svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Elevation</span>
+                    <span class="metric-value" id="metric-elevation-value">246 m</span>
+                    <span class="metric-sub">above sea level</span>
+                  </div>
+                </div>
+
+                <!-- Metric 4: Distance to River -->
+                <div class="metric-card">
+                  <div class="metric-icon gray">
+                    <svg width="20" height="24" viewBox="0 0 24 28"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="currentColor"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
+                  </div>
+                  <div class="metric-info">
+                    <span class="metric-label">Distance to river</span>
+                    <span class="metric-value" id="metric-river-dist">3.8 km</span>
+                    <span class="metric-sub">Beas River</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Official Alerts Summary Banner -->
+              <div class="home-alert-banner" id="home-alert-banner">
+                <div class="alert-check-icon" id="home-alert-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+                </div>
+                <div class="alert-banner-text" id="home-alert-summary">
+                  No active official disaster bulletins for your area.
+                </div>
               </div>
             </div>
 
-            <!-- Metric 4: Distance to River -->
-            <div class="metric-card">
-              <div class="metric-icon gray">
-                <svg width="20" height="24" viewBox="0 0 24 28"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="currentColor"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
-              </div>
-              <div class="metric-info">
-                <span class="metric-label">Distance to river</span>
-                <span class="metric-value" id="metric-river-dist">3.8 km</span>
-                <span class="metric-sub">Beas River</span>
-              </div>
+            <!-- Desktop Quick Action Cards (Visible on PC/Tablet) -->
+            <div class="desktop-quick-grid">
+              <button class="desktop-quick-card" onclick="document.querySelector('.nav-tab-btn[data-tab=\'shelters\']')?.click()">
+                <div class="quick-icon-wrap" style="background:#eff6ff; color:#2563eb;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                </div>
+                <div class="quick-card-text">
+                  <strong>Nearest Safe Shelters</strong>
+                  <p>Verified relief centers with live distances and facilities</p>
+                </div>
+              </button>
+
+              <button class="desktop-quick-card" onclick="document.querySelector('.nav-tab-btn[data-tab=\'map\']')?.click()">
+                <div class="quick-icon-wrap" style="background:#fef3c7; color:#d97706;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>
+                </div>
+                <div class="quick-card-text">
+                  <strong>Offline Maps Downloader</strong>
+                  <p>Cache vector tiles on PC or mobile for 100% offline access</p>
+                </div>
+              </button>
+
+              <button class="desktop-quick-card" onclick="document.querySelector('.nav-tab-btn[data-tab=\'saathi\']')?.click()">
+                <div class="quick-icon-wrap" style="background:#f3e8ff; color:#7c3aed;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="14" r="5.5"/><circle cx="19" cy="6" r="2.2"/><path d="M8 13v1M12 13v1M8 16.5q2 1.5 4 0"/></svg>
+                </div>
+                <div class="quick-card-text">
+                  <strong>Ask Saathi AI Assistant</strong>
+                  <p>On-device emergency guidance with verified safety invariants</p>
+                </div>
+              </button>
+
+              <button class="desktop-quick-card" onclick="document.querySelector('.nav-tab-btn[data-tab=\'sos\']')?.click()">
+                <div class="quick-icon-wrap" style="background:#fee2e2; color:#ef1c24;">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="quick-card-text">
+                  <strong>Emergency SOS & 112</strong>
+                  <p>1-tap emergency dialers and pre-composed GPS location alerts</p>
+                </div>
+              </button>
             </div>
           </div>
-
-          <!-- Official Alerts Summary Banner -->
-          <div class="home-alert-banner" id="home-alert-banner">
-            <div class="alert-check-icon" id="home-alert-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
-            </div>
-            <div class="alert-banner-text" id="home-alert-summary">
-              No active official disaster bulletins for your area.
-            </div>
-          </div>
-
-          <!-- User Action Reporting Buttons (PRD 8.2) -->
-          <div class="reporting-actions">
-            <button class="action-report-btn" id="btn-water-reached">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#ef1c24" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-              <span data-i18n="actions.water_reached">Water reached my street</span>
-            </button>
-            <button class="action-report-btn" id="btn-water-receding">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-              <span data-i18n="actions.water_receding">Water is receding</span>
-            </button>
-          </div>
-
-          <button class="btn-refresh" id="btn-refresh-data" data-i18n="actions.refresh">Refresh Live Telemetry</button>
         </div>
       </section>
 
@@ -214,45 +319,105 @@
            TAB 3: ASK SAATHI CONVERSATIONAL ASSISTANT (F6)
            ========================================= -->
       <section class="view-section" id="view-saathi">
-        <div class="chat-app">
-          <div class="chat-header">
-            <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
-            <div>
-              <h2 style="font-size: 16px; font-weight: 700;">Ask Saathi</h2>
-              <p style="font-size: 12px; color: var(--muted);">Offline Disaster & Safety Guide</p>
-            </div>
-          </div>
-
-          <!-- Conversational Message Thread -->
-          <div class="chat-thread" id="chat-thread" aria-live="polite">
-            <!-- Initial Bot Welcome Card -->
-            <div class="msg-bot-wrap">
-              <div class="bot-avatar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
-              </div>
-              <article class="bot-card">
-                <h3>Sat Sri Akal / Namaste!</h3>
-                <p style="font-size: 14.5px; line-height: 1.5; color: var(--ink2); margin-bottom: 12px;">
-                  I am FloodSaathi. Ask me how to purify water, what to pack in an evacuation bag, electrical safety, or where the nearest relief camp is.
-                </p>
-                <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                  <button class="amenity-chip btn-suggested-query" data-q="What should I do if flood water enters my home?">Flood entering home</button>
-                  <button class="amenity-chip btn-suggested-query" data-q="How to purify well drinking water?">Drinking water</button>
-                  <button class="amenity-chip btn-suggested-query" data-q="Where is the nearest shelter?">Nearest shelter</button>
+        <div class="chat-workspace">
+          <!-- Desktop Safety Topics Sidebar (Visible >= 860px) -->
+          <aside class="chat-desktop-sidebar">
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Safety Knowledge Index</h3>
+            <p style="font-size: 12.5px; color: var(--mut); margin-bottom: 14px;">Instant verified guidance grounded in NDMA and Punjab SDMA protocols.</p>
+            
+            <div class="safety-topics-list">
+              <button class="safety-topic-item btn-suggested-query" data-q="How to purify well drinking water with bleaching powder?">
+                <span class="topic-dot" style="background:#2563eb;"></span>
+                <div>
+                  <strong>Drinking Water Purification</strong>
+                  <p>Bleaching powder ratios & boiling steps</p>
                 </div>
-              </article>
-            </div>
-          </div>
+              </button>
 
-          <!-- Message Composer Bar -->
-          <div class="chat-composer">
-            <button class="composer-mic" id="btn-chat-mic" aria-label="Voice input">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>
-            </button>
-            <input type="text" class="composer-input" id="chat-input-field" placeholder="Ask a question in English, Hindi, or Punjabi..." aria-label="Ask a question">
-            <button class="composer-send" id="btn-chat-send" aria-label="Send message">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.5 12h14M13 6l6 6-6 6"/></svg>
-            </button>
+              <button class="safety-topic-item btn-suggested-query" data-q="What should I do if an electric power line falls in flood water?">
+                <span class="topic-dot" style="background:#ef1c24;"></span>
+                <div>
+                  <strong>Electrical & Wire Hazard</strong>
+                  <p>10m distance, power cutoff & 1912</p>
+                </div>
+              </button>
+
+              <button class="safety-topic-item btn-suggested-query" data-q="Is it safe to drive a car or tractor through flood water?">
+                <span class="topic-dot" style="background:#d97706;"></span>
+                <div>
+                  <strong>Water Crossing Dangers</strong>
+                  <p>Turn around, don't drown rules</p>
+                </div>
+              </button>
+
+              <button class="safety-topic-item btn-suggested-query" data-q="First aid for snakebite during floods?">
+                <span class="topic-dot" style="background:#16a34a;"></span>
+                <div>
+                  <strong>Snakebite & Medical First Aid</strong>
+                  <p>Anti-venom protocol & 108 ambulance</p>
+                </div>
+              </button>
+
+              <button class="safety-topic-item btn-suggested-query" data-q="How to protect livestock and cattle during floods?">
+                <span class="topic-dot" style="background:#8b5cf6;"></span>
+                <div>
+                  <strong>Livestock & Animal Safety</strong>
+                  <p>Untying khuntas, fodder & relief bunds</p>
+                </div>
+              </button>
+            </div>
+
+            <div style="margin-top: 16px; padding: 12px; background: #fff; border-radius: 12px; border: 1px solid var(--line);">
+              <strong style="font-size: 13px; color: var(--navy);">Emergency Quick Dials:</strong>
+              <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
+                <a href="tel:112" class="helpline-btn" style="font-size: 11px; padding: 3px 8px;">112 ERSS</a>
+                <a href="tel:1078" class="helpline-btn sec" style="font-size: 11px; padding: 3px 8px;">1078 NDMA</a>
+                <a href="tel:1070" class="helpline-btn sec" style="font-size: 11px; padding: 3px 8px;">1070 Punjab</a>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Chat Application Window -->
+          <div class="chat-app">
+            <div class="chat-header">
+              <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
+              <div>
+                <h2 style="font-size: 16px; font-weight: 700;">Ask Saathi</h2>
+                <p style="font-size: 12px; color: var(--muted);">Offline Disaster & Safety Guide</p>
+              </div>
+            </div>
+
+            <!-- Conversational Message Thread -->
+            <div class="chat-thread" id="chat-thread" aria-live="polite">
+              <!-- Initial Bot Welcome Card -->
+              <div class="msg-bot-wrap">
+                <div class="bot-avatar">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
+                </div>
+                <article class="bot-card">
+                  <h3>Sat Sri Akal / Namaste!</h3>
+                  <p style="font-size: 14.5px; line-height: 1.5; color: var(--ink2); margin-bottom: 12px;">
+                    I am FloodSaathi. Ask me how to purify water, what to pack in an evacuation bag, electrical safety, or where the nearest relief camp is.
+                  </p>
+                  <div style="display:flex; flex-wrap:wrap; gap:6px;">
+                    <button class="amenity-chip btn-suggested-query" data-q="What should I do if flood water enters my home?">Flood entering home</button>
+                    <button class="amenity-chip btn-suggested-query" data-q="How to purify well drinking water?">Drinking water</button>
+                    <button class="amenity-chip btn-suggested-query" data-q="Where is the nearest shelter?">Nearest shelter</button>
+                  </div>
+                </article>
+              </div>
+            </div>
+
+            <!-- Message Composer Bar -->
+            <div class="chat-composer">
+              <button class="composer-mic" id="btn-chat-mic" aria-label="Voice input">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>
+              </button>
+              <input type="text" class="composer-input" id="chat-input-field" placeholder="Ask a question in English, Hindi, or Punjabi..." aria-label="Ask a question">
+              <button class="composer-send" id="btn-chat-send" aria-label="Send message">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.5 12h14M13 6l6 6-6 6"/></svg>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -464,6 +629,6 @@
 
   </div>
 
-  <script type="module" src="./js/main.js?v=1.3.0"></script>
+  <script type="module" src="./js/main.js?v=1.4.0"></script>
 </body>
 </html>
