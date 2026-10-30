@@ -59,14 +59,17 @@ Build a production-ready Downloads & Plugins interface for offline maps, AI mode
 ## Team Roster
 | Agent | Type | Work Item | Status | Conv ID |
 |-------|------|-----------|--------|---------|
-| explorer_m3_1 | teamwork_explorer | Disaster guideline compiler & dataset | in-progress | 912231ce-164f-4a83-9ed4-dae3be42a0d6 |
-| explorer_m3_2 | teamwork_explorer | LoRA fine-tuning & ONNX/GGUF export | in-progress | e8acc0f8-3a00-4fc4-b882-a64c6b0d9f83 |
-| explorer_m3_3 | teamwork_explorer | Preferences UI & pytest test suite | in-progress | 02ba2f8e-0fd3-4156-9a9e-e03ec4933660 |
+| worker_m3 | teamwork_worker | Milestone 3 Implementation & Tests | completed | f2822921-ca78-403b-8669-e2d025edbb0a |
+| reviewer_m3_1 | teamwork_reviewer | Reviewer 1 Quality & Tests | in-progress | 9c37c85b-192a-4de7-8447-3a459df6d176 |
+| reviewer_m3_2 | teamwork_reviewer | Reviewer 2 Edge Cases & Safety | in-progress | 4a3ac586-e2dc-489b-825a-284fe7da3f8b |
+| challenger_m3_1 | teamwork_challenger | Challenger 1 Adversarial Stress | in-progress | 57476cf4-525d-45cf-9a38-0371f25450a9 |
+| challenger_m3_2 | teamwork_challenger | Challenger 2 Oracle Invariant | in-progress | de7d7b50-e0b5-4c5e-a228-2af07a72ca66 |
+| auditor_m3 | teamwork_auditor | Forensic Integrity Audit | in-progress | 7ea6c452-3224-4971-8c3c-5de67eee0990 |
 
 ## Succession Status
 - Succession required: no
-- Cumulative Spawns: 50 / 128
-- Pending subagents: 3 active explorers
+- Cumulative Spawns: 56 / 128
+- Pending subagents: 5 active gating agents
 
 ## Active Timers
 - Heartbeat cron: 9cc25926-f064-4a11-b0f8-934dad82bf28/task-471

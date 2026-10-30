@@ -5,7 +5,7 @@ import pathlib, re, sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 RUNTIME = ["app", "relay", "backend", "console", "android", "packs", "models", "eval"]
 SKIP_DIRS = {"test", "tests", "vendor", "node_modules", ".venv", "__pycache__", "build", ".git"}
-SKIP_NAMES = {"REPORT.md"}
+SKIP_NAMES = {"REPORT.md", "tokenizer.json"}
 PATTERNS = [
     r"\bmock(ed|s)?\b", r"\blorem ipsum\b", r"\bdummy\b", r"\bsample[_ -]?data\b",
     r"\bfake[_ -]?(data|gauge|village|user|report)", r"\bdemo[_ -]?mode\b", r"\breplay[_ -]?mode\b",

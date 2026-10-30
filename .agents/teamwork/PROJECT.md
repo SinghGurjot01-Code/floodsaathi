@@ -42,7 +42,7 @@ The system consists of three primary tiers:
 | E2E | E2E Testing Track | Requirement-driven test harness and test cases (Tiers 1-4), publishes TEST_READY.md | none | DONE |
 | M1 | Downloads & Plugins UI | R1: Downloads tab navigation (desktop + mobile), 4 plugin cards (Maps, SLM, Python, Language Packs) | none | DONE |
 | M2 | GPS Re-sync & Proximity Display | R2: GPS re-sync with visual feedback and Home view transparent telemetry proximity indicator | M1 (UI layout) | DONE |
-| M3 | AI Model Ingestion & Fine-Tuning | R3: D:\FloodSaathi_AI\ storage root, disaster guideline compiler, LoRA training, ONNX/GGUF exports, Google Translate settings | none | PLANNED |
+| M3 | AI Model Ingestion & Fine-Tuning | R3: D:\FloodSaathi_AI\ storage root, disaster guideline compiler, LoRA training, ONNX/GGUF exports, Google Translate settings | none | IN_PROGRESS |
 | M4 | Final Milestone & Hardening | R4: Pass 100% E2E test suite (Tiers 1-4) + Phase 2 Tier 5 Adversarial Coverage Hardening | E2E, M1, M2, M3 | PLANNED |
 
 ## Interface Contracts
