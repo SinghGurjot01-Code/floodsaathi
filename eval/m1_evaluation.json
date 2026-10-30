@@ -1,0 +1,28 @@
+{
+  "model": "LightGBM Baseline (M1)",
+  "temporal_split": {
+    "train": "2019-2022",
+    "validation": "2023",
+    "test": "2024-2025 held-out"
+  },
+  "test_samples": 7,
+  "test_flood_events": 4,
+  "warning_exceedance_metrics": {
+    "recall": 0.0,
+    "precision": 0.0,
+    "false_alarm_ratio": 0.0,
+    "confusion_matrix": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 4,
+      "tn": 3
+    }
+  },
+  "level_forecast_metrics": {
+    "mae_metres": 0.976,
+    "nse": -0.004
+  },
+  "gates_passed": false,
+  "status_label": "ADVISORY",
+  "advisory_reason": "Sparse historical flood observations on regulated Indus reaches require advisory labeling until multi-year archive expands."
+}

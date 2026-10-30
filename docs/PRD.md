@@ -499,8 +499,8 @@ Workflow `.github/workflows/relay.yml`: cron `*/15 * * * *` plus `workflow_dispa
 | Component | Metric | Gate | Test set |
 |---|---|---|---|
 | **Offline estimator (MVP core)** | True arrival inside displayed range; status wrongly lowered; median error (h) | In range ≥ 80% of the real-history offline start times tested; **never** wrongly lowered; report median error | Backtest on real historical records: go "offline" at many real past times (eval only) |
-| M1 warning exceedance (24 h) | Recall / precision / false-alarm ratio | Recall ≥ 80%, precision ≥ 70%, FAR ≤ 30% | Train to 2024; test Aug–Sep 2025 + 2023 peaks |
-| M1 level forecast | NSE, MAE | NSE ≥ 0.8 at +24 h (unregulated gauges); regulated reported separately | Same |
+| M1 warning exceedance (24 h) | Recall / precision / false-alarm ratio | Recall ≥ 80%, precision ≥ 70%, FAR ≤ 30% | Chronological split: Train 2019–2022, Val 2023, Test 2024–2025 held-out (no leakage) |
+| M1 level forecast | NSE, MAE | NSE ≥ 0.8 at +24 h (unregulated gauges); regulated reported separately | Same chronological split (Advisory on sparse Indus reaches) |
 | M2 inundation | Village recall; pixel IoU vs Sentinel-1 | Recall ≥ 80%, IoU ≥ 0.6 | Punjab 2025 masks built by us |
 | Retriever / cards | Top-1 correct card for a labelled query | ≥ 85% on 100 queries (MVP), 300 held-out questions later (100 per language) | Written and graded by humans |
 | Safety-critical items | Helplines, "never walk or drive through flood water", electrical hazards, drinking water | **100%** on 40 must-pass items | Fixed list in `eval/must_pass.json` |
