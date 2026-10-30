@@ -16,7 +16,7 @@ export async function initI18n() {
     currentLang = saved;
   } else {
     // Detect browser language if Hindi or Punjabi
-    const navLangs = navigator.languages || [navigator.language || "en"];
+    const navLangs = (typeof navigator !== "undefined" && (navigator.languages || [navigator.language || "en"])) || ["en"];
     for (const l of navLangs) {
       const code = l.toLowerCase().split("-")[0];
       if (SUPPORTED_LANGS.includes(code)) {
@@ -27,7 +27,9 @@ export async function initI18n() {
   }
 
   await loadTranslations(currentLang);
-  applyTranslations();
+  if (typeof document !== "undefined") {
+    applyTranslations();
+  }
   return currentLang;
 }
 
@@ -39,25 +41,73 @@ export async function loadTranslations(lang) {
     lang = DEFAULT_LANG;
   }
   try {
-    const res = await fetch(`./i18n/${lang}.json?v=1.6.0`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    let res = null;
+    try {
+      if (typeof fetch === "function") {
+        res = await fetch(`./i18n/${lang}.json?v=1.7.0`);
+      }
+    } catch (fetchErr) {
+      // Offline fallback to Cache API
+      if (typeof caches !== "undefined") {
+        res = await caches.match(`./i18n/${lang}.json`);
+      }
+    }
+
+    if (!res || !res.ok) {
+      if (typeof caches !== "undefined") {
+        const cached = await caches.match(`./i18n/${lang}.json`);
+        if (cached && cached.ok) res = cached;
+      }
+    }
+
+    // Node.js test environment fallback
+    if ((!res || !res.ok) && typeof process !== "undefined" && process?.versions?.node) {
+      try {
+        const fs = await import("node:fs");
+        const path = await import("node:path");
+        const filePath = path.resolve(process.cwd(), "app", "i18n", `${lang}.json`);
+        if (fs.existsSync(filePath)) {
+          const raw = fs.readFileSync(filePath, "utf-8");
+          translations = JSON.parse(raw);
+          currentLang = lang;
+          try {
+            await setSetting("preferred_lang", lang);
+          } catch {}
+          if (typeof document !== "undefined" && document.documentElement) {
+            document.documentElement.lang = lang;
+          }
+          return;
+        }
+      } catch (nodeErr) {
+        // Continue to fallback error handling
+      }
+    }
+
+    if (!res || !res.ok) throw new Error(`HTTP ${res?.status || "offline"}`);
     translations = await res.json();
     currentLang = lang;
-    await setSetting("preferred_lang", lang);
-    document.documentElement.lang = lang;
+    try {
+      await setSetting("preferred_lang", lang);
+    } catch {}
+    if (typeof document !== "undefined" && document.documentElement) {
+      document.documentElement.lang = lang;
+    }
   } catch (err) {
     console.error("Failed to load language JSON:", err);
   }
 }
 
 /**
- * Change current language.
+ * Change current language and apply translations to DOM.
  */
 export async function setLanguage(lang) {
-  if (lang === currentLang) return;
   await loadTranslations(lang);
-  applyTranslations();
-  window.dispatchEvent(new CustomEvent("floodsaathi:language_changed", { detail: { lang } }));
+  if (typeof document !== "undefined") {
+    applyTranslations();
+  }
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("floodsaathi:language_changed", { detail: { lang } }));
+  }
 }
 
 export function getCurrentLanguage() {
@@ -90,14 +140,19 @@ export function t(key, params = {}) {
 }
 
 /**
- * Translate all DOM elements marked with data-i18n attribute.
+ * Translate all DOM elements marked with data-i18n, data-i18n-placeholder, data-i18n-aria.
  */
 export function applyTranslations(root = document) {
+  if (!root || typeof root.querySelectorAll !== "function") return;
+
   const elements = root.querySelectorAll("[data-i18n]");
   elements.forEach((el) => {
     const key = el.getAttribute("data-i18n");
     if (key) {
-      el.textContent = t(key);
+      const translated = t(key);
+      if (translated && translated !== key) {
+        el.textContent = translated;
+      }
     }
   });
 
@@ -105,7 +160,10 @@ export function applyTranslations(root = document) {
   placeholders.forEach((el) => {
     const key = el.getAttribute("data-i18n-placeholder");
     if (key) {
-      el.placeholder = t(key);
+      const translated = t(key);
+      if (translated && translated !== key) {
+        el.placeholder = translated;
+      }
     }
   });
 
@@ -113,7 +171,10 @@ export function applyTranslations(root = document) {
   ariaLabels.forEach((el) => {
     const key = el.getAttribute("data-i18n-aria");
     if (key) {
-      el.setAttribute("aria-label", t(key));
+      const translated = t(key);
+      if (translated && translated !== key) {
+        el.setAttribute("aria-label", translated);
+      }
     }
   });
 }

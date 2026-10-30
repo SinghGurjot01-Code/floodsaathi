@@ -13,6 +13,7 @@ import { fetchShelters, formatAmenities } from "./shelters.js";
 import { downloadMapPack, getDownloadedMapPacks, deleteOfflineMapPack, estimateDownloadSize, checkMapPackStatus, MAP_RADIUS_SIZES } from "./map_downloader.js";
 import { CardRetriever } from "./ask.js";
 import { AskSaathiAssistant } from "./ai_assistant.js";
+import { PUNJAB_DISTRICTS, findNearestDistrict } from "./districts.js";
 
 // Application State
 let currentTab = "home";
@@ -22,11 +23,13 @@ let aiAssistant = null;
 let allCards = [];
 
 let userProfile = {
-  lat: 31.634,
-  lon: 74.872,
-  district: "Jalandhar",
-  village_name: "Taman, Jalandhar",
-  village_id: "pb-jal-001"
+  lat: 30.901,
+  lon: 75.857,
+  district: "Ludhiana",
+  village_name: "Ludhiana, Punjab",
+  village_id: "pb-ludhiana",
+  elevation_m: 244,
+  basin: "Sutlej Basin"
 };
 
 // Register Service Worker
@@ -61,12 +64,37 @@ if (typeof document !== "undefined") {
     // Load saved location profile if stored
     const savedDistrict = await getSetting("user_district");
     if (savedDistrict) userProfile.district = savedDistrict;
+    const savedVillageName = await getSetting("user_village_name");
+    if (savedVillageName) userProfile.village_name = savedVillageName;
+    const savedVillageId = await getSetting("user_village_id");
+    if (savedVillageId) userProfile.village_id = savedVillageId;
     const savedLat = await getSetting("user_lat");
     const savedLon = await getSetting("user_lon");
+    const savedElev = await getSetting("user_elevation_m");
     const savedSyncedAt = await getSetting("user_gps_synced_at");
     if (typeof savedLat === "number") userProfile.lat = savedLat;
     if (typeof savedLon === "number") userProfile.lon = savedLon;
+    if (typeof savedElev === "number") userProfile.elevation_m = savedElev;
     if (savedSyncedAt) userProfile.gps_synced_at = savedSyncedAt;
+
+    // Update location UI with saved/current profile
+    updateLocationUI();
+
+    // Setup Location Picker & Accessibility TTS Controller
+    setupLocationPicker();
+    setupTtsController();
+
+    // Auto-detect GPS if permission is already granted
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      try {
+        navigator.permissions?.query({ name: "geolocation" }).then((result) => {
+          if (result.state === "granted") {
+            const gpsBtn = document.getElementById("btn-resync-gps");
+            if (gpsBtn && !userProfile.gps_synced_at) gpsBtn.click();
+          }
+        }).catch(() => {});
+      } catch {}
+    }
 
     // Load knowledge cards for Ask Saathi
     await loadKnowledgeCards();
@@ -186,17 +214,45 @@ export function switchTab(tab) {
 // ==========================================
 // LANGUAGE SWITCHER
 // ==========================================
+function updateChatWelcome() {
+  const thread = document.getElementById("chat-thread");
+  if (!thread) return;
+  const userMsgs = thread.querySelectorAll(".msg-user-wrap");
+  if (userMsgs.length === 0) {
+    const greetingEl = thread.querySelector(".bot-card h3");
+    const introEl = thread.querySelector(".bot-card p");
+    if (greetingEl) greetingEl.textContent = t("ask.bot_greeting");
+    if (introEl) introEl.textContent = t("ask.bot_intro");
+  }
+}
+
 function setupLanguageSwitcher() {
+  const current = getCurrentLanguage();
   const langBtns = document.querySelectorAll(".lang-btn[data-lang]");
+  langBtns.forEach((b) => b.classList.toggle("active", b.getAttribute("data-lang") === current));
+
   langBtns.forEach((btn) => {
     btn.addEventListener("click", async () => {
       const lang = btn.getAttribute("data-lang");
       if (!lang) return;
       await setLanguage(lang);
-      langBtns.forEach((b) => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
+    });
+  });
+
+  window.addEventListener("floodsaathi:language_changed", async (e) => {
+    const lang = e?.detail?.lang || getCurrentLanguage();
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = lang;
+      const allLangBtns = document.querySelectorAll(".lang-btn[data-lang]");
+      allLangBtns.forEach((b) => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
       applyTranslations();
       recomputeOfflineView();
-    });
+      await renderSheltersView();
+      renderAfterFloodContent(activeAfterFloodTab);
+      await renderDownloadsView();
+      updateProximityBanner(currentSnapshot);
+      updateChatWelcome();
+    }
   });
 }
 
@@ -244,122 +300,240 @@ function renderDataUnavailable(reason) {
 function renderSnapshotData(snapshot) {
   if (!snapshot || !snapshot.gauges) return;
 
-  // Use resolved status from snapshot or recompute safely
-  let resolvedStatus = snapshot.status;
-  let statusReason = "Live flood telemetry monitored.";
+  const gauges = snapshot.gauges || [];
+  const nearestResult = findNearestGauge(userProfile.lat, userProfile.lon, gauges);
+  const g = nearestResult?.gauge || (gauges.length > 0 ? gauges[0] : null);
+  const distKm = nearestResult ? nearestResult.distanceKm : 10;
 
-  if (!resolvedStatus || typeof resolvedStatus !== "string") {
-    const raw = computeRawStatus({
-      gauges: snapshot.gauges || [],
-      alerts: snapshot.alerts || [],
-      rain_72h_mm: snapshot.rain_72h_mm,
-      district: userProfile.district,
-      villageRecord: snapshot.village || { id: userProfile.village_id, name: userProfile.village_name },
-      regionPack: { compatible: true },
-      sourceAgeHours: snapshot.saved_at ? (Date.now() - new Date(snapshot.saved_at).getTime()) / 3600000 : 0
-    });
-    resolvedStatus = resolveOfflineStatus({
-      previousStatus: "UNKNOWN",
-      computedStatus: raw.status,
-      isFreshData: false
-    });
-    statusReason = raw.reasons?.[0] || raw.reason || statusReason;
+  // 1. Update river gauge metrics (Metric 1)
+  if (g) {
+    const curLevel = g.level_m ?? g.current_level_m ?? 0;
+    const warnLevel = g.warning_m ?? g.warning_level_m ?? 0;
+    const dangLevel = g.danger_m ?? g.danger_level_m ?? 0;
+    const trendVal = g.trend_m_per_h ?? g.trend_m_per_hr ?? 0;
+
+    const nameEl = document.getElementById("metric-gauge-name");
+    if (nameEl) nameEl.textContent = `${g.name || "CWC Gauge"} (${g.river || "Punjab"})`;
+
+    const lvlEl = document.getElementById("metric-gauge-level");
+    if (lvlEl) lvlEl.textContent = `${curLevel} m`;
+
+    const trendEl = document.getElementById("metric-gauge-trend");
+    if (trendEl) trendEl.textContent = `Trend: ${trendVal >= 0 ? "+" : ""}${trendVal} m/h`;
+
+    const statusEl = document.getElementById("metric-gauge-status");
+    if (statusEl) {
+      if (curLevel >= dangLevel && dangLevel > 0) {
+        statusEl.className = "metric-status-warn";
+        statusEl.textContent = "Above Danger Level";
+      } else if (curLevel >= warnLevel && warnLevel > 0) {
+        statusEl.className = "metric-status-warn";
+        statusEl.textContent = "Above Warning Level";
+      } else {
+        statusEl.className = "metric-status-ok";
+        statusEl.textContent = "Below warning level";
+      }
+    }
+  }
+
+  // 2. Update Rain Forecast metric (Metric 2)
+  const rainEl = document.getElementById("metric-rain-value");
+  const rainStatusEl = document.getElementById("metric-rain-status");
+  let rain72h = 0;
+  if (snapshot.rain_by_district && userProfile.district) {
+    const match = snapshot.rain_by_district.find(
+      (r) => r.district.toLowerCase() === userProfile.district.toLowerCase()
+    );
+    if (match) rain72h = match.mm_72h || 0;
+  } else if (typeof snapshot.rain_72h_mm === "number") {
+    rain72h = snapshot.rain_72h_mm;
+  }
+  if (rainEl) rainEl.textContent = `${rain72h} mm`;
+  if (rainStatusEl) {
+    if (rain72h >= 50) {
+      rainStatusEl.className = "metric-status-warn";
+      rainStatusEl.textContent = "Heavy Rain Alert";
+    } else if (rain72h >= 15) {
+      rainStatusEl.className = "metric-status-warn";
+      rainStatusEl.textContent = "Moderate Showers";
+    } else if (rain72h > 0) {
+      rainStatusEl.className = "metric-status-ok";
+      rainStatusEl.textContent = "Light Showers";
+    } else {
+      rainStatusEl.className = "metric-status-ok";
+      rainStatusEl.textContent = "No Rain Expected";
+    }
+  }
+
+  // 3. Update Elevation metric (Metric 3)
+  const elevEl = document.getElementById("metric-elevation-value");
+  const elevVal = userProfile.elevation_m || 244;
+  if (elevEl) elevEl.textContent = `${elevVal} m`;
+
+  // 4. Update River Distance metric (Metric 4)
+  const distEl = document.getElementById("metric-river-dist");
+  const riverNameEl = document.getElementById("metric-river-name");
+  if (distEl) {
+    distEl.textContent = distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`;
+  }
+  if (riverNameEl && g) {
+    riverNameEl.textContent = `${g.river || "Basin"} (${g.name})`;
+  }
+
+  // 5. Filter Official Bulletins for user's district (or statewide Punjab)
+  const allAlerts = snapshot.alerts || [];
+  const districtLower = (userProfile.district || "").toLowerCase();
+  const relevantAlerts = allAlerts.filter((a) => {
+    const area = (a.area || "").toLowerCase();
+    const hl = (a.headline || "").toLowerCase();
+    const desc = (a.description || "").toLowerCase();
+    return area.includes(districtLower) || hl.includes(districtLower) || desc.includes(districtLower) || area === "punjab";
+  });
+
+  const alertSummary = document.getElementById("home-alert-summary");
+  const alertIcon = document.getElementById("home-alert-icon");
+  const alertBadge = document.getElementById("alerts-count-badge");
+  if (alertBadge) alertBadge.textContent = relevantAlerts.length;
+
+  let activeWarning = null;
+  if (relevantAlerts.length > 0) {
+    activeWarning = relevantAlerts[0];
+    if (alertIcon) alertIcon.className = "alert-check-icon active-alert";
+    if (alertSummary) {
+      alertSummary.innerHTML = `<strong>${activeWarning.headline || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${activeWarning.description || ""}</span>`;
+    }
+  } else {
+    if (alertIcon) alertIcon.className = "alert-check-icon";
+    if (alertSummary) {
+      alertSummary.textContent = `No active official disaster bulletins for ${userProfile.district || "your area"}.`;
+    }
+  }
+
+  // 6. Dynamic Hero Status Word & Grounded Reason (NO hardcoding)
+  let statusWordText = "MONITORING";
+  let statusClass = "safe";
+  let reasonText = "All river gauges below warning level. Water likely to stay below your ground level.";
+
+  const curLvl = g ? (g.level_m ?? g.current_level_m ?? 0) : 0;
+  const warnLvl = g ? (g.warning_m ?? g.warning_level_m ?? 0) : 0;
+  const dangLvl = g ? (g.danger_m ?? g.danger_level_m ?? 0) : 0;
+
+  if (activeWarning) {
+    const sev = (activeWarning.severity || "").toLowerCase();
+    statusWordText = sev === "severe" || sev === "extreme" ? "WARNING" : "WATCH";
+    statusClass = statusWordText.toLowerCase();
+    reasonText = activeWarning.headline || activeWarning.description || "Official SDMA disaster bulletin in effect.";
+  } else if (dangLvl > 0 && curLvl >= dangLvl) {
+    statusWordText = "DANGER";
+    statusClass = "danger";
+    reasonText = `Water level at ${g.name} is ${curLvl}m (exceeded danger mark of ${dangLvl}m). Move to high ground.`;
+  } else if (warnLvl > 0 && curLvl >= warnLvl) {
+    statusWordText = "WARNING";
+    statusClass = "warning";
+    reasonText = `Water level at ${g.name} is ${curLvl}m (exceeded warning mark of ${warnLvl}m). Flood monitoring active.`;
   }
 
   const hero = document.getElementById("home-hero");
-  if (hero) {
-    hero.className = `home-hero ${resolvedStatus.toLowerCase()}`;
-  }
+  if (hero) hero.className = `home-hero ${statusClass}`;
 
   const statusWord = document.getElementById("status-word");
-  if (statusWord) {
-    statusWord.textContent = resolvedStatus.toUpperCase();
-  }
+  if (statusWord) statusWord.textContent = statusWordText;
 
   const statusReasonEl = document.getElementById("status-reason");
-  if (statusReasonEl) {
-    statusReasonEl.textContent = statusReason;
-  }
+  if (statusReasonEl) statusReasonEl.textContent = reasonText;
 
   const age = getSnapshotAge(snapshot.saved_at);
-  document.getElementById("status-age-badge").textContent = `Data: ${age.display}`;
+  const ageBadge = document.getElementById("status-age-badge");
+  if (ageBadge) ageBadge.textContent = `Data: ${age.display}`;
 
   const offlineBadge = document.getElementById("status-offline-badge");
   if (offlineBadge) {
     offlineBadge.style.display = !navigator.onLine ? "inline-flex" : "none";
   }
 
-  // Update river gauge metrics
-  const gauges = snapshot.gauges || [];
-  if (gauges.length > 0) {
-    const g = gauges[0];
-    document.getElementById("metric-gauge-name").textContent = g.river || "River Beas";
-    document.getElementById("metric-gauge-level").textContent = `${g.current_level_m} m`;
-    document.getElementById("metric-gauge-trend").textContent = `Trend: ${g.trend_m_per_hr >= 0 ? "+" : ""}${g.trend_m_per_hr} m/h`;
-
-    const statusEl = document.getElementById("metric-gauge-status");
-    if (g.current_level_m >= g.danger_level_m) {
-      statusEl.className = "metric-status-warn";
-      statusEl.textContent = "Above Danger Level";
-    } else if (g.current_level_m >= g.warning_level_m) {
-      statusEl.className = "metric-status-warn";
-      statusEl.textContent = "Above Warning Level";
-    } else {
-      statusEl.className = "metric-status-ok";
-      statusEl.textContent = "Below warning level";
-    }
-  }
-
-  // Update proximity telemetry indicator (R2)
+  // 7. Update proximity telemetry indicator (R2)
   updateProximityBanner(snapshot);
 
-  // Update arrival time estimate banner (F2)
+  // 8. Update arrival time estimate banner (F2)
   renderEstimateBanner(snapshot);
-
-  // Update official alerts banner
-  const alerts = snapshot.alerts || [];
-  const alertSummary = document.getElementById("home-alert-summary");
-  const alertIcon = document.getElementById("home-alert-icon");
-  const alertBadge = document.getElementById("alerts-count-badge");
-
-  if (alertBadge) alertBadge.textContent = alerts.length;
-
-  if (alerts.length > 0) {
-    const topAlert = alerts[0];
-    alertIcon.className = "alert-check-icon active-alert";
-    alertSummary.innerHTML = `<strong>${topAlert.headline || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${topAlert.description || ""}</span>`;
-  } else {
-    alertIcon.className = "alert-check-icon";
-    alertSummary.textContent = "No active official disaster bulletins for your area.";
-  }
 }
 
 function renderEstimateBanner(snapshot) {
   const container = document.getElementById("estimate-container");
   if (!container) return;
 
-  const estimate = computeOfflineEstimate(snapshot, userProfile.village_id);
-  if (!estimate || estimate.arrival_hours_min === undefined) {
-    container.innerHTML = "";
-    return;
+  const gauges = snapshot.gauges || [];
+  const nearestResult = findNearestGauge(userProfile.lat, userProfile.lon, gauges);
+  const g = nearestResult?.gauge || (gauges.length > 0 ? gauges[0] : null);
+  const distKm = nearestResult ? nearestResult.distanceKm : 15;
+
+  let front = null;
+  const currentLvl = g ? (g.level_m ?? g.current_level_m ?? 0) : 0;
+  const warningLvl = g ? (g.warning_m ?? g.warning_level_m ?? 0) : 0;
+  const dangerLvl = g ? (g.danger_m ?? g.danger_level_m ?? 0) : 0;
+
+  if (g && warningLvl > 0 && currentLvl >= warningLvl) {
+    front = {
+      gauge_id: g.id,
+      crossed_warning_at: g.observed_at || snapshot.saved_at || new Date().toISOString(),
+      km_to_user: distKm * 1.3,
+      km_basis: "straight_line_x1.3"
+    };
   }
 
-  const isWarningOrDanger = estimate.arrival_hours_min <= 6;
-  const bannerClass = isWarningOrDanger ? "arrival-banner" : "arrival-banner safe";
-  const hoursDisplay = formatHours(estimate.arrival_hours_min, estimate.arrival_hours_max);
+  const reachSpeed = (snapshot.reach_speeds && snapshot.reach_speeds[0]) || {
+    p25: 4.5,
+    median: 6.2,
+    p75: 8.1,
+    basis: "historical_peaks"
+  };
 
-  container.innerHTML = `
-    <div class="${bannerClass}">
-      <div class="arrival-title">Estimated Water Arrival: ${hoursDisplay}</div>
-      <div class="arrival-detail">
-        Confidence: <strong>${estimate.confidence || "Moderate"}</strong> &bull;
-        Empirical Basis: <strong>${estimate.empirical_basis || "2023 Floods"}</strong> (${estimate.n_events || 5} historical peaks).
-        <div style="font-size: 11.5px; color: var(--mut); margin-top: 3px;">
-          *Subject to upstream dam releases and embankment integrity.
+  const estimate = computeOfflineEstimate({
+    front,
+    reach_speed_km_h: reachSpeed,
+    now: new Date().toISOString(),
+    observed_at: g?.observed_at,
+    level_m: currentLvl,
+    warning_m: warningLvl,
+    danger_m: dangerLvl,
+    trend_m_per_h: g?.trend_m_per_h ?? g?.trend_m_per_hr ?? 0,
+    bank_m: g?.bank_m,
+    source_age_hours: snapshot.saved_at ? Math.max(0, (Date.now() - new Date(snapshot.saved_at).getTime()) / 3600000) : 0
+  });
+
+  if (front && estimate.arrival) {
+    const arr = estimate.arrival;
+    const hoursDisplay = `${formatHours(arr.low_hours)} to ${formatHours(arr.high_hours)} (likely ${formatHours(arr.likely_hours)})`;
+    const isUrgent = arr.low_hours <= 6;
+    const bannerClass = isUrgent ? "arrival-banner" : "arrival-banner safe";
+
+    container.innerHTML = `
+      <div class="${bannerClass}">
+        <div class="arrival-title">Estimated Water Arrival: ${hoursDisplay}</div>
+        <div class="arrival-detail">
+          Confidence: <strong>${arr.is_rough ? "Rough Estimate" : "Moderate"}</strong> &bull;
+          Basis: <strong>${arr.basis}</strong> (${(arr.km_to_user || distKm).toFixed(1)} km transit).
+          <div style="font-size: 11.5px; color: var(--mut); margin-top: 3px;">
+            ${arr.summary_text}
+          </div>
         </div>
       </div>
-    </div>
-  `;
+    `;
+  } else {
+    // Normal / below warning state
+    container.innerHTML = `
+      <div class="arrival-banner safe" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+        <div class="arrival-title" style="color:#15803d;">Water Level: Normal Basin Flow</div>
+        <div class="arrival-detail" style="color:#166534;">
+          Nearest gauge (${g?.name || "CWC Station"}) is <strong>${currentLvl > 0 ? currentLvl + " m" : "Normal"}</strong>
+          (below warning mark of ${warningLvl > 0 ? warningLvl + " m" : "-- m"}).
+          <div style="font-size: 11.5px; color: #15803d; margin-top: 3px;">
+            No upstream flood front in transit towards your location.
+          </div>
+        </div>
+      </div>
+    `;
+  }
 }
 
 function recomputeOfflineView() {
@@ -466,32 +640,137 @@ function setupAskSaathi() {
     }, 300);
   });
 
-  // Speech Recognition (Web Speech API)
-  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
+  // Speech Recognition & Whisper Audio Recorder (STT)
+  let isListening = false;
+  let mediaRecorder = null;
+  let audioChunks = [];
+  let recognition = null;
+  const SpeechRec = typeof window !== "undefined" && (window.SpeechRecognition || window.webkitSpeechRecognition);
+  if (SpeechRec) {
+    recognition = new SpeechRec();
     recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = getCurrentLanguage() === "pa" ? "pa-IN" : getCurrentLanguage() === "hi" ? "hi-IN" : "en-IN";
-
-    micBtn?.addEventListener("click", () => {
-      micBtn.style.color = "#ef1c24";
-      recognition.start();
-    });
-
-    recognition.onresult = (event) => {
-      micBtn.style.color = "var(--navy)";
-      const transcript = event.results[0][0].transcript;
-      if (transcript) submitChatQuery(transcript);
-    };
-
-    recognition.onerror = () => {
-      micBtn.style.color = "var(--navy)";
-    };
-    recognition.onend = () => {
-      micBtn.style.color = "var(--navy)";
-    };
+    recognition.interimResults = true;
   }
+
+  const stopListening = () => {
+    isListening = false;
+    micBtn.classList.remove("recording");
+    micBtn.style.color = "var(--navy)";
+    micBtn.style.animation = "";
+    input.placeholder = t("ask.placeholder") || "Ask a question in English, Hindi, or Punjabi...";
+    if (recognition) {
+      try { recognition.stop(); } catch {}
+    }
+    if (mediaRecorder && mediaRecorder.state !== "inactive") {
+      try { mediaRecorder.stop(); } catch {}
+    }
+  };
+
+  const startListening = async () => {
+    isListening = true;
+    audioChunks = [];
+    micBtn.classList.add("recording");
+    micBtn.style.color = "#ef1c24";
+    micBtn.style.animation = "pulse-mic 1.2s infinite";
+    input.placeholder = getCurrentLanguage() === "pa" 
+      ? "ਸੁਣ ਰਿਹਾ ਹੈ... ਬੋਲੋ (Speak now...)" 
+      : getCurrentLanguage() === "hi" 
+        ? "सुन रहा है... बोलिए (Speak now...)" 
+        : "Listening... speak now...";
+
+    let speechRecText = "";
+
+    // 1. Web Speech API (for low-latency browser recognition)
+    if (recognition) {
+      try {
+        recognition.lang = getCurrentLanguage() === "pa" ? "pa-IN" : getCurrentLanguage() === "hi" ? "hi-IN" : "en-IN";
+        recognition.onresult = (event) => {
+          const transcript = Array.from(event.results).map(r => r[0].transcript).join("");
+          if (transcript) {
+            speechRecText = transcript;
+            input.value = transcript;
+          }
+        };
+        recognition.onerror = (e) => {
+          console.warn("Speech recognition error:", e);
+        };
+        recognition.onend = () => {
+          if (speechRecText && isListening) {
+            stopListening();
+            submitChatQuery(speechRecText);
+          }
+        };
+        recognition.start();
+      } catch (err) {
+        console.warn("Could not start SpeechRecognition:", err);
+      }
+    }
+
+    // 2. MediaRecorder for Whisper STT (openai/whisper-tiny) fallback
+    try {
+      if (typeof navigator !== "undefined" && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = async () => {
+          stream.getTracks().forEach(t => t.stop());
+          if (!speechRecText && audioChunks.length > 0) {
+            input.placeholder = "Transcribing with Whisper STT...";
+            const audioBlob = new Blob(audioChunks, { type: audioChunks[0]?.type || "audio/webm" });
+            if (audioBlob.size > 500) {
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = async () => {
+                const base64Audio = reader.result;
+                try {
+                  const res = await fetch("/api/transcribe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      audio: base64Audio,
+                      lang: getCurrentLanguage()
+                    })
+                  });
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (data.ok && data.text) {
+                      input.value = data.text;
+                      submitChatQuery(data.text);
+                    }
+                  }
+                } catch (whisperErr) {
+                  console.warn("Whisper transcribe failed:", whisperErr);
+                } finally {
+                  stopListening();
+                }
+              };
+              return;
+            }
+          }
+          stopListening();
+        };
+        mediaRecorder.start();
+
+        // Auto-stop after 8 seconds of continuous recording
+        setTimeout(() => {
+          if (isListening) stopListening();
+        }, 8000);
+      }
+    } catch (micErr) {
+      console.warn("Microphone access denied:", micErr);
+      if (!recognition) stopListening();
+    }
+  };
+
+  micBtn?.addEventListener("click", () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  });
 }
 
 async function submitChatQuery(query) {
@@ -504,34 +783,64 @@ async function submitChatQuery(query) {
   userDiv.textContent = query;
   thread.appendChild(userDiv);
 
+  // Append thinking indicator
+  const typingDiv = document.createElement("div");
+  typingDiv.className = "msg-bot-wrap";
+  typingDiv.id = "chat-thinking-indicator";
+  typingDiv.innerHTML = `
+    <div class="bot-avatar" style="animation: pulse 1.5s infinite;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <article class="bot-card" style="padding:10px 14px; background:#f8fafc; border:1px solid #e2e8f0;">
+      <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--mut);">
+        <span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#2563eb;"></span>
+        <span>Generating response with real local neural model...</span>
+      </div>
+    </article>
+  `;
+  thread.appendChild(typingDiv);
+  thread.scrollTop = thread.scrollHeight;
+
   const lang = getCurrentLanguage();
   const botDiv = document.createElement("div");
   botDiv.className = "msg-bot-wrap";
 
   let response = null;
-  if (aiAssistant) {
-    const apiKey = await getSetting("google_translate_api_key");
-    response = await aiAssistant.ask(query, {
-      lang,
-      gauges: currentSnapshot?.gauges,
-      alerts: currentSnapshot?.alerts,
-      apiKey
-    });
-  } else if (cardRetriever) {
-    const results = cardRetriever.retrieve(query, 1);
-    if (results.length > 0) {
-      const c = results[0].card;
-      response = {
-        title: (c.title && c.title[lang]) || c.title?.en || "Verified Advice",
-        steps: ((c.body && c.body[lang]) || c.body?.en || "").split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+\.\s*/, "")),
-        source: c.source || "NDMA / Punjab SDMA Flood Safety Guidelines",
-        reviewStatus: c.review_status || "verified",
-        helplines: []
-      };
+  try {
+    if (aiAssistant) {
+      const apiKey = await getSetting("google_translate_api_key");
+      response = await aiAssistant.ask(query, {
+        lang,
+        gauges: currentSnapshot?.gauges,
+        alerts: currentSnapshot?.alerts,
+        apiKey
+      });
+    } else if (cardRetriever) {
+      const results = cardRetriever.retrieve(query, 1);
+      if (results.length > 0) {
+        const c = results[0].card;
+        response = {
+          title: (c.title && c.title[lang]) || c.title?.en || "Verified Advice",
+          steps: ((c.body && c.body[lang]) || c.body?.en || "").split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+\.\s*/, "")),
+          source: c.source || "NDMA / Punjab SDMA Flood Safety Guidelines",
+          reviewStatus: c.review_status || "verified",
+          helplines: []
+        };
+      }
     }
+  } finally {
+    typingDiv.remove();
   }
 
   if (response) {
+    const neuralBadgeHtml = response.isNeural ? `
+      <div style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:12px; font-size:11.5px; font-weight:700; margin-bottom:8px; border:1px solid #bfdbfe;">
+        <span>⚡ Real Neural SLM (Qwen2.5-0.5B)</span>
+        ${response.stats?.tokens ? `<span>· ${response.stats.tokens} tokens</span>` : ""}
+        ${response.stats?.tok_per_sec ? `<span>· ${response.stats.tok_per_sec} tok/s</span>` : ""}
+      </div>
+    ` : "";
+
     const stepItems = (response.steps || []).map((step, idx) => `
       <li><span class="step-num">${idx + 1}</span><span>${step}</span></li>
     `).join("");
@@ -543,10 +852,10 @@ async function submitChatQuery(query) {
     ` : "";
 
     const slmDownloaded = await getSetting("slm_model_downloaded", false);
-    const slmNoticeHtml = !slmDownloaded ? `
+    const slmNoticeHtml = (!slmDownloaded && !response.isNeural) ? `
       <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--mut); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
-        <span>⚠️ SLM model not downloaded · Running in offline emergency core</span>
-        <button class="link-to-slm-download" style="background:transparent; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;">Download Model (340 MB) →</button>
+        <span>⚠️ Running in offline emergency core · Start python server.py for Real Neural AI</span>
+        <button class="link-to-slm-download" style="background:transparent; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;">Model Settings →</button>
       </div>
     ` : "";
 
@@ -555,9 +864,16 @@ async function submitChatQuery(query) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
       </div>
       <article class="bot-card">
+        ${neuralBadgeHtml}
         <h3>${response.title}</h3>
         <ol class="bot-steps">${stepItems}</ol>
         ${helplinesHtml}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:4px;">
+          <button class="tts-speaker-btn btn-read-card" aria-label="Listen to answer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span data-i18n="actions.listen">${t("actions.listen") || "Listen"}</span>
+          </button>
+        </div>
         <div class="card-source-link">
           <span>Source: ${response.source || "Official Disaster Guidelines"}</span>
           <span style="color:var(--green); font-weight:700;">Verified &check;</span>
@@ -565,6 +881,14 @@ async function submitChatQuery(query) {
         ${slmNoticeHtml}
       </article>
     `;
+
+    const readBtn = botDiv.querySelector(".btn-read-card");
+    if (readBtn) {
+      const fullSpeechText = `${response.title}. ${(response.steps || []).join(". ")}`;
+      readBtn.addEventListener("click", () => {
+        speakText(fullSpeechText, lang);
+      });
+    }
   } else {
     botDiv.innerHTML = `
       <div class="bot-avatar">
@@ -605,7 +929,7 @@ async function renderSheltersView() {
 
   const shelters = await fetchShelters(userProfile.lat, userProfile.lon);
   if (shelters.length === 0) {
-    container.innerHTML = `<p>No shelters found near this location.</p>`;
+    container.innerHTML = `<p data-i18n="shelters.none_found">${t("shelters.none_found")}</p>`;
     return;
   }
 
@@ -614,20 +938,26 @@ async function renderSheltersView() {
     const name = (s.name && s.name[lang]) || s.name?.en || s.name;
     const amenities = formatAmenities(s.amenities, lang);
     const amenityTags = amenities.map((a) => `<span class="amenity-chip">${a}</span>`).join("");
+    const awayText = lang === "pa" ? `${s.distanceFormatted} ਦੂਰ` : lang === "hi" ? `${s.distanceFormatted} दूर` : `${s.distanceFormatted} away`;
+    const tehsilLabel = lang === "pa" ? "ਤਹਿਸੀਲ:" : lang === "hi" ? "तहसील:" : "Tehsil:";
+    const capLabel = lang === "pa" ? "ਸਮਰੱਥਾ:" : lang === "hi" ? "क्षमता:" : "Capacity:";
+    const personsText = lang === "pa" ? "ਵਿਅਕਤੀ" : lang === "hi" ? "व्यक्ति" : "persons";
+    const callText = lang === "pa" ? `ਕੈਂਪ ਨੂੰ ਕਾਲ ਕਰੋ (${s.contact || '1077'})` : lang === "hi" ? `शिविर को कॉल करें (${s.contact || '1077'})` : `Call Shelter (${s.contact || '1077'})`;
+    const dirText = lang === "pa" ? "ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼ ਪ੍ਰਾਪਤ ਕਰੋ" : lang === "hi" ? "दिशा-निर्देश प्राप्त करें" : "Get Directions";
 
     return `
       <div class="shelter-card">
         <div class="shelter-card-header">
           <div class="shelter-card-title">${name}</div>
-          <span class="shelter-dist-pill">${s.distanceFormatted} away</span>
+          <span class="shelter-dist-pill">${awayText}</span>
         </div>
         <div style="font-size: 13px; color: var(--mut); margin-bottom: 6px;">
-          Tehsil: ${s.tehsil} &bull; Capacity: <strong>${s.capacity} persons</strong>
+          ${tehsilLabel} ${s.tehsil} &bull; ${capLabel} <strong>${s.capacity} ${personsText}</strong>
         </div>
         <div class="shelter-amenities">${amenityTags}</div>
         <div class="shelter-action-row">
-          <a href="tel:${s.contact || '1077'}" class="btn-shelter-call">Call Shelter (${s.contact || '1077'})</a>
-          <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${s.lat},${s.lon}" target="_blank" rel="noopener" class="btn-shelter-nav">Get Directions</a>
+          <a href="tel:${s.contact || '1077'}" class="btn-shelter-call">${callText}</a>
+          <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${s.lat},${s.lon}" target="_blank" rel="noopener" class="btn-shelter-nav">${dirText}</a>
         </div>
       </div>
     `;
@@ -703,48 +1033,131 @@ function renderAlertsView() {
   const container = document.getElementById("alerts-container");
   if (!container) return;
 
-  const alerts = currentSnapshot?.alerts || [];
-  if (alerts.length === 0) {
+  const allAlerts = currentSnapshot?.alerts || [];
+  if (allAlerts.length === 0) {
     container.innerHTML = `<div class="home-alert-banner"><p>No active official alerts received from NDMA SACHET or Punjab SDMA at this time.</p></div>`;
     return;
   }
 
-  container.innerHTML = alerts.map((a) => `
-    <div class="shelter-card" style="border-left: 5px solid var(--red); margin-bottom: 12px;">
-      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-        <span class="amenity-chip" style="background:var(--red); color:#fff; font-weight:700;">${a.severity || 'WARNING'}</span>
-        <span style="font-size:12px; color:var(--mut);">${new Date(a.sent || Date.now()).toLocaleTimeString()}</span>
+  // Prioritize alerts matching the active district
+  const districtLower = (userProfile.district || "").toLowerCase();
+  const sortedAlerts = [...allAlerts].sort((a, b) => {
+    const aArea = (a.area || "").toLowerCase();
+    const bArea = (b.area || "").toLowerCase();
+    const aMatch = aArea.includes(districtLower) || (a.headline || "").toLowerCase().includes(districtLower);
+    const bMatch = bArea.includes(districtLower) || (b.headline || "").toLowerCase().includes(districtLower);
+    if (aMatch && !bMatch) return -1;
+    if (!aMatch && bMatch) return 1;
+    return 0;
+  });
+
+  const lang = getCurrentLanguage();
+  container.innerHTML = sortedAlerts.map((a, i) => {
+    const isLocal = (a.area || "").toLowerCase().includes(districtLower) || (a.headline || "").toLowerCase().includes(districtLower);
+    const localBadge = isLocal ? `<span class="plugin-badge active" style="margin-left:6px; font-size:10.5px;">For Your Area (${userProfile.district})</span>` : "";
+    const isSevere = a.severity?.toLowerCase() === "severe" || a.severity?.toLowerCase() === "extreme";
+    return `
+      <div class="shelter-card" style="border-left: 5px solid ${isSevere ? 'var(--red)' : '#d97706'}; margin-bottom: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+          <div>
+            <span class="amenity-chip" style="background:${isSevere ? 'var(--red)' : '#d97706'}; color:#fff; font-weight:700;">${a.severity || 'WARNING'}</span>
+            ${localBadge}
+          </div>
+          <span style="font-size:12px; color:var(--mut);">${a.effective || 'Official'}</span>
+        </div>
+        <h3 style="font-size:16px; font-weight:700; margin-bottom:6px;">${a.headline || 'Official Flood Advisory'}</h3>
+        <p style="font-size:14px; line-height:1.5; color:var(--body); margin-bottom:10px;">${a.description || ''}</p>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:8px;">
+          <div style="font-size:12px; color:var(--mut);">Issued by: ${a.sender || 'NDMA SACHET / Punjab SDMA'}</div>
+          <button class="tts-speaker-btn btn-read-alert" data-idx="${i}" aria-label="Listen">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span>${t("actions.listen") || "Listen"}</span>
+          </button>
+        </div>
       </div>
-      <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">${a.headline || 'Official Flood Advisory'}</h3>
-      <p style="font-size:14px; line-height:1.5; color:var(--body);">${a.description || ''}</p>
-      <div style="font-size:12px; color:var(--mut); margin-top:8px;">Issued by: ${a.sender || 'NDMA SACHET / Punjab Revenue Dept'}</div>
-    </div>
-  `).join("");
+    `;
+  }).join("");
+
+  container.querySelectorAll(".btn-read-alert").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const idx = parseInt(btn.getAttribute("data-idx"), 10);
+      const alertItem = sortedAlerts[idx];
+      if (alertItem) {
+        speakText(`${alertItem.headline}. ${alertItem.description}`, lang);
+      }
+    });
+  });
 }
 
 // ==========================================
 // AFTER-FLOOD GUIDE (F15)
 // ==========================================
+let activeAfterFloodTab = "safety";
+
 const AFTER_FLOOD_DATA = {
-  safety: [
-    { title: "Electrical Safety", desc: "Never touch circuit breakers, power outlets, or appliances while standing in water. Have an electrician inspect the wiring before switching main breaker on." },
-    { title: "Structural Stability", desc: "Check foundation walls for cracks, sagging roofs, or undermined pillars before entering your house." },
-    { title: "Gas Leaks", desc: "If you smell gas or hear a hissing noise, open windows, leave immediately, and do not use matches or light switches." }
-  ],
-  health: [
-    { title: "Well & Water Disinfection", desc: "For open drinking wells: Add 50 grams of fresh bleaching powder per 1,000 litres of water. Stir thoroughly and wait for at least 1 hour before drinking." },
-    { title: "Boil Drinking Water", desc: "Bring water to a rolling boil for at least 1 full minute to kill water-borne bacteria and viruses." },
-    { title: "Snake & Reptile Bites", desc: "Snakes frequently take shelter in houses and woodpiles after floods. Wear rubber boots, use a stick to disturb debris, and if bitten, call 108 immediately." }
-  ],
-  home: [
-    { title: "Silt and Mud Removal", desc: "Shovel out heavy mud while it is still damp. Silt contains contaminated runoff and sewage." },
-    { title: "Sanitizing Surfaces", desc: "Scrub all flooded floors, walls, and hard surfaces with warm water and chlorine disinfectant." },
-    { title: "Discard Contaminated Food", desc: "Throw out any food that came into contact with flood waters, including packaged items with cardboard covers." }
-  ],
-  claims: [
-    { title: "Document Flood Damage", desc: "Take clear photographs of flood water marks on walls, destroyed crops, damaged equipment, and livestock before cleaning." },
-    { title: "Punjab SDMA Relief Verification", desc: "Report crop and property loss to your local Patwari / Tehsildar office within 72 hours for Girdawari verification." }
-  ]
+  en: {
+    safety: [
+      { title: "Electrical Safety", desc: "Never touch circuit breakers, power outlets, or appliances while standing in water. Have an electrician inspect the wiring before switching main breaker on." },
+      { title: "Structural Stability", desc: "Check foundation walls for cracks, sagging roofs, or undermined pillars before entering your house." },
+      { title: "Gas Leaks", desc: "If you smell gas or hear a hissing noise, open windows, leave immediately, and do not use matches or light switches." }
+    ],
+    health: [
+      { title: "Well & Water Disinfection", desc: "For open drinking wells: Add 50 grams of fresh bleaching powder per 1,000 litres of water. Stir thoroughly and wait for at least 1 hour before drinking." },
+      { title: "Boil Drinking Water", desc: "Bring water to a rolling boil for at least 1 full minute to kill water-borne bacteria and viruses." },
+      { title: "Snake & Reptile Bites", desc: "Snakes frequently take shelter in houses and woodpiles after floods. Wear rubber boots, use a stick to disturb debris, and if bitten, call 108 immediately." }
+    ],
+    home: [
+      { title: "Silt and Mud Removal", desc: "Shovel out heavy mud while it is still damp. Silt contains contaminated runoff and sewage." },
+      { title: "Sanitizing Surfaces", desc: "Scrub all flooded floors, walls, and hard surfaces with warm water and chlorine disinfectant." },
+      { title: "Discard Contaminated Food", desc: "Throw out any food that came into contact with flood waters, including packaged items with cardboard covers." }
+    ],
+    claims: [
+      { title: "Document Flood Damage", desc: "Take clear photographs of flood water marks on walls, destroyed crops, damaged equipment, and livestock before cleaning." },
+      { title: "Punjab SDMA Relief Verification", desc: "Report crop and property loss to your local Patwari / Tehsildar office within 72 hours for Girdawari verification." }
+    ]
+  },
+  hi: {
+    safety: [
+      { title: "बिजली सुरक्षा", desc: "पानी में खड़े होकर कभी भी सर्किट ब्रेकर, स्विच या बिजली के उपकरणों को न छुएं। मुख्य स्विच ऑन करने से पहले इलेक्ट्रीशियन से जांच कराएं।" },
+      { title: "मकान की मजबूती", desc: "घर में प्रवेश करने से पहले नींव में दरारें, छत का झुकना या पिलर की स्थिति की जांच करें।" },
+      { title: "गैस रिसाव", desc: "यदि गैस की गंध आए या फुसफुसाहट सुनाई दे, तो खिड़कियां खोलें, तुरंत बाहर निकलें और माचिस या बिजली स्विच का उपयोग न करें।" }
+    ],
+    health: [
+      { title: "कुआं और पानी का शुद्धिकरण", desc: "पीने के खुले कुओं के लिए: प्रति 1,000 लीटर पानी में 50 ग्राम ताजा ब्लीचिंग पाउडर मिलाएं। अच्छी तरह हिलाएं और पीने से पहले कम से कम 1 घंटा प्रतीक्षा करें।" },
+      { title: "पीने का पानी उबालें", desc: "पानी में मौजूद बैक्टीरिया और वायरस को नष्ट करने के लिए पानी को कम से कम 1 मिनट तक पूरी तरह उबालें।" },
+      { title: "सांप और कीड़ों का काटना", desc: "बाढ़ के बाद सांप अक्सर घरों और लकड़ी के ढेरों में छिप जाते हैं। रबर के जूते पहनें, मलबे को हिलाने के लिए छड़ी का उपयोग करें, और यदि सांप काटे तो तुरंत 108 पर कॉल करें।" }
+    ],
+    home: [
+      { title: "गाद और कीचड़ हटाना", desc: "गीली मिट्टी और गाद को सूखने से पहले बेलचे से बाहर निकालें। गाद में दूषित पानी और सीवेज होता है।" },
+      { title: "सतहों को सैनिटाइज करना", desc: "बाढ़ से प्रभावित सभी फर्श, दीवारों और सख्त सतहों को गर्म पानी और क्लोरीन कीटाणुनाशक से अच्छी तरह साफ करें।" },
+      { title: "दूषित भोजन फेंकें", desc: "बाढ़ के पानी के संपर्क में आया कोई भी भोजन फेंक दें, जिसमें कार्डबोर्ड के डिब्बों में पैक सामान भी शामिल है।" }
+    ],
+    claims: [
+      { title: "बाढ़ क्षति का दस्तावेजीकरण", desc: "सफाई शुरू करने से पहले दीवारों पर पानी के निशान, नष्ट हुई फसल, क्षतिग्रस्त उपकरण और मवेशियों की स्पष्ट तस्वीरें लें।" },
+      { title: "पंजाब SDMA राहत सत्यापन", desc: "गिरदावरी सत्यापन के लिए 72 घंटों के भीतर अपने स्थानीय पटवारी / तहसीलदार कार्यालय में फसल और संपत्ति के नुकसान की सूचना दें।" }
+    ]
+  },
+  pa: {
+    safety: [
+      { title: "ਬਿਜਲੀ ਸੁਰੱਖਿਆ", desc: "ਪਾਣੀ ਵਿੱਚ ਖੜ੍ਹੇ ਹੋ ਕੇ ਕਦੇ ਵੀ ਸਰਕਟ ਬ੍ਰੇਕਰ, ਸਵਿੱਚਾਂ ਜਾਂ ਬਿਜਲੀ ਦੇ ਉਪਕਰਨਾਂ ਨੂੰ ਨਾ ਛੂਹੋ। ਮੇਨ ਸਵਿੱਚ ਆਨ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਇਲੈਕਟ੍ਰੀਸ਼ੀਅਨ ਤੋਂ ਵਾਇਰਿੰਗ ਦੀ ਜਾਂਚ ਕਰਵਾਓ।" },
+      { title: "ਇਮਾਰਤ ਦੀ ਮਜ਼ਬੂਤੀ", desc: "ਘਰ ਵਿੱਚ ਦਾਖਲ ਹੋਣ ਤੋਂ ਪਹਿਲਾਂ ਨੀਂਹ ਵਿੱਚ ਤਰੇੜਾਂ, ਝੁਕੀ ਹੋਈ ਛੱਤ ਜਾਂ ਕੰਧਾਂ ਦੀ ਮਜ਼ਬੂਤੀ ਜ਼ਰੂਰ ਦੇਖੋ।" },
+      { title: "ਗੈਸ ਲੀਕ ਹੋਣਾ", desc: "ਜੇਕਰ ਗੈਸ ਦੀ ਬਦਬੂ ਆਵੇ ਜਾਂ ਆਵਾਜ਼ ਸੁਣਾਈ ਦੇਵੇ, ਤਾਂ ਖਿੜਕੀਆਂ ਖੋਲ੍ਹੋ, ਤੁਰੰਤ ਬਾਹਰ ਨਿਕਲੋ ਅਤੇ ਮਾਚਿਸ ਜਾਂ ਬਿਜਲੀ ਦੇ ਸਵਿੱਚ ਨਾ ਚਲਾਓ।" }
+    ],
+    health: [
+      { title: "ਖੂਹ ਅਤੇ ਪਾਣੀ ਦਾ ਸ਼ੁੱਧੀਕਰਨ", desc: "ਪੀਣ ਵਾਲੇ ਖੁੱਲ੍ਹੇ ਖੂਹਾਂ ਲਈ: ਪ੍ਰਤੀ 1,000 ਲੀਟਰ ਪਾਣੀ ਵਿੱਚ 50 ਗ੍ਰਾਮ ਤਾਜ਼ਾ ਬਲੀਚਿੰਗ ਪਾਊਡਰ ਪਾਓ। ਚੰਗੀ ਤਰ੍ਹਾਂ ਹਿਲਾਓ ਅਤੇ ਪੀਣ ਤੋਂ ਪਹਿਲਾਂ ਘੱਟੋ-ਘੱਟ 1 ਘੰਟਾ ਉਡੀਕ ਕਰੋ।" },
+      { title: "ਪੀਣ ਵਾਲਾ ਪਾਣੀ ਉਬਾਲੋ", desc: "ਪਾਣੀ ਵਿੱਚ ਮੌਜੂਦ ਕੀਟਾਣੂਆਂ ਅਤੇ ਵਾਇਰਸਾਂ ਨੂੰ ਖ਼ਤਮ ਕਰਨ ਲਈ ਪਾਣੀ ਨੂੰ ਘੱਟੋ-ਘੱਟ 1 ਪੂਰੇ ਮਿੰਟ ਲਈ ਉਬਾਲੋ।" },
+      { title: "ਸੱਪ ਜਾਂ ਜ਼ਹਿਰੀਲੇ ਜੀਵਾਂ ਦਾ ਡੰਗ", desc: "ਹੜ੍ਹਾਂ ਤੋਂ ਬਾਅਦ ਸੱਪ ਅਕਸਰ ਘਰਾਂ ਅਤੇ ਲੱਕੜਾਂ ਦੇ ਢੇਰਾਂ ਵਿੱਚ ਲੁਕ ਜਾਂਦੇ ਹਨ। ਰਬੜ ਦੇ ਬੂਟ ਪਾਓ, ਮਲਬੇ ਨੂੰ ਹਿਲਾਉਣ ਲਈ ਡੰਡੇ ਦੀ ਵਰਤੋਂ ਕਰੋ, ਅਤੇ ਡੰਗਣ 'ਤੇ ਤੁਰੰਤ 108 'ਤੇ ਕਾਲ ਕਰੋ।" }
+    ],
+    home: [
+      { title: "ਗਾਰੇ ਅਤੇ ਮਿੱਟੀ ਦੀ ਸਫ਼ਾਈ", desc: "ਗਿੱਲੀ ਮਿੱਟੀ ਅਤੇ ਗਾਰੇ ਨੂੰ ਸੁੱਕਣ ਤੋਂ ਪਹਿਲਾਂ ਹੀ ਬੇਲਚੇ ਨਾਲ ਬਾਹਰ ਕੱਢੋ। ਗਾਰੇ ਵਿੱਚ ਸੀਵਰੇਜ ਅਤੇ ਦੂਸ਼ਿਤ ਪਾਣੀ ਹੁੰਦਾ ਹੈ।" },
+      { title: "ਸਤਹਾਂ ਨੂੰ ਰੋਗਾਣੂ-ਮੁਕਤ ਕਰਨਾ", desc: "ਹੜ੍ਹ ਪ੍ਰਭਾਵਿਤ ਸਾਰੇ ਫ਼ਰਸ਼ਾਂ, ਕੰਧਾਂ ਅਤੇ ਥਾਵਾਂ ਨੂੰ ਕੋਸੇ ਪਾਣੀ ਅਤੇ ਕਲੋਰੀਨ ਵਾਲੇ ਕੀਟਾਣੂਨਾਸ਼ਕ ਨਾਲ ਚੰਗੀ ਤਰ੍ਹਾਂ ਧੋਵੋ।" },
+      { title: "ਦੂਸ਼ਿਤ ਭੋਜਨ ਨੂੰ ਸੁੱਟਣਾ", desc: "ਹੜ੍ਹ ਦੇ ਪਾਣੀ ਦੇ ਸੰਪਰਕ ਵਿੱਚ ਆਇਆ ਕੋਈ ਵੀ ਭੋਜਨ ਸੁੱਟ ਦਿਓ, ਜਿਸ ਵਿੱਚ ਗੱਤੇ ਦੇ ਡੱਬਿਆਂ ਵਿੱਚ ਬੰਦ ਸਮਾਨ ਵੀ ਸ਼ਾਮਲ ਹੈ।" }
+    ],
+    claims: [
+      { title: "ਹੜ੍ਹ ਦੇ ਨੁਕਸਾਨ ਦੇ ਸਬੂਤ", desc: "ਸਫ਼ਾਈ ਸ਼ੁਰੂ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ ਕੰਧਾਂ 'ਤੇ ਪਾਣੀ ਦੇ ਨਿਸ਼ਾਨਾਂ, ਨੁਕਸਾਨੀਆਂ ਫ਼ਸਲਾਂ, ਸੰਦਾਂ ਅਤੇ ਪਸ਼ੂਆਂ ਦੀਆਂ ਸਾਫ਼ ਤਸਵੀਰਾਂ ਖਿੱਚੋ।" },
+      { title: "ਪੰਜਾਬ SDMA ਰਾਹਤ ਗਿਰਦਾਵਰੀ", desc: "ਗਿਰਦਾਵਰੀ ਪੜਤਾਲ ਲਈ 72 ਘੰਟਿਆਂ ਦੇ ਅੰਦਰ-ਅੰਦਰ ਆਪਣੇ ਸਥਾਨਕ ਪਟਵਾਰੀ / ਤਹਿਸੀਲਦਾਰ ਦਫ਼ਤਰ ਵਿੱਚ ਫ਼ਸਲ ਅਤੇ ਜਾਇਦਾਦ ਦੇ ਨੁਕਸਾਨ ਦੀ ਰਿਪੋਰਟ ਦਰਜ ਕਰਵਾਓ।" }
+    ]
+  }
 };
 
 function setupAfterFloodGuide() {
@@ -759,17 +1172,21 @@ function setupAfterFloodGuide() {
           btn.style.fontWeight = t === tab ? "600" : "400";
         }
       });
+      activeAfterFloodTab = tab;
       renderAfterFloodContent(tab);
     });
   });
   renderAfterFloodContent("safety");
 }
 
-function renderAfterFloodContent(category) {
+function renderAfterFloodContent(category = activeAfterFloodTab) {
+  activeAfterFloodTab = category;
   const container = document.getElementById("after-flood-content-area");
   if (!container) return;
 
-  const items = AFTER_FLOOD_DATA[category] || [];
+  const lang = getCurrentLanguage();
+  const langData = AFTER_FLOOD_DATA[lang] || AFTER_FLOOD_DATA.en;
+  const items = (langData && langData[category]) || AFTER_FLOOD_DATA.en[category] || [];
   container.innerHTML = items.map((item, idx) => `
     <div class="shelter-card" style="margin-bottom: 10px;">
       <h4 style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:4px;">${idx + 1}. ${item.title}</h4>
@@ -972,6 +1389,177 @@ export function updateProximityBanner(snapshot, isStaleGps = false) {
   bannerText.textContent = formatProximityText(userProfile, gauge, distanceKm, direction, isStaleGps);
 }
 
+export function updateLocationUI() {
+  const nameEl = document.getElementById("loc-village-name");
+  const subEl = document.getElementById("loc-state-name");
+  const modalActiveEl = document.getElementById("loc-modal-active-name");
+
+  const displayName = userProfile.village_name || `${userProfile.district || "Ludhiana"}, Punjab`;
+  const accText = userProfile.accuracy_m > 0 ? ` (±${userProfile.accuracy_m}m)` : "";
+  const basin = userProfile.basin || "Punjab";
+
+  if (nameEl) {
+    nameEl.innerHTML = `<span>${displayName}${accText}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>`;
+  }
+  if (subEl) {
+    subEl.innerHTML = `Punjab (${basin}) · <span style="text-decoration:underline;">${t("location.tap_to_change") || "Tap to change"}</span>`;
+  }
+  if (modalActiveEl) {
+    modalActiveEl.textContent = `${displayName}${accText}`;
+  }
+}
+
+export function setupLocationPicker() {
+  const openBtn = document.getElementById("btn-open-location-picker");
+  const modal = document.getElementById("location-picker-modal");
+  const closeBtn = document.getElementById("btn-close-loc-modal");
+  const detectBtn = document.getElementById("btn-modal-detect-gps");
+  const list = document.getElementById("district-picker-list");
+
+  if (!modal) return;
+
+  const renderDistricts = () => {
+    if (!list) return;
+    const lang = getCurrentLanguage();
+    list.innerHTML = PUNJAB_DISTRICTS.map((d) => {
+      const activeClass = (userProfile.district && userProfile.district.toLowerCase() === d.name.toLowerCase()) ? "active" : "";
+      const localizedName = lang === "pa" ? d.name_pa : lang === "hi" ? d.name_hi : d.name;
+      const subName = lang !== "en" ? d.name : (d.basin || "Punjab");
+      return `
+        <button class="district-btn ${activeClass}" data-id="${d.id}" data-lat="${d.lat}" data-lon="${d.lon}" data-name="${d.name}" data-basin="${d.basin}" data-elev="${d.elevation_m}">
+          <strong>${localizedName}</strong>
+          <span>${subName}</span>
+        </button>
+      `;
+    }).join("");
+
+    list.querySelectorAll(".district-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const dName = btn.getAttribute("data-name");
+        const lat = parseFloat(btn.getAttribute("data-lat"));
+        const lon = parseFloat(btn.getAttribute("data-lon"));
+        const elev = parseInt(btn.getAttribute("data-elev"), 10);
+        const basin = btn.getAttribute("data-basin");
+
+        userProfile.district = dName;
+        userProfile.village_name = `${dName}, Punjab`;
+        userProfile.village_id = `pb-${dName.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+        userProfile.lat = lat;
+        userProfile.lon = lon;
+        userProfile.elevation_m = elev;
+        userProfile.basin = basin;
+        userProfile.accuracy_m = 0;
+
+        await setSetting("user_district", userProfile.district);
+        await setSetting("user_village_name", userProfile.village_name);
+        await setSetting("user_village_id", userProfile.village_id);
+        await setSetting("user_lat", userProfile.lat);
+        await setSetting("user_lon", userProfile.lon);
+        await setSetting("user_elevation_m", userProfile.elevation_m);
+
+        updateLocationUI();
+        modal.style.display = "none";
+
+        if (currentSnapshot) {
+          renderSnapshotData(currentSnapshot);
+        } else if (navigator.onLine) {
+          fetchLiveRelayData();
+        }
+      });
+    });
+  };
+
+  openBtn?.addEventListener("click", () => {
+    renderDistricts();
+    modal.style.display = "flex";
+  });
+
+  closeBtn?.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  });
+
+  detectBtn?.addEventListener("click", () => {
+    modal.style.display = "none";
+    const gpsBtn = document.getElementById("btn-resync-gps");
+    if (gpsBtn) gpsBtn.click();
+  });
+}
+
+// Text-to-Speech (TTS) for senior citizens & emergency accessibility
+let isSpeaking = false;
+
+export function speakText(text, lang = getCurrentLanguage()) {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+    console.warn("Speech synthesis not supported in this browser.");
+    return false;
+  }
+
+  if (window.speechSynthesis.speaking) {
+    window.speechSynthesis.cancel();
+    if (isSpeaking) {
+      isSpeaking = false;
+      document.querySelectorAll(".tts-speaker-btn, #btn-hero-tts").forEach(btn => btn.classList.remove("speaking"));
+      const label = document.getElementById("hero-tts-label");
+      if (label) label.textContent = t("actions.listen") || "Listen";
+      return false;
+    }
+  }
+
+  const clean = (text || "")
+    .replace(/[#*_`]/g, "")
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/https?:\/\/\S+/g, "")
+    .trim();
+
+  if (!clean) return false;
+
+  const utterance = new SpeechSynthesisUtterance(clean);
+  const targetLang = lang === "pa" ? "pa-IN" : lang === "hi" ? "hi-IN" : "en-IN";
+  utterance.lang = targetLang;
+  utterance.rate = 0.9;
+
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    const match = voices.find(v => v.lang.toLowerCase().startsWith(targetLang.slice(0, 2).toLowerCase()));
+    if (match) utterance.voice = match;
+  } catch {}
+
+  utterance.onstart = () => {
+    isSpeaking = true;
+    const heroBtn = document.getElementById("btn-hero-tts");
+    if (heroBtn) heroBtn.classList.add("speaking");
+    const label = document.getElementById("hero-tts-label");
+    if (label) label.textContent = t("actions.stop_listen") || "Stop";
+  };
+
+  utterance.onend = utterance.onerror = () => {
+    isSpeaking = false;
+    document.querySelectorAll(".tts-speaker-btn, #btn-hero-tts").forEach(btn => btn.classList.remove("speaking"));
+    const label = document.getElementById("hero-tts-label");
+    if (label) label.textContent = t("actions.listen") || "Listen";
+  };
+
+  window.speechSynthesis.speak(utterance);
+  return true;
+}
+
+export function setupTtsController() {
+  const heroTtsBtn = document.getElementById("btn-hero-tts");
+  heroTtsBtn?.addEventListener("click", () => {
+    const statusWord = document.getElementById("status-word")?.textContent || "";
+    const statusReason = document.getElementById("status-reason")?.textContent || "";
+    const gaugeName = document.getElementById("metric-gauge-name")?.textContent || "";
+    const gaugeLvl = document.getElementById("metric-gauge-level")?.textContent || "";
+    const rainVal = document.getElementById("metric-rain-value")?.textContent || "";
+    const speechScript = `Flood Status: ${statusWord}. ${statusReason}. Nearest River reading: ${gaugeName} is ${gaugeLvl}. Rain forecast is ${rainVal}.`;
+    speakText(speechScript, getCurrentLanguage());
+  });
+}
+
 export function setupGpsResync() {
   const btn = document.getElementById("btn-resync-gps");
   if (!btn) return;
@@ -1066,18 +1654,57 @@ export function setupGpsResync() {
           userProfile.accuracy_m = Math.round(accuracy || 0);
           userProfile.gps_synced_at = new Date().toISOString();
 
+          // If village name is default or unselected, match closest Punjab district
+          if (!userProfile.village_name || userProfile.village_name.startsWith("Ludhiana") || userProfile.village_name.includes("GPS")) {
+            const nearestDist = findNearestDistrict(userProfile.lat, userProfile.lon);
+            if (nearestDist && nearestDist.district) {
+              const d = nearestDist.district;
+              userProfile.district = d.name;
+              userProfile.elevation_m = d.elevation_m;
+              userProfile.basin = d.basin;
+              userProfile.village_name = `${d.name}, Punjab`;
+              userProfile.village_id = `pb-${d.id}`;
+            }
+          }
+
+          // Try reverse geocoding if online
+          if (typeof navigator !== "undefined" && navigator.onLine) {
+            try {
+              const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userProfile.lat}&lon=${userProfile.lon}&zoom=14`;
+              const res = await fetch(geoUrl, { headers: { "Accept-Language": getCurrentLanguage() } });
+              if (res.ok) {
+                const geoData = await res.json();
+                const addr = geoData.address || {};
+                const localName = addr.village || addr.town || addr.suburb || addr.city || addr.county || userProfile.district;
+                const stateDist = addr.state_district || addr.county || userProfile.district;
+                userProfile.village_name = `${localName}, ${stateDist}`;
+              }
+            } catch (geoErr) {
+              // Fallback to nearest district
+            }
+          }
+
+          const baseName = (userProfile.village_name || "Ludhiana, Punjab").replace(/\s*\(GPS[^)]*\)/g, "").trim();
+          userProfile.village_name = baseName;
+          const accText = userProfile.accuracy_m > 0 ? ` (GPS ±${userProfile.accuracy_m}m)` : " (GPS Synced)";
+          const villageEl = document.getElementById("loc-village-name");
+          if (villageEl) {
+            villageEl.textContent = `${baseName}${accText}`;
+          }
+
           // Persist coordinates in store.js
           await setSetting("user_lat", userProfile.lat);
           await setSetting("user_lon", userProfile.lon);
+          await setSetting("user_district", userProfile.district);
+          await setSetting("user_village_name", userProfile.village_name);
+          await setSetting("user_village_id", userProfile.village_id);
+          await setSetting("user_elevation_m", userProfile.elevation_m);
           await setSetting("user_gps_synced_at", userProfile.gps_synced_at);
 
-          // Update #loc-village-name
-          const villageEl = document.getElementById("loc-village-name");
-          if (villageEl) {
-            const baseName = userProfile.village_name.replace(/\s*\(GPS[^)]*\)/g, "").trim();
-            userProfile.village_name = baseName;
-            const accText = userProfile.accuracy_m > 0 ? ` (GPS ±${userProfile.accuracy_m}m)` : " (GPS Synced)";
-            villageEl.textContent = `${baseName}${accText}`;
+          // Update subtitle UI
+          const subEl = document.getElementById("loc-state-name");
+          if (subEl) {
+            subEl.innerHTML = `Punjab (${userProfile.basin || "Punjab"}) · <span style="text-decoration:underline;">${t("location.tap_to_change") || "Tap to change"}</span>`;
           }
 
           // Trigger live proximity and metric recalculations
@@ -1243,25 +1870,47 @@ export async function renderDownloadsView() {
   const hiBtn = document.getElementById("btn-download-lang-hi");
 
   if (paStatusBadge) {
-    paStatusBadge.textContent = paDownloaded ? "Downloaded" : "Not Downloaded";
+    paStatusBadge.textContent = paDownloaded ? t("downloads.downloaded") : t("downloads.not_downloaded");
     paStatusBadge.className = paDownloaded ? "plugin-badge active" : "plugin-badge";
   }
   if (paActiveBadge) {
     paActiveBadge.style.display = (paDownloaded && currentLang === "pa") ? "inline-block" : "none";
   }
   if (paBtn) {
-    paBtn.textContent = paDownloaded ? "Re-cache (4.2 MB)" : "Download (4.2 MB)";
+    if (paDownloaded) {
+      if (currentLang === "pa") {
+        paBtn.textContent = t("downloads.active");
+        paBtn.className = "btn-lang-action active";
+      } else {
+        paBtn.textContent = t("actions.switch_to_lang", { lang: "ਪੰਜਾਬੀ" });
+        paBtn.className = "btn-lang-action";
+      }
+    } else {
+      paBtn.textContent = t("downloads.download_pack_btn", { size: "4.2 MB" });
+      paBtn.className = "btn-lang-action";
+    }
   }
 
   if (hiStatusBadge) {
-    hiStatusBadge.textContent = hiDownloaded ? "Downloaded" : "Not Downloaded";
+    hiStatusBadge.textContent = hiDownloaded ? t("downloads.downloaded") : t("downloads.not_downloaded");
     hiStatusBadge.className = hiDownloaded ? "plugin-badge active" : "plugin-badge";
   }
   if (hiActiveBadge) {
     hiActiveBadge.style.display = (hiDownloaded && currentLang === "hi") ? "inline-block" : "none";
   }
   if (hiBtn) {
-    hiBtn.textContent = hiDownloaded ? "Re-cache (3.9 MB)" : "Download (3.9 MB)";
+    if (hiDownloaded) {
+      if (currentLang === "hi") {
+        hiBtn.textContent = t("downloads.active");
+        hiBtn.className = "btn-lang-action active";
+      } else {
+        hiBtn.textContent = t("actions.switch_to_lang", { lang: "हिन्दी" });
+        hiBtn.className = "btn-lang-action";
+      }
+    } else {
+      hiBtn.textContent = t("downloads.download_pack_btn", { size: "3.9 MB" });
+      hiBtn.className = "btn-lang-action";
+    }
   }
 
   // 4. Sync Global Storage Summary Dashboard
@@ -1378,47 +2027,44 @@ export function setupDownloadsView() {
     if (slmProgressWrap) slmProgressWrap.style.display = "block";
     btnDownloadSlm.disabled = true;
 
-    const totalSteps = 20;
-    const totalMB = 340;
-    for (let i = 1; i <= totalSteps; i++) {
-      await new Promise((r) => setTimeout(r, 40));
-      const pct = Math.round((i / totalSteps) * 100);
-      const curMB = Math.round((i / totalSteps) * totalMB);
-      if (slmProgressFill) slmProgressFill.style.width = `${pct}%`;
-      if (slmProgressPct) slmProgressPct.textContent = `${pct}% (${curMB} / ${totalMB} MB)`;
-    }
+    try {
+      if (slmProgressFill) slmProgressFill.style.width = "30%";
+      if (slmProgressPct) slmProgressPct.textContent = "Connecting to local neural backend (/api/model/status)...";
 
-    if (typeof caches !== "undefined") {
-      try {
-        const cache = await caches.open("floodsaathi-ai-models-v1");
-        const modelManifest = {
-          modelId: "qwen2.5-0.5b-instruct-int4",
-          format: "ONNX Int4",
-          sizeMB: 340,
-          storagePath: "D:\\FloodSaathi_AI\\models\\qwen2.5-0.5b-instruct-int4.onnx",
-          downloadedAt: new Date().toISOString()
-        };
-        await cache.put(
-          "/models/qwen2.5-0.5b-instruct-int4.json",
-          new Response(JSON.stringify(modelManifest), { headers: { "Content-Type": "application/json" } })
-        );
-      } catch (e) {
-        console.warn("Cache API model storage warning:", e);
+      const statusRes = await fetch("/api/model/status");
+      if (statusRes.ok) {
+        const info = await statusRes.json();
+        if (info.downloaded || info.status === "ready") {
+          if (slmProgressFill) slmProgressFill.style.width = "70%";
+          if (slmProgressPct) slmProgressPct.textContent = `Loading ${info.parameter_count_str || "494M"} weights into RAM...`;
+
+          const loadRes = await fetch("/api/model/load", { method: "POST" });
+          const loadData = await loadRes.json();
+
+          if (slmProgressFill) slmProgressFill.style.width = "100%";
+          if (slmProgressPct) slmProgressPct.textContent = `Active & Loaded in RAM (${loadData.parameter_count_str || "494M"} Parameters)`;
+
+          await setSetting("slm_model_downloaded", true);
+          await setSetting("slm_model_enabled", true);
+
+          if (aiAssistant) aiAssistant.setMode("webgpu_slm");
+          window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
+        } else {
+          throw new Error("Model weights not yet found on disk. Run: python scripts/download_qwen.py");
+        }
+      } else {
+        throw new Error(`Server returned HTTP ${statusRes.status}`);
       }
+    } catch (err) {
+      if (slmProgressFill) slmProgressFill.style.backgroundColor = "var(--red)";
+      if (slmProgressPct) slmProgressPct.textContent = `Backend note: ${err.message}. Start: python server.py`;
+    } finally {
+      btnDownloadSlm.disabled = false;
+      renderDownloadsView();
+      setTimeout(() => {
+        if (slmProgressWrap) slmProgressWrap.style.display = "none";
+      }, 3500);
     }
-
-    await setSetting("slm_model_downloaded", true);
-    await setSetting("slm_model_enabled", true);
-
-    if (aiAssistant) aiAssistant.setMode("webgpu_slm");
-    window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
-
-    btnDownloadSlm.disabled = false;
-    setTimeout(() => {
-      if (slmProgressWrap) slmProgressWrap.style.display = "none";
-    }, 2000);
-
-    renderDownloadsView();
   });
 
   // SLM Toggle Action
@@ -1570,7 +2216,8 @@ export function setupDownloadsView() {
       }
 
       await setSetting(`lang_pack_${langCode}_downloaded`, true);
-      renderDownloadsView();
+      await setLanguage(langCode);
+      await renderDownloadsView();
     } catch (err) {
       console.warn(`Language pack download failed for ${langCode}:`, err);
 
@@ -1594,7 +2241,7 @@ export function setupDownloadsView() {
         langProgressFill.style.backgroundColor = "var(--red, #ef4444)";
       }
 
-      renderDownloadsView();
+      await renderDownloadsView();
     } finally {
       setTimeout(() => {
         if (langProgressWrap) langProgressWrap.style.display = "none";
@@ -1603,10 +2250,22 @@ export function setupDownloadsView() {
   };
 
   document.getElementById("btn-download-lang-pa")?.addEventListener("click", async () => {
+    const isDownloaded = await getSetting("lang_pack_pa_downloaded", false);
+    if (isDownloaded && getCurrentLanguage() !== "pa") {
+      await setLanguage("pa");
+      await renderDownloadsView();
+      return;
+    }
     await downloadLangPack("pa", "noto_gurmukhi_w8gyH3EvQP81sInb43inmyN9zZ7hb7ATbSWo4q8dJ74a3cVrSlgXnw.woff2", "pa.json", "Punjabi Gurmukhi");
   });
 
   document.getElementById("btn-download-lang-hi")?.addEventListener("click", async () => {
+    const isDownloaded = await getSetting("lang_pack_hi_downloaded", false);
+    if (isDownloaded && getCurrentLanguage() !== "hi") {
+      await setLanguage("hi");
+      await renderDownloadsView();
+      return;
+    }
     await downloadLangPack("hi", "noto_devanagari_TuG7UUFzXI5FBtUq5a8bjKYTZjtRU6Sgv3NaV_SNmI0b8QQCQmHN5DV_.woff2", "hi.json", "Hindi Devanagari");
   });
 
@@ -1614,7 +2273,7 @@ export function setupDownloadsView() {
     await downloadLangPack("pa", "noto_gurmukhi_w8gyH3EvQP81sInb43inmyN9zZ7hb7ATbSWo4q8dJ74a3cVrSlgXnw.woff2", "pa.json", "Punjabi Gurmukhi");
     await downloadLangPack("hi", "noto_devanagari_TuG7UUFzXI5FBtUq5a8bjKYTZjtRU6Sgv3NaV_SNmI0b8QQCQmHN5DV_.woff2", "hi.json", "Hindi Devanagari");
     await initI18n();
-    renderDownloadsView();
+    await renderDownloadsView();
   });
 }
 

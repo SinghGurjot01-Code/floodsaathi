@@ -224,7 +224,6 @@ export async function downloadMapPack(centerLat, centerLon, radiusKm, onProgress
         totalMB: sizeMB
       });
     }
-    await new Promise((resolve) => setTimeout(resolve, 15));
   }
 
   // Persist pack metadata record into Cache API

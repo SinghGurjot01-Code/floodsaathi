@@ -6,7 +6,7 @@
 | GitHub | Yes (SinghGurjot01-Code) | `SinghGurjot01-Code/floodsaathi` | - |
 | Cloudflare | Yes (singhgurjotpal84@gmail.com) | Pages: `floodsaathi`, D1: `floodsaathi-db`, KV: `floodsaathi-kv` | Add billing card if R2 bucket is desired (fallback gh-pages active per D-03) |
 | Render | Device code prompted | - | User will connect soon |
-| Hugging Face | CLI installed | - | HF token when M3 LLM / dataset sync is run |
+| Hugging Face | Yes (SinghGurjot01) | Datasets: `SinghGurjot01/floodsaathi-packs`, Models: `SinghGurjot01/floodsaathi-model` | - |
 | Copernicus Data Space | Probed public OData | - | User will connect account for bulk Sentinel-1 downloads in A7/D4 |
 | NASA Earthdata | Probed public CMR | - | Earthdata login when GPM granules are pulled |
 | Google Earth Engine (optional) | - | - | Optional for flood extent |

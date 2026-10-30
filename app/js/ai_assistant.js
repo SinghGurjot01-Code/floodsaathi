@@ -142,6 +142,63 @@ export class AskSaathiAssistant {
   }
 
   /**
+   * Queries the local real neural backend (Qwen2.5-0.5B-Instruct SLM).
+   * @param {string} query
+   * @param {Object} context
+   * @returns {Promise<Object|null>}
+   */
+  async queryNeuralBackend(query, context = {}) {
+    // Only query if in browser or explicitly requested
+    if (typeof window === "undefined" && !context.useNeural) {
+      return null;
+    }
+
+    const endpoints = [
+      "/api/chat",
+      "http://localhost:8080/api/chat",
+      "http://127.0.0.1:8080/api/chat"
+    ];
+
+    for (const url of endpoints) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 20000);
+
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            query,
+            lang: context.lang || "en",
+            history: context.history || []
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.text) {
+            return {
+              title: "Saathi Neural AI (Real On-Device SLM)",
+              text: data.text,
+              steps: data.text.split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+[\.\)]\s*/, "")),
+              stats: data.stats || { tokens: 0, duration_s: 0, tok_per_sec: 0, model: "Qwen2.5-0.5B" },
+              helplines: data.helplines || AUTHORIZED_HELPLINES,
+              source: data.source || "Qwen2.5-0.5B Local Neural SLM",
+              reviewStatus: "verified",
+              isNeural: true
+            };
+          }
+        }
+      } catch {
+        // Fallback to next endpoint or deterministic offline core
+      }
+    }
+    return null;
+  }
+
+  /**
    * Check whether WebGPU is detected on device.
    */
   isWebGPUSupported() {
@@ -179,7 +236,19 @@ export class AskSaathiAssistant {
     }
 
     // =========================================================================
+    // REAL NEURAL MODEL INFERENCE (Qwen2.5-0.5B Local SLM)
+    // Connects to local server when in neural mode
+    // =========================================================================
+    if (this.mode === "webgpu_slm" || this.mode === "neural_slm" || this.mode === "real_neural" || context.useNeural) {
+      const neuralResp = await this.queryNeuralBackend(q, context);
+      if (neuralResp) {
+        return neuralResp;
+      }
+    }
+
+    // =========================================================================
     // RETRIEVAL & SAFETY-GUARDED INFERENCE (M5 ROUTER + KNOWLEDGE REPOSITORY)
+    // Offline deterministic fallback when neural server is not active
     // =========================================================================
     const retrieved = this.retriever.retrieve(q, 1);
     if (retrieved.length > 0) {

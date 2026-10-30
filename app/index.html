@@ -9,6 +9,7 @@
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <title>FloodSaathi – Offline Flood Early-Warning</title>
   <link rel="stylesheet" href="./css/main.css?v=1.6.0">
+  <link rel="stylesheet" href="./css/fonts.css?v=1.7.0">
   <link rel="stylesheet" href="./css/status.css?v=1.6.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
@@ -37,7 +38,7 @@
         <img src="./icons/icon.svg" alt="FloodSaathi Logo" class="brand-icon">
         <div class="brand-text-wrap">
           <span class="brand-title" data-i18n="app_name">FloodSaathi</span>
-          <span class="brand-sub">Punjab Early-Warning</span>
+          <span class="brand-sub" data-i18n="brand_sub">Punjab Early-Warning</span>
         </div>
       </div>
 
@@ -61,22 +62,22 @@
         </button>
         <button class="nav-tab-btn" data-tab="shelters">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          <span>Shelters</span>
+          <span data-i18n="nav.shelters">Shelters</span>
         </button>
         <button class="nav-tab-btn" data-tab="after-flood">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <span>Guide</span>
+          <span data-i18n="nav.guide">Guide</span>
         </button>
         <button class="nav-tab-btn" data-tab="preferences">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-          <span>Preferences</span>
+          <span data-i18n="nav.preferences">Preferences</span>
         </button>
         <button class="nav-tab-btn" data-tab="downloads">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           <span data-i18n="nav.downloads">Downloads</span>
         </button>
         <button class="nav-tab-btn desktop-sos-tab-btn" data-tab="sos">
-          <span>SOS</span>
+          <span data-i18n="nav.sos">SOS</span>
         </button>
       </nav>
 
@@ -92,7 +93,7 @@
 
     <!-- Persistent Emergency Helplines Bar -->
     <nav class="helpline-bar" id="helpline-bar" aria-label="Emergency Helplines">
-      <span>Emergency:</span>
+      <span data-i18n="helplines.bar_label">Emergency:</span>
       <div class="helpline-links">
         <a href="tel:112" class="helpline-btn">112 (ERSS)</a>
         <a href="tel:1078" class="helpline-btn sec">1078 (NDMA)</a>
@@ -118,17 +119,24 @@
             <!-- Hero Status Banner (Matches FloodSaathi Home UI) -->
             <div class="home-hero loading" id="home-hero">
               <div class="location-bar">
-                <div class="location-text">
+                <div class="location-text" id="btn-open-location-picker" role="button" tabindex="0" title="Tap to change location" style="cursor:pointer;">
                   <svg viewBox="0 0 24 28" fill="none"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="#ef1c24"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
                   <div>
-                    <div class="location-name" id="loc-village-name">Taman, Jalandhar</div>
-                    <div class="location-sub" id="loc-state-name">Punjab (Beas Basin)</div>
+                    <div class="location-name" id="loc-village-name" style="display:inline-flex; align-items:center; gap:6px;">
+                      <span>Ludhiana, Punjab</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
+                    </div>
+                    <div class="location-sub" id="loc-state-name">Punjab · <span style="text-decoration:underline;" data-i18n="location.tap_to_change">Tap to change</span></div>
                   </div>
                 </div>
-                <div style="display:flex; align-items:center; gap:8px;">
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <button class="btn-resync-gps" id="btn-hero-tts" title="Read warning and status aloud (TTS)" aria-label="Read status aloud">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                    <span id="hero-tts-label" data-i18n="actions.listen">Listen</span>
+                  </button>
                   <button class="btn-resync-gps" id="btn-resync-gps" title="Re-sync device GPS location" aria-label="Re-sync GPS">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/><circle cx="12" cy="12" r="2"/></svg>
-                    <span>Re-sync GPS</span>
+                    <span data-i18n="actions.resync_gps">Re-sync GPS</span>
                   </button>
                   <button class="bell-btn" id="btn-hero-bell" aria-label="Alerts Notification"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg><i id="alerts-count-badge">0</i></button>
                 </div>
@@ -137,17 +145,17 @@
               <!-- Transparent Telemetry Proximity Indicator (R2) -->
               <div class="telemetry-proximity-banner" id="telemetry-proximity-banner">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                <span id="telemetry-proximity-text">Your location: Taman, Jalandhar · Hydrologic telemetry from: CWC Beas Gauge (3.8 km away)</span>
+                <span id="telemetry-proximity-text" data-i18n="status.loading_reason">Checking live hydrologic telemetry from nearest river gauge...</span>
               </div>
 
               <div class="status-headline-wrap">
                 <div class="status-hero-word" id="status-word">LOADING...</div>
-                <div class="status-hero-sub" id="status-reason">Loading live flood and hydrologic telemetry...</div>
+                <div class="status-hero-sub" id="status-reason" data-i18n="status.loading_reason">Loading live flood and hydrologic telemetry...</div>
               </div>
 
               <div class="status-badge-row">
-                <span class="badge-tag" id="status-age-badge">Data from just now</span>
-                <span class="badge-tag estimated" id="status-offline-badge" style="display:none;">Estimated Range</span>
+                <span class="badge-tag" id="status-age-badge" data-i18n="status.just_now">Data from just now</span>
+                <span class="badge-tag estimated" id="status-offline-badge" style="display:none;" data-i18n="status.estimated_range">Estimated Range</span>
               </div>
 
               <!-- Time-to-water arrival banner (F2) -->
@@ -177,13 +185,13 @@
                 <!-- Metric 1: River Gauge -->
                 <div class="metric-card">
                   <div class="metric-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 9.5a4 4 0 017 0M12 4.5v2.5"/><path d="M3.5 13.5c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0M3.5 18c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0"/></svg>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 9.5a4 4 0 017 0M12 4.5v2.5"/><path d="M3.5 13.5c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0M3.5 18c2-1.5 3.5-1.5 5.5 0s3.5 1.5 5.5 0 3.5-1.5 5.5 0"/></svg>
                   </div>
                   <div class="metric-info">
                     <span class="metric-label" id="metric-gauge-name">River Beas</span>
                     <span class="metric-value" id="metric-gauge-level">-- m</span>
                     <span class="metric-sub" id="metric-gauge-trend">Trend: Stable</span>
-                    <span class="metric-status-ok" id="metric-gauge-status">Checking...</span>
+                    <span class="metric-status-ok" id="metric-gauge-status" data-i18n="metrics.checking">Checking...</span>
                   </div>
                 </div>
 
@@ -193,10 +201,10 @@
                     <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7.5 15.5a4.5 4.5 0 01-.6-8.9 6 6 0 0111.3 1.6 3.7 3.7 0 01-.9 7.3z" fill="#3b82f6"/><path d="M8.5 18.5l-1 2.5M12.5 18.5l-1 2.5M16.5 18.5l-1 2.5" stroke="#3b82f6" stroke-width="2" stroke-linecap="round"/></svg>
                   </div>
                   <div class="metric-info">
-                    <span class="metric-label">Rain Forecast</span>
+                    <span class="metric-label" data-i18n="metrics.rain_forecast">Rain Forecast</span>
                     <span class="metric-value" id="metric-rain-value">12 mm</span>
-                    <span class="metric-sub">Next 24 hours</span>
-                    <span class="metric-status-ok">Light showers</span>
+                    <span class="metric-sub" data-i18n="metrics.next_24h">Next 24 hours</span>
+                    <span class="metric-status-ok" data-i18n="metrics.light_showers">Light showers</span>
                   </div>
                 </div>
               </div>
@@ -210,9 +218,9 @@
                     <svg width="22" height="22" viewBox="0 0 24 24"><path d="M2.5 20L9.5 7.5l3.7 6.5 2.3-3.5L21.5 20z" fill="currentColor"/><path d="M9.5 7.5l1.8 3.2-1.8-.9-1.8.9z" fill="#fff"/></svg>
                   </div>
                   <div class="metric-info">
-                    <span class="metric-label">Elevation</span>
+                    <span class="metric-label" data-i18n="metrics.elevation">Elevation</span>
                     <span class="metric-value" id="metric-elevation-value">246 m</span>
-                    <span class="metric-sub">above sea level</span>
+                    <span class="metric-sub" data-i18n="metrics.above_sea_level">above sea level</span>
                   </div>
                 </div>
 
@@ -222,9 +230,9 @@
                     <svg width="20" height="24" viewBox="0 0 24 28"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="currentColor"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
                   </div>
                   <div class="metric-info">
-                    <span class="metric-label">Distance to river</span>
-                    <span class="metric-value" id="metric-river-dist">3.8 km</span>
-                    <span class="metric-sub">Beas River</span>
+                    <span class="metric-label" data-i18n="metrics.dist_to_river">Distance to river</span>
+                    <span class="metric-value" id="metric-river-dist">-- km</span>
+                    <span class="metric-sub" id="metric-river-name">Nearest Gauge</span>
                   </div>
                 </div>
               </div>
@@ -234,7 +242,7 @@
                 <div class="alert-check-icon" id="home-alert-icon">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
                 </div>
-                <div class="alert-banner-text" id="home-alert-summary">
+                <div class="alert-banner-text" id="home-alert-summary" data-i18n="status.no_bulletins">
                   No active official disaster bulletins for your area.
                 </div>
               </div>
@@ -247,8 +255,8 @@
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </div>
                 <div class="quick-card-text">
-                  <strong>Nearest Safe Shelters</strong>
-                  <p>Verified relief centers with live distances and facilities</p>
+                  <strong data-i18n="quick.shelters_title">Nearest Safe Shelters</strong>
+                  <p data-i18n="quick.shelters_desc">Verified relief centers with live distances and facilities</p>
                 </div>
               </button>
 
@@ -257,8 +265,8 @@
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>
                 </div>
                 <div class="quick-card-text">
-                  <strong>Offline Maps Downloader</strong>
-                  <p>Cache vector tiles on PC or mobile for 100% offline access</p>
+                  <strong data-i18n="quick.maps_title">Offline Maps Downloader</strong>
+                  <p data-i18n="quick.maps_desc">Cache vector tiles on PC or mobile for 100% offline access</p>
                 </div>
               </button>
 
@@ -267,8 +275,8 @@
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="14" r="5.5"/><circle cx="19" cy="6" r="2.2"/><path d="M8 13v1M12 13v1M8 16.5q2 1.5 4 0"/></svg>
                 </div>
                 <div class="quick-card-text">
-                  <strong>Ask Saathi AI Assistant</strong>
-                  <p>On-device emergency guidance with verified safety invariants</p>
+                  <strong data-i18n="quick.saathi_title">Ask Saathi AI Assistant</strong>
+                  <p data-i18n="quick.saathi_desc">On-device emergency guidance with verified safety invariants</p>
                 </div>
               </button>
 
@@ -277,8 +285,8 @@
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                 </div>
                 <div class="quick-card-text">
-                  <strong>Emergency SOS & 112</strong>
-                  <p>1-tap emergency dialers and pre-composed GPS location alerts</p>
+                  <strong data-i18n="quick.sos_title">Emergency SOS & 112</strong>
+                  <p data-i18n="quick.sos_desc">1-tap emergency dialers and pre-composed GPS location alerts</p>
                 </div>
               </button>
             </div>
@@ -296,12 +304,12 @@
             <div class="map-card-panel">
               <div class="offline-downloader-bar">
                 <div>
-                  <strong style="font-size: 14px;">Offline Map Storage</strong>
-                  <div style="font-size: 12px; color: var(--mut);" id="map-storage-info">Ready to cache vector tiles</div>
+                  <strong style="font-size: 14px;" data-i18n="map_view.storage_title">Offline Map Storage</strong>
+                  <div style="font-size: 12px; color: var(--mut);" id="map-storage-info" data-i18n="map_view.ready_to_cache">Ready to cache vector tiles</div>
                 </div>
                 <button class="btn-download-map" id="btn-open-download-modal">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  Download
+                  <span data-i18n="map_view.download_btn">Download</span>
                 </button>
               </div>
 
@@ -311,7 +319,7 @@
                   <div class="progress-bar-fill" id="map-download-progress-fill"></div>
                 </div>
                 <div style="font-size: 11px; margin-top: 4px; display: flex; justify-content: space-between;" id="map-download-progress-text">
-                  <span>Downloading...</span>
+                  <span data-i18n="map_view.downloading">Downloading...</span>
                   <span id="map-download-progress-pct">0%</span>
                 </div>
               </div>
@@ -323,8 +331,8 @@
             <div style="display:grid; place-items:center; height:100%; color:var(--body); padding:20px; text-align:center;">
               <div>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
-                <p style="margin-top: 10px; font-weight:600;">Interactive Water & Risk Map</p>
-                <p style="font-size:13px; color:var(--mut);">CWC Gauges, River Networks & Risk Inundation Zones</p>
+                <p style="margin-top: 10px; font-weight:600;" data-i18n="map_view.interactive_title">Interactive Water & Risk Map</p>
+                <p style="font-size:13px; color:var(--mut);" data-i18n="map_view.interactive_sub">CWC Gauges, River Networks & Risk Inundation Zones</p>
               </div>
             </div>
           </div>
@@ -338,53 +346,53 @@
         <div class="chat-workspace">
           <!-- Desktop Safety Topics Sidebar (Visible >= 860px) -->
           <aside class="chat-desktop-sidebar">
-            <h3 style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px;">Safety Knowledge Index</h3>
-            <p style="font-size: 12.5px; color: var(--mut); margin-bottom: 14px;">Instant verified guidance grounded in NDMA and Punjab SDMA protocols.</p>
+            <h3 style="font-size: 15px; font-weight: 700; color: var(--navy); margin-bottom: 6px;" data-i18n="ask.sidebar_title">Safety Knowledge Index</h3>
+            <p style="font-size: 12.5px; color: var(--mut); margin-bottom: 14px;" data-i18n="ask.sidebar_desc">Instant verified guidance grounded in NDMA and Punjab SDMA protocols.</p>
             
             <div class="safety-topics-list">
               <button class="safety-topic-item btn-suggested-query" data-q="How to purify well drinking water with bleaching powder?">
                 <span class="topic-dot" style="background:#2563eb;"></span>
                 <div>
-                  <strong>Drinking Water Purification</strong>
-                  <p>Bleaching powder ratios & boiling steps</p>
+                  <strong data-i18n="ask.topic_water">Drinking Water Purification</strong>
+                  <p data-i18n="ask.topic_water_sub">Bleaching powder ratios & boiling steps</p>
                 </div>
               </button>
 
               <button class="safety-topic-item btn-suggested-query" data-q="What should I do if an electric power line falls in flood water?">
                 <span class="topic-dot" style="background:#ef1c24;"></span>
                 <div>
-                  <strong>Electrical & Wire Hazard</strong>
-                  <p>10m distance, power cutoff & 1912</p>
+                  <strong data-i18n="ask.topic_elec">Electrical & Wire Hazard</strong>
+                  <p data-i18n="ask.topic_elec_sub">10m distance, power cutoff & 1912</p>
                 </div>
               </button>
 
               <button class="safety-topic-item btn-suggested-query" data-q="Is it safe to drive a car or tractor through flood water?">
                 <span class="topic-dot" style="background:#d97706;"></span>
                 <div>
-                  <strong>Water Crossing Dangers</strong>
-                  <p>Turn around, don't drown rules</p>
+                  <strong data-i18n="ask.topic_crossing">Water Crossing Dangers</strong>
+                  <p data-i18n="ask.topic_crossing_sub">Turn around, don't drown rules</p>
                 </div>
               </button>
 
               <button class="safety-topic-item btn-suggested-query" data-q="First aid for snakebite during floods?">
                 <span class="topic-dot" style="background:#16a34a;"></span>
                 <div>
-                  <strong>Snakebite & Medical First Aid</strong>
-                  <p>Anti-venom protocol & 108 ambulance</p>
+                  <strong data-i18n="ask.topic_snake">Snakebite & Medical First Aid</strong>
+                  <p data-i18n="ask.topic_snake_sub">Anti-venom protocol & 108 ambulance</p>
                 </div>
               </button>
 
               <button class="safety-topic-item btn-suggested-query" data-q="How to protect livestock and cattle during floods?">
                 <span class="topic-dot" style="background:#8b5cf6;"></span>
                 <div>
-                  <strong>Livestock & Animal Safety</strong>
-                  <p>Untying khuntas, fodder & relief bunds</p>
+                  <strong data-i18n="ask.topic_cattle">Livestock & Animal Safety</strong>
+                  <p data-i18n="ask.topic_cattle_sub">Untying khuntas, fodder & relief bunds</p>
                 </div>
               </button>
             </div>
 
             <div style="margin-top: 16px; padding: 12px; background: #fff; border-radius: 12px; border: 1px solid var(--line);">
-              <strong style="font-size: 13px; color: var(--navy);">Emergency Quick Dials:</strong>
+              <strong style="font-size: 13px; color: var(--navy);" data-i18n="ask.quick_dials">Emergency Quick Dials:</strong>
               <div style="display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap;">
                 <a href="tel:112" class="helpline-btn" style="font-size: 11px; padding: 3px 8px;">112 ERSS</a>
                 <a href="tel:1078" class="helpline-btn sec" style="font-size: 11px; padding: 3px 8px;">1078 NDMA</a>
@@ -399,8 +407,8 @@
               <div style="display:flex; align-items:center; gap:10px;">
                 <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
                 <div>
-                  <h2 style="font-size: 16px; font-weight: 700;">Ask Saathi</h2>
-                  <p style="font-size: 12px; color: var(--muted);">Offline Disaster & Safety Guide</p>
+                  <h2 style="font-size: 16px; font-weight: 700;" data-i18n="ask.title">Ask Saathi</h2>
+                  <p style="font-size: 12px; color: var(--muted);" data-i18n="ask.header_sub">Offline Disaster & Safety Guide</p>
                 </div>
               </div>
               <div id="saathi-model-status-indicator">
@@ -425,14 +433,14 @@
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
                 </div>
                 <article class="bot-card">
-                  <h3>Sat Sri Akal / Namaste!</h3>
-                  <p style="font-size: 14.5px; line-height: 1.5; color: var(--ink2); margin-bottom: 12px;">
+                  <h3 data-i18n="ask.bot_greeting">Sat Sri Akal / Namaste!</h3>
+                  <p style="font-size: 14.5px; line-height: 1.5; color: var(--ink2); margin-bottom: 12px;" data-i18n="ask.bot_intro">
                     I am FloodSaathi. Ask me how to purify water, what to pack in an evacuation bag, electrical safety, or where the nearest relief camp is.
                   </p>
                   <div style="display:flex; flex-wrap:wrap; gap:6px;">
-                    <button class="amenity-chip btn-suggested-query" data-q="What should I do if flood water enters my home?">Flood entering home</button>
-                    <button class="amenity-chip btn-suggested-query" data-q="How to purify well drinking water?">Drinking water</button>
-                    <button class="amenity-chip btn-suggested-query" data-q="Where is the nearest shelter?">Nearest shelter</button>
+                    <button class="amenity-chip btn-suggested-query" data-q="What should I do if flood water enters my home?" data-i18n="ask.chip_home">Flood entering home</button>
+                    <button class="amenity-chip btn-suggested-query" data-q="How to purify well drinking water?" data-i18n="ask.chip_water">Drinking water</button>
+                    <button class="amenity-chip btn-suggested-query" data-q="Where is the nearest shelter?" data-i18n="ask.chip_shelter">Nearest shelter</button>
                   </div>
                 </article>
               </div>
@@ -443,7 +451,7 @@
               <button class="composer-mic" id="btn-chat-mic" aria-label="Voice input">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3"/></svg>
               </button>
-              <input type="text" class="composer-input" id="chat-input-field" placeholder="Ask a question in English, Hindi, or Punjabi..." aria-label="Ask a question">
+              <input type="text" class="composer-input" id="chat-input-field" placeholder="Ask a question in English, Hindi, or Punjabi..." data-i18n-placeholder="ask.placeholder" aria-label="Ask a question">
               <button class="composer-send" id="btn-chat-send" aria-label="Send message">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4.5 12h14M13 6l6 6-6 6"/></svg>
               </button>
@@ -457,10 +465,10 @@
            ========================================= -->
       <section class="view-section" id="view-alerts">
         <div style="padding: 20px;">
-          <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">Official Bulletins</h2>
-          <p style="font-size: 14px; color: var(--mut); margin-bottom: 16px;">NDMA SACHET & Punjab State Disaster Management Bulletins (Verbatim)</p>
+          <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;" data-i18n="alerts.heading">Official Bulletins</h2>
+          <p style="font-size: 14px; color: var(--mut); margin-bottom: 16px;" data-i18n="alerts.subheading">NDMA SACHET & Punjab State Disaster Management Bulletins (Verbatim)</p>
           <div id="alerts-container">
-            <p>Loading official bulletins...</p>
+            <p data-i18n="alerts.loading">Loading official bulletins...</p>
           </div>
         </div>
       </section>
@@ -470,8 +478,8 @@
            ========================================= -->
       <section class="view-section" id="view-more">
         <div style="padding: 20px; overflow-y: auto;">
-          <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;">More Tools & Assistance</h2>
-          <p style="font-size: 14px; color: var(--mut); margin-bottom: 20px;">Evacuation shelters, emergency SOS, and post-flood recovery guides.</p>
+          <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;" data-i18n="more.title">More Tools & Assistance</h2>
+          <p style="font-size: 14px; color: var(--mut); margin-bottom: 20px;" data-i18n="more.subtitle">Evacuation shelters, emergency SOS, and post-flood recovery guides.</p>
 
           <div style="display: grid; gap: 12px;">
             <!-- Shelter Directory Link -->
@@ -480,8 +488,8 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
               </div>
               <div style="text-align: left; margin-left: 10px;">
-                <strong style="font-size: 16px;">Nearest Safe Shelters</strong>
-                <div style="font-size: 13px; color: var(--mut);">Verified relief camps with distance & amenities</div>
+                <strong style="font-size: 16px;" data-i18n="more.shelters">Nearest Safe Shelters</strong>
+                <div style="font-size: 13px; color: var(--mut);" data-i18n="more.shelters_sub">Verified relief camps with distance & amenities</div>
               </div>
             </button>
 
@@ -491,8 +499,8 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               </div>
               <div style="text-align: left; margin-left: 10px;">
-                <strong style="font-size: 16px;">Emergency SOS & Family Check-in</strong>
-                <div style="font-size: 13px; color: var(--mut);">One-tap 112/1078 dialer, geolocation SMS</div>
+                <strong style="font-size: 16px;" data-i18n="more.sos">Emergency SOS & Family Check-in</strong>
+                <div style="font-size: 13px; color: var(--mut);" data-i18n="more.sos_sub">One-tap 112/1078 dialer, geolocation SMS</div>
               </div>
             </button>
 
@@ -502,8 +510,8 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
               </div>
               <div style="text-align: left; margin-left: 10px;">
-                <strong style="font-size: 16px;">After-Flood Health & Safety Guide</strong>
-                <div style="font-size: 13px; color: var(--mut);">Well disinfection, electrical safety, relief claims</div>
+                <strong style="font-size: 16px;" data-i18n="more.guide">After-Flood Health & Safety Guide</strong>
+                <div style="font-size: 13px; color: var(--mut);" data-i18n="more.guide_sub">Well disinfection, electrical safety, relief claims</div>
               </div>
             </button>
 
@@ -513,8 +521,8 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
               </div>
               <div style="text-align: left; margin-left: 10px;">
-                <strong style="font-size: 16px;">Alert Preferences & Storage</strong>
-                <div style="font-size: 13px; color: var(--mut);">Notification radius, dam release, offline packs</div>
+                <strong style="font-size: 16px;" data-i18n="more.preferences">Alert Preferences & Storage</strong>
+                <div style="font-size: 13px; color: var(--mut);" data-i18n="more.preferences_sub">Notification radius, dam release, offline packs</div>
               </div>
             </button>
 
@@ -524,14 +532,14 @@
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
               </div>
               <div style="text-align: left; margin-left: 10px;">
-                <strong style="font-size: 16px;">Offline Packs & Plugins</strong>
-                <div style="font-size: 13px; color: var(--mut);">Offline maps, AI model, language packs, python engine</div>
+                <strong style="font-size: 16px;" data-i18n="more.downloads">Offline Packs & Plugins</strong>
+                <div style="font-size: 13px; color: var(--mut);" data-i18n="more.downloads_sub">Offline maps, AI model, language packs, python engine</div>
               </div>
             </button>
           </div>
 
-          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--mut); line-height: 1.5;">
-            <strong>Data Sources & Attribution:</strong> Central Water Commission (CWC), NDMA SACHET, Open-Meteo, Copernicus GLO-30 DEM, OpenStreetMap, Punjab Revenue Department.<br>
+          <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--mut); line-height: 1.5;" data-i18n="more.attribution">
+            Data Sources & Attribution: Central Water Commission (CWC), NDMA SACHET, Open-Meteo, Copernicus GLO-30 DEM, OpenStreetMap, Punjab Revenue Department.<br>
             Version 1.2.0 (CTBF-AI-12 Punjab Pilot)
           </div>
         </div>
@@ -542,11 +550,11 @@
            ========================================= -->
       <section class="view-section" id="view-shelters">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-shelters" style="width: auto; padding: 0 10px;">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">Nearest Safe Shelters</h2>
+          <button class="lang-btn" id="btn-back-from-shelters" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="shelters.title">Nearest Safe Shelters</h2>
         </div>
         <div class="shelter-list-wrap" id="shelters-list-container">
-          <p>Finding verified relief centers...</p>
+          <p data-i18n="shelters.finding">Finding verified relief centers...</p>
         </div>
       </section>
 
@@ -555,8 +563,8 @@
            ========================================= -->
       <section class="view-section" id="view-sos">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-sos" style="width: auto; padding: 0 10px;">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">Emergency SOS</h2>
+          <button class="lang-btn" id="btn-back-from-sos" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="sos.title">Emergency SOS</h2>
         </div>
         <div class="sos-view-scroll">
           <div class="sos-ring-wrap">
@@ -565,21 +573,21 @@
             <span class="sos-ring sos-r3"></span>
             <button class="sos-center-btn" id="btn-big-sos">SOS</button>
           </div>
-          <p style="text-align: center; font-weight: 700; color: var(--red); font-size: 18px;">Tap to Send Emergency Alert</p>
-          <p style="text-align: center; font-size: 13.5px; color: var(--body); margin-top: 4px;">Sends pre-composed SMS with GPS coordinates and village name</p>
+          <p style="text-align: center; font-weight: 700; color: var(--red); font-size: 18px;" data-i18n="sos.tap_prompt">Tap to Send Emergency Alert</p>
+          <p style="text-align: center; font-size: 13.5px; color: var(--body); margin-top: 4px;" data-i18n="sos.desc">Sends pre-composed SMS with GPS coordinates and village name</p>
 
           <div class="sos-quick-actions">
-            <a href="tel:112" class="btn-sos-call">Call 112</a>
-            <button class="btn-sos-sms" id="btn-sos-send-sms">Send SMS</button>
+            <a href="tel:112" class="btn-sos-call" data-i18n="sos.call_112_btn">Call 112</a>
+            <button class="btn-sos-sms" id="btn-sos-send-sms" data-i18n="sos.send_sms_btn">Send SMS</button>
           </div>
 
           <div style="margin-top: 24px;">
-            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">My Emergency Contacts</h3>
+            <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 8px;" data-i18n="sos.contacts_heading">My Emergency Contacts</h3>
             <div id="sos-contacts-list"></div>
             <form id="sos-add-contact-form" style="margin-top: 14px; display:flex; flex-direction:column; gap:8px;">
-              <input type="text" id="contact-name" class="composer-input" style="border: 1px solid var(--line); background:#fff;" placeholder="Contact Name" required>
-              <input type="tel" id="contact-phone" class="composer-input" style="border: 1px solid var(--line); background:#fff;" placeholder="Phone Number" required>
-              <button type="submit" class="btn-download-map" style="justify-content:center;">Add Contact</button>
+              <input type="text" id="contact-name" class="composer-input" style="border: 1px solid var(--line); background:#fff;" placeholder="Contact Name" data-i18n-placeholder="sos.name_placeholder" required>
+              <input type="tel" id="contact-phone" class="composer-input" style="border: 1px solid var(--line); background:#fff;" placeholder="Phone Number" data-i18n-placeholder="sos.phone_placeholder" required>
+              <button type="submit" class="btn-download-map" style="justify-content:center;" data-i18n="sos.add_contact">Add Contact</button>
             </form>
           </div>
         </div>
@@ -590,15 +598,15 @@
            ========================================= -->
       <section class="view-section" id="view-after-flood">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-after-flood" style="width: auto; padding: 0 10px;">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">After-Flood Guide</h2>
+          <button class="lang-btn" id="btn-back-from-after-flood" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="guide.title">After-Flood Guide</h2>
         </div>
         <div style="padding: 20px; overflow-y: auto;">
           <div style="display:flex; gap:8px; margin-bottom:16px;">
-            <button class="amenity-chip active-tab-chip" id="tab-af-safety" style="background:var(--red); color:#fff; font-weight:600;">Safety</button>
-            <button class="amenity-chip" id="tab-af-health">Health</button>
-            <button class="amenity-chip" id="tab-af-home">Home</button>
-            <button class="amenity-chip" id="tab-af-claims">Claims</button>
+            <button class="amenity-chip active-tab-chip" id="tab-af-safety" style="background:var(--red); color:#fff; font-weight:600;" data-i18n="guide.tab_safety">Safety</button>
+            <button class="amenity-chip" id="tab-af-health" data-i18n="guide.tab_health">Health</button>
+            <button class="amenity-chip" id="tab-af-home" data-i18n="guide.tab_home">Home</button>
+            <button class="amenity-chip" id="tab-af-claims" data-i18n="guide.tab_claims">Claims</button>
           </div>
           <div id="after-flood-content-area" style="font-size: 14.5px; line-height: 1.6; color: var(--navy);">
             <!-- Populated dynamically -->
@@ -611,44 +619,44 @@
            ========================================= -->
       <section class="view-section" id="view-preferences">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-preferences" style="width: auto; padding: 0 10px;">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">Alert Preferences</h2>
+          <button class="lang-btn" id="btn-back-from-preferences" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="preferences.title">Alert Preferences</h2>
         </div>
         <div style="padding: 20px; overflow-y: auto;">
           <div style="display: flex; flex-direction: column; gap: 16px;">
             <div>
-              <label style="font-size: 14px; font-weight: 600;">Alert Distance Radius: <span id="pref-radius-display">25 km</span></label>
+              <label style="font-size: 14px; font-weight: 600;"><span data-i18n="preferences.radius_label">Alert Distance Radius:</span> <span id="pref-radius-display">25 km</span></label>
               <input type="range" id="pref-radius-slider" min="5" max="50" step="5" value="25" style="width: 100%; margin-top: 8px;">
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line);">
-              <span>Critical Audio Siren for Danger</span>
+              <span data-i18n="preferences.siren_label">Critical Audio Siren for Danger</span>
               <input type="checkbox" id="pref-audio-siren" checked style="width: 20px; height: 20px;">
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line);">
-              <span>Dam Release Bulletins</span>
+              <span data-i18n="preferences.dam_label">Dam Release Bulletins</span>
               <input type="checkbox" id="pref-dam-release" checked style="width: 20px; height: 20px;">
             </div>
 
             <!-- Google Cloud Translation API Configuration (R3) -->
             <div style="margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid var(--line); border-radius: 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <label for="input-translate-api-key" style="font-size: 13.5px; font-weight: 700; color: var(--navy);">Google Translate API Key (Online Fallback)</label>
+                <label for="input-translate-api-key" style="font-size: 13.5px; font-weight: 700; color: var(--navy);" data-i18n="preferences.translate_label">Google Translate API Key (Online Fallback)</label>
                 <span class="plugin-badge" id="translate-key-status" style="font-size:11px;">Offline Core</span>
               </div>
-              <p style="font-size: 12px; color: var(--mut); margin-bottom: 8px; line-height: 1.4;">
+              <p style="font-size: 12px; color: var(--mut); margin-bottom: 8px; line-height: 1.4;" data-i18n="preferences.translate_desc">
                 Optional: Used when online to dynamically translate English safety guidance into natural Punjabi and Hindi. When offline or unset, FloodSaathi strictly uses the verified offline disaster cards.
               </p>
               <div style="display: flex; gap: 8px;">
                 <input type="password" id="input-translate-api-key" data-legacy-id="pref-google-translate-key" placeholder="AIzaSy..." style="flex:1; height:38px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); font-family: monospace; font-size: 13px;">
-                <button class="btn-resync-gps" id="btn-save-translate-key" style="min-height:38px; padding:0 14px; font-weight:700;">Save</button>
+                <button class="btn-resync-gps" id="btn-save-translate-key" style="min-height:38px; padding:0 14px; font-weight:700;" data-i18n="preferences.save_btn">Save</button>
               </div>
             </div>
 
             <div style="margin-top: 16px;">
-              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">Downloaded Offline Map Packs</h3>
-              <div id="offline-packs-list" style="font-size: 13px; color: var(--mut);">No offline map packs downloaded yet.</div>
+              <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;" data-i18n="preferences.downloaded_maps">Downloaded Offline Map Packs</h3>
+              <div id="offline-packs-list" style="font-size: 13px; color: var(--mut);" data-i18n="preferences.no_maps">No offline map packs downloaded yet.</div>
             </div>
           </div>
         </div>
@@ -659,13 +667,13 @@
            ========================================= -->
       <section class="view-section" id="view-downloads">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="btn-view-back" id="btn-back-from-downloads" aria-label="Back to home view">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">Offline Packs & Plugins</h2>
+          <button class="btn-view-back" id="btn-back-from-downloads" aria-label="Back to home view" data-i18n="common.back">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="downloads.title">Offline Packs & Plugins</h2>
         </div>
         <div class="downloads-container">
           <div class="downloads-header-intro">
-            <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);">Local Storage & Plugins</h3>
-            <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45; margin-top: 4px;">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs directly to device cache for 100% offline emergency preparedness.</p>
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);" data-i18n="downloads.intro_title">Local Storage & Plugins</h3>
+            <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45; margin-top: 4px;" data-i18n="downloads.intro_desc">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs directly to device cache for 100% offline emergency preparedness.</p>
           </div>
 
           <!-- Storage Usage Dashboard Bar -->
@@ -673,7 +681,7 @@
             <div class="storage-summary-top">
               <div style="display:flex; align-items:center; gap:8px;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                <strong style="font-size:14.5px; color:var(--navy);">Offline Cache Storage</strong>
+                <strong style="font-size:14.5px; color:var(--navy);" data-i18n="downloads.storage_cache">Offline Cache Storage</strong>
               </div>
               <span id="storage-summary-total-text" class="plugin-badge" style="font-size:12px;">Calculating...</span>
             </div>
@@ -683,10 +691,10 @@
               <div class="storage-bar-seg seg-slm" id="storage-bar-slm" style="width: 0%;" title="SLM Model"></div>
             </div>
             <div class="storage-legend-row">
-              <span class="storage-legend-item"><span class="legend-dot dot-maps"></span>Maps: <strong id="legend-maps-val">Ready to cache</strong></span>
-              <span class="storage-legend-item"><span class="legend-dot dot-langs"></span>Languages: <strong id="legend-langs-val">Ready to cache</strong></span>
-              <span class="storage-legend-item"><span class="legend-dot dot-slm"></span>SLM AI: <strong id="legend-slm-val">Not Downloaded</strong></span>
-              <span class="storage-legend-item" style="margin-left:auto;"><span class="legend-dot dot-free"></span>Offline Cache Ready</span>
+              <span class="storage-legend-item"><span class="legend-dot dot-maps"></span><span data-i18n="downloads.legend_maps">Maps:</span> <strong id="legend-maps-val">Ready to cache</strong></span>
+              <span class="storage-legend-item"><span class="legend-dot dot-langs"></span><span data-i18n="downloads.legend_langs">Languages:</span> <strong id="legend-langs-val">Ready to cache</strong></span>
+              <span class="storage-legend-item"><span class="legend-dot dot-slm"></span><span data-i18n="downloads.legend_slm">SLM AI:</span> <strong id="legend-slm-val">Not Downloaded</strong></span>
+              <span class="storage-legend-item" style="margin-left:auto;"><span class="legend-dot dot-free"></span><span data-i18n="downloads.legend_ready">Offline Cache Ready</span></span>
             </div>
           </div>
 
@@ -699,16 +707,16 @@
                 </div>
                 <div class="plugin-meta">
                   <div class="plugin-badge-row">
-                    <span class="plugin-badge rec">Recommended</span>
-                    <span class="plugin-badge" id="map-pack-status-badge">Ready to Cache</span>
+                    <span class="plugin-badge rec" data-i18n="downloads.recommended">Recommended</span>
+                    <span class="plugin-badge" id="map-pack-status-badge" data-i18n="downloads.ready_to_cache">Ready to Cache</span>
                   </div>
-                  <h3 class="plugin-title">Punjab Offline Vector Map Pack</h3>
-                  <p class="plugin-desc">High-contrast OpenStreetMap vector tiles with rivers, embankments, elevation contours, and safe evacuation paths.</p>
+                  <h3 class="plugin-title" data-i18n="downloads.map_title">Punjab Offline Vector Map Pack</h3>
+                  <p class="plugin-desc" data-i18n="downloads.map_desc">High-contrast OpenStreetMap vector tiles with rivers, embankments, elevation contours, and safe evacuation paths.</p>
                 </div>
               </div>
 
               <div class="plugin-config-box">
-                <label style="font-size: 12.5px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 6px;">Select Area Radius:</label>
+                <label style="font-size: 12.5px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 6px;" data-i18n="downloads.select_radius">Select Area Radius:</label>
                 <div class="radius-selector-row">
                   <button class="radius-pill" data-radius="10" data-mb="12">10 km (~12 MB)</button>
                   <button class="radius-pill active" data-radius="25" data-mb="28">25 km (~28 MB)</button>
@@ -716,7 +724,7 @@
                   <button class="radius-pill" data-radius="100" data-mb="140">100 km (~140 MB)</button>
                 </div>
                 <div class="plugin-stat-row">
-                  <span>Selected Download Size: <strong id="map-selected-size-text">28 MB</strong></span>
+                  <span><span data-i18n="downloads.selected_size">Selected Download Size:</span> <strong id="map-selected-size-text">28 MB</strong></span>
                   <span id="map-storage-usage-text">Storage: IndexedDB Cached</span>
                 </div>
               </div>
@@ -724,7 +732,7 @@
               <div class="plugin-actions">
                 <button class="btn-plugin-download" id="btn-download-map-pack-plugin">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  <span>Download Map Pack</span>
+                  <span data-i18n="downloads.download_map_pack">Download Map Pack</span>
                 </button>
               </div>
 
@@ -753,8 +761,8 @@
                     <span class="plugin-badge" id="slm-download-status-badge">Not Downloaded</span>
                     <span class="plugin-badge active" id="slm-active-status-badge">Standby (M5 Fallback)</span>
                   </div>
-                  <h3 class="plugin-title">FloodSaathi SLM (Qwen2.5-0.5B-Instruct)</h3>
-                  <p class="plugin-desc">On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.</p>
+                  <h3 class="plugin-title" data-i18n="downloads.slm_title">FloodSaathi SLM (Qwen2.5-0.5B-Instruct)</h3>
+                  <p class="plugin-desc" data-i18n="downloads.slm_desc">On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.</p>
                 </div>
               </div>
               <div class="plugin-config-box">
@@ -765,7 +773,7 @@
                   <strong>Inference Hook:</strong> WebGPU / Client ONNX Runtime (D:\FloodSaathi_AI\models)
                 </div>
                 <label for="toggle-slm-model" style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f8fafc; border-radius: 10px; margin-top: 6px; cursor: pointer;">
-                  <span style="font-size:13px; font-weight:600;">Enable Local SLM Model:</span>
+                  <span style="font-size:13px; font-weight:600;" data-i18n="downloads.slm_enable">Enable Local SLM Model:</span>
                   <input type="checkbox" id="toggle-slm-model" style="width:20px; height:20px; cursor:pointer;" disabled>
                 </label>
                 <!-- SLM Download Progress -->
@@ -782,7 +790,7 @@
               <div class="plugin-actions">
                 <button class="btn-plugin-download" id="btn-download-slm">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-                  <span>Download Model (~340 MB)</span>
+                  <span data-i18n="downloads.download_model">Download Model (~340 MB)</span>
                 </button>
               </div>
             </div>
@@ -799,28 +807,28 @@
                     <span class="plugin-badge size">~18 MB</span>
                     <span class="plugin-badge" id="py-engine-status-badge">Browser Native</span>
                   </div>
-                  <h3 class="plugin-title">Python Runtime & Hydrologic Compute Bridge</h3>
-                  <p class="plugin-desc">Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.</p>
+                  <h3 class="plugin-title" data-i18n="downloads.py_title">Python Runtime & Hydrologic Compute Bridge</h3>
+                  <p class="plugin-desc" data-i18n="downloads.py_desc">Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.</p>
                 </div>
               </div>
               <div class="plugin-config-box">
                 <div class="plugin-stat-row">
-                  <span>Engine Status: <strong id="py-engine-status-text">Browser Native (Offline PWA)</strong></span>
+                  <span><span data-i18n="downloads.py_status">Engine Status:</span> <strong id="py-engine-status-text">Browser Native (Offline PWA)</strong></span>
                 </div>
                 <div id="py-engine-probe-result" style="font-size:12px; color:var(--mut); margin-top:4px;"></div>
                 <div class="py-setup-guidance" style="background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:10px; margin-top:8px; font-size:12px;">
-                  <strong style="color:var(--navy);">Local Python Relay Setup Guidance:</strong>
+                  <strong style="color:var(--navy);" data-i18n="downloads.py_guidance_title">Local Python Relay Setup Guidance:</strong>
                   <pre style="background:#1e293b; color:#f1f5f9; padding:8px; border-radius:6px; overflow-x:auto; margin:6px 0; font-size:11px;"># Run local FloodSaathi Python Relay & Engine
 git clone https://github.com/floodsaathi/relay
 cd FloodSaathi
 pip install -r relay/requirements.txt
 python relay/run.py --out app/data/latest/</pre>
-                  <span style="color:var(--mut);">Runs local Python 3.11 telemetry fetcher and hydrologic model engine on localhost:8000.</span>
+                  <span style="color:var(--mut);" data-i18n="downloads.py_guidance_desc">Runs local Python 3.11 telemetry fetcher and hydrologic model engine on localhost:8000.</span>
                 </div>
               </div>
               <div class="plugin-actions">
                 <button class="btn-plugin-download sec" id="btn-check-python-runtime">
-                  <span>Check Engine Connection</span>
+                  <span data-i18n="downloads.py_check_btn">Check Engine Connection</span>
                 </button>
               </div>
             </div>
@@ -833,12 +841,12 @@ python relay/run.py --out app/data/latest/</pre>
                 </div>
                 <div class="plugin-meta">
                   <div class="plugin-badge-row">
-                    <span class="plugin-badge rec">Recommended</span>
+                    <span class="plugin-badge rec" data-i18n="downloads.recommended">Recommended</span>
                     <span class="plugin-badge size">~8 MB Total</span>
                     <span class="plugin-badge active" id="lang-packs-global-badge">Ready Offline</span>
                   </div>
-                  <h3 class="plugin-title">Regional Language Packs (Hindi & Punjabi Gurmukhi)</h3>
-                  <p class="plugin-desc">Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in default.</p>
+                  <h3 class="plugin-title" data-i18n="downloads.lang_title">Regional Language Packs (Hindi & Punjabi Gurmukhi)</h3>
+                  <p class="plugin-desc" data-i18n="downloads.lang_desc">Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in default.</p>
                 </div>
               </div>
               <div class="plugin-config-box">
@@ -846,17 +854,17 @@ python relay/run.py --out app/data/latest/</pre>
                   <!-- English (Default) -->
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
                     <div>
-                      <strong>English</strong>
-                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">Built-in System Default</span>
+                      <strong data-i18n="downloads.lang_en_title">English</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;" data-i18n="downloads.lang_en_sub">Built-in System Default</span>
                     </div>
-                    <span class="plugin-badge active" style="font-size:11px;">Active Default</span>
+                    <span class="plugin-badge active" style="font-size:11px;" data-i18n="downloads.lang_en_badge">Active Default</span>
                   </div>
 
                   <!-- Punjabi Pack -->
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
                     <div>
-                      <strong>ਪੰਜਾਬੀ (Punjabi Gurmukhi)</strong>
-                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~4.2 MB · Noto Sans Gurmukhi</span>
+                      <strong data-i18n="downloads.lang_pa_title">ਪੰਜਾਬੀ (Punjabi Gurmukhi)</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;" data-i18n="downloads.lang_pa_sub">~4.2 MB · Noto Sans Gurmukhi</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
                       <span class="plugin-badge" id="badge-lang-pa-status">Not Downloaded</span>
@@ -868,8 +876,8 @@ python relay/run.py --out app/data/latest/</pre>
                   <!-- Hindi Pack -->
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
                     <div>
-                      <strong>हिन्दी (Hindi Devanagari)</strong>
-                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~3.9 MB · Noto Sans Devanagari</span>
+                      <strong data-i18n="downloads.lang_hi_title">हिन्दी (Hindi Devanagari)</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;" data-i18n="downloads.lang_hi_sub">~3.9 MB · Noto Sans Devanagari</span>
                     </div>
                     <div style="display:flex; align-items:center; gap:6px;">
                       <span class="plugin-badge" id="badge-lang-hi-status">Not Downloaded</span>
@@ -893,7 +901,7 @@ python relay/run.py --out app/data/latest/</pre>
               <div class="plugin-actions">
                 <button class="btn-plugin-download" id="btn-sync-lang-packs">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
-                  <span>Re-Sync Regional Packs</span>
+                  <span data-i18n="downloads.resync_packs">Re-Sync Regional Packs</span>
                 </button>
               </div>
             </div>
@@ -952,14 +960,14 @@ python relay/run.py --out app/data/latest/</pre>
       <!-- Header -->
       <div style="background:var(--red); padding:24px 24px 20px; text-align:center;">
         <img src="./icons/icon.svg" alt="FloodSaathi" style="width:52px; height:52px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.25); margin-bottom:12px;">
-        <div style="font-size:22px; font-weight:800; color:#fff; letter-spacing:-0.02em;">Welcome to FloodSaathi</div>
+        <div style="font-size:22px; font-weight:800; color:#fff; letter-spacing:-0.02em;" data-i18n="first_run.welcome">Welcome to FloodSaathi</div>
         <div style="font-size:13px; color:rgba(255,255,255,0.82); margin-top:4px;">ਫਲੱਡਸਾਥੀ ਵਿੱਚ ਜੀ ਆਇਆਂ &nbsp;·&nbsp; फ्लडसाथी में आपका स्वागत है</div>
       </div>
 
       <!-- Body -->
       <div style="padding:24px;">
-        <p id="frm-title" style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:6px;">Choose your language</p>
-        <p style="font-size:12.5px; color:var(--mut); margin-bottom:18px; line-height:1.5;">
+        <p id="frm-title" style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:6px;" data-i18n="first_run.choose_lang">Choose your language</p>
+        <p style="font-size:12.5px; color:var(--mut); margin-bottom:18px; line-height:1.5;" data-i18n="first_run.desc">
           Select your preferred language. Font and translation packs will be downloaded automatically if you're online.
         </p>
 
@@ -974,9 +982,9 @@ python relay/run.py --out app/data/latest/</pre>
             <input type="radio" name="frm-lang" value="en" checked style="width:20px;height:20px;accent-color:var(--red);">
             <div>
               <div style="font-size:15px; font-weight:700; color:var(--navy);">🇬🇧 English</div>
-              <div style="font-size:12px; color:var(--mut);">Built-in · No download needed</div>
+              <div style="font-size:12px; color:var(--mut);" data-i18n="downloads.lang_en_sub">Built-in · No download needed</div>
             </div>
-            <span style="margin-left:auto; font-size:11px; font-weight:700; background:var(--green); color:#fff; padding:3px 8px; border-radius:6px;">Default</span>
+            <span style="margin-left:auto; font-size:11px; font-weight:700; background:var(--green); color:#fff; padding:3px 8px; border-radius:6px;" data-i18n="downloads.lang_en_badge">Default</span>
           </label>
 
           <!-- Hindi -->
@@ -1023,9 +1031,9 @@ python relay/run.py --out app/data/latest/</pre>
           background:var(--red); color:#fff; border:none; border-radius:14px;
           cursor:pointer; letter-spacing:0.01em;
           box-shadow:0 4px 16px rgba(239,28,36,0.28); transition:background 0.15s;
-        ">Get Started →</button>
+        " data-i18n="first_run.get_started">Get Started →</button>
 
-        <p style="font-size:11.5px; color:var(--mut); text-align:center; margin-top:10px; line-height:1.4;">
+        <p style="font-size:11.5px; color:var(--mut); text-align:center; margin-top:10px; line-height:1.4;" data-i18n="first_run.footer">
           You can change language anytime in Settings. App works 100% offline after setup.
         </p>
       </div>
@@ -1045,19 +1053,76 @@ python relay/run.py --out app/data/latest/</pre>
     <div style="display:flex; align-items:flex-start; gap:10px;">
       <span style="font-size:22px; flex:none; margin-top:1px;">🤖</span>
       <div style="flex:1;">
-        <div style="font-weight:700; margin-bottom:3px; color:#f1f5f9;">AI Model Not Downloaded</div>
-        <div style="color:#94a3b8; font-size:12.5px;">
+        <div style="font-weight:700; margin-bottom:3px; color:#f1f5f9;" data-i18n="toast.slm_title">AI Model Not Downloaded</div>
+        <div style="color:#94a3b8; font-size:12.5px;" data-i18n="toast.slm_desc">
           Ask Saathi is running on verified offline cards. Download the SLM model for full AI responses.
         </div>
         <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
           <button id="slm-toast-download-btn" style="
             background:var(--red); color:#fff; border:none; border-radius:8px;
             padding:7px 14px; font-size:12px; font-weight:700; cursor:pointer;
-          ">Download Model (340 MB)</button>
+          " data-i18n="toast.slm_download">Download Model (340 MB)</button>
           <button id="slm-toast-dismiss-btn" style="
             background:rgba(255,255,255,0.1); color:#e2e8f0; border:none; border-radius:8px;
             padding:7px 10px; font-size:12px; cursor:pointer;
-          ">Dismiss</button>
+          " data-i18n="toast.slm_dismiss">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
+       LOCATION SELECTOR MODAL (GPS / District Choice)
+       ============================================= -->
+  <div id="location-picker-modal" role="dialog" aria-modal="true" aria-labelledby="loc-modal-title" style="
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:rgba(18,23,43,0.72); backdrop-filter:blur(4px);
+    justify-content:center; align-items:center; padding:20px;
+  ">
+    <div style="
+      background:#fff; border-radius:24px; max-width:440px; width:100%;
+      box-shadow:0 24px 80px rgba(18,23,43,0.28); overflow:hidden;
+      display:flex; flex-direction:column; max-height:90vh;
+    ">
+      <div style="background:var(--navy); padding:20px 24px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div id="loc-modal-title" style="font-size:18px; font-weight:800;" data-i18n="location.picker_title">Select Your Location</div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.8); margin-top:2px;">ਪੰਜਾਬ ਵਿੱਚ ਆਪਣਾ ਸਥਾਨ ਚੁਣੋ</div>
+        </div>
+        <button id="btn-close-loc-modal" aria-label="Close" style="background:rgba(255,255,255,0.15); border:none; color:#fff; border-radius:50%; width:32px; height:32px; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+      </div>
+      
+      <div style="padding:20px; overflow-y:auto; flex:1;">
+        <p style="font-size:13px; color:var(--mut); margin-bottom:14px; line-height:1.4;" data-i18n="location.picker_desc">
+          Choose your district in Punjab or auto-detect using device GPS to get real telemetry and alerts.
+        </p>
+
+        <!-- Current Location Indicator -->
+        <div style="background:#f1f5f9; border-radius:12px; padding:12px 14px; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
+          <div>
+            <span style="font-size:11px; text-transform:uppercase; color:var(--mut); font-weight:700;">Active Location</span>
+            <div id="loc-modal-active-name" style="font-size:14.5px; font-weight:700; color:var(--navy);">Ludhiana, Punjab</div>
+          </div>
+          <span class="plugin-badge active" style="font-size:11px;">Active</span>
+        </div>
+
+        <!-- Auto-Detect GPS Button -->
+        <button id="btn-modal-detect-gps" style="
+          width:100%; padding:12px 16px; background:var(--blue); color:#fff; border:none;
+          border-radius:12px; font-weight:700; font-size:13.5px; cursor:pointer;
+          display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px;
+        ">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/><circle cx="12" cy="12" r="2"/></svg>
+          <span data-i18n="location.detect_gps">Detect Current GPS Location</span>
+        </button>
+
+        <div style="font-size:12px; font-weight:700; color:var(--mut); text-transform:uppercase; margin-bottom:10px;" data-i18n="location.or_select_district">
+          Or Select Punjab District:
+        </div>
+
+        <!-- District Selector List -->
+        <div id="district-picker-list" style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <!-- Dynamically populated from PUNJAB_DISTRICTS -->
         </div>
       </div>
     </div>

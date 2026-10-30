@@ -1,6 +1,7 @@
 {
   "app_name": "FloodSaathi",
   "tagline": "Offline-First Flood Early-Warning",
+  "brand_sub": "Punjab Early-Warning",
   "nav": {
     "status": "My Status",
     "home": "Home",
@@ -34,7 +35,11 @@
     "numbers_hidden": "Numbers hidden: data is older than 24 hours. Contact emergency helplines below.",
     "ground_safe": "Water likely to stay below your ground level",
     "receding_reported": "Water is receding (reported by you)",
-    "reached_reported": "Water reached your location (reported by you)"
+    "reached_reported": "Water reached your location (reported by you)",
+    "just_now": "Data from just now",
+    "estimated_range": "Estimated Range",
+    "loading_reason": "Loading live flood and hydrologic telemetry...",
+    "no_bulletins": "No active official disaster bulletins for your area."
   },
   "estimator": {
     "arrival_range": "Water may reach your area in about {low} to {high}, most likely {likely}.",
@@ -56,12 +61,27 @@
   "actions": {
     "water_reached": "Water reached my street",
     "water_receding": "Water is receding",
-    "refresh": "Refresh Live Data",
+    "refresh": "Refresh Live Telemetry",
     "refreshing": "Fetching latest data...",
-    "change_location": "Change Village / Location"
+    "change_location": "Change Village / Location",
+    "resync_gps": "Re-sync GPS",
+    "switch_to_lang": "Switch to {lang}",
+    "listen": "Listen",
+    "listening": "Listening...",
+    "stop_listen": "Stop"
+  },
+  "location": {
+    "picker_title": "Select Your Location",
+    "picker_desc": "Choose your district in Punjab or auto-detect using device GPS to get real telemetry and alerts.",
+    "detect_gps": "Detect Current GPS Location",
+    "or_select_district": "Or Select Punjab District:",
+    "tap_to_change": "Tap to change",
+    "gps_synced": "GPS Synced",
+    "gps_stale": "GPS Stale"
   },
   "helplines": {
     "title": "Emergency Helplines",
+    "bar_label": "Emergency:",
     "call_112": "Call 112 (National Emergency)",
     "call_1078": "Call 1078 (NDMA Disaster)",
     "call_1070": "Call 1070 (Punjab State SEOC)",
@@ -69,20 +89,175 @@
     "always_available": "Toll-free emergency numbers work even with low cellular balance."
   },
   "alerts": {
+    "heading": "Official Bulletins",
+    "subheading": "NDMA SACHET & Punjab State Disaster Management Bulletins (Verbatim)",
     "title": "Official Alerts (NDMA SACHET)",
     "no_alerts": "No active official flood alerts for this area.",
     "source_badge": "Official NDMA SACHET",
     "severity": "Severity: {sev}",
     "effective": "Effective: {time}",
     "area": "Affected area: {area}",
-    "verbatim_note": "Official alert text is presented verbatim from NDMA SACHET."
+    "verbatim_note": "Official alert text is presented verbatim from NDMA SACHET.",
+    "loading": "Loading official bulletins..."
+  },
+  "metrics": {
+    "rain_forecast": "Rain Forecast",
+    "next_24h": "Next 24 hours",
+    "light_showers": "Light showers",
+    "elevation": "Elevation",
+    "above_sea_level": "above sea level",
+    "dist_to_river": "Distance to river",
+    "checking": "Checking...",
+    "stable": "Stable"
+  },
+  "quick": {
+    "shelters_title": "Nearest Safe Shelters",
+    "shelters_desc": "Verified relief centers with live distances and facilities",
+    "maps_title": "Offline Maps Downloader",
+    "maps_desc": "Cache vector tiles on PC or mobile for 100% offline access",
+    "saathi_title": "Ask Saathi AI Assistant",
+    "saathi_desc": "On-device emergency guidance with verified safety invariants",
+    "sos_title": "Emergency SOS & 112",
+    "sos_desc": "1-tap emergency dialers and pre-composed GPS location alerts"
+  },
+  "map_view": {
+    "storage_title": "Offline Map Storage",
+    "ready_to_cache": "Ready to cache vector tiles",
+    "download_btn": "Download",
+    "downloading": "Downloading...",
+    "interactive_title": "Interactive Water & Risk Map",
+    "interactive_sub": "CWC Gauges, River Networks & Risk Inundation Zones"
+  },
+  "ask": {
+    "title": "Ask Saathi",
+    "header_sub": "Offline Disaster & Safety Guide",
+    "sidebar_title": "Safety Knowledge Index",
+    "sidebar_desc": "Instant verified guidance grounded in NDMA and Punjab SDMA protocols.",
+    "topic_water": "Drinking Water Purification",
+    "topic_water_sub": "Bleaching powder ratios & boiling steps",
+    "topic_elec": "Electrical & Wire Hazard",
+    "topic_elec_sub": "10m distance, power cutoff & 1912",
+    "topic_crossing": "Water Crossing Dangers",
+    "topic_crossing_sub": "Turn around, don't drown rules",
+    "topic_snake": "Snakebite & Medical First Aid",
+    "topic_snake_sub": "Anti-venom protocol & 108 ambulance",
+    "topic_cattle": "Livestock & Animal Safety",
+    "topic_cattle_sub": "Untying khuntas, fodder & relief bunds",
+    "quick_dials": "Emergency Quick Dials:",
+    "bot_greeting": "Sat Sri Akal / Namaste!",
+    "bot_intro": "I am FloodSaathi. Ask me how to purify water, what to pack in an evacuation bag, electrical safety, or where the nearest relief camp is.",
+    "chip_home": "Flood entering home",
+    "chip_water": "Drinking water",
+    "chip_shelter": "Nearest shelter",
+    "placeholder": "Ask a question in English, Hindi, or Punjabi..."
+  },
+  "more": {
+    "title": "More Tools & Assistance",
+    "subtitle": "Evacuation shelters, emergency SOS, and post-flood recovery guides.",
+    "shelters": "Nearest Safe Shelters",
+    "shelters_sub": "Verified relief camps with distance & amenities",
+    "sos": "Emergency SOS & Family Check-in",
+    "sos_sub": "One-tap 112/1078 dialer, geolocation SMS",
+    "guide": "After-Flood Health & Safety Guide",
+    "guide_sub": "Well disinfection, electrical safety, relief claims",
+    "preferences": "Alert Preferences & Storage",
+    "preferences_sub": "Notification radius, dam release, offline packs",
+    "downloads": "Offline Packs & Plugins",
+    "downloads_sub": "Offline maps, AI model, language packs, python engine",
+    "attribution": "Data Sources & Attribution: Central Water Commission (CWC), NDMA SACHET, Open-Meteo, Copernicus GLO-30 DEM, OpenStreetMap, Punjab Revenue Department. Version 1.2.0 (CTBF-AI-12 Punjab Pilot)"
+  },
+  "shelters": {
+    "title": "Nearest Safe Shelters",
+    "finding": "Finding verified relief centers...",
+    "none_found": "No shelters found near this location.",
+    "away": "{dist} away"
+  },
+  "guide": {
+    "title": "After-Flood Guide",
+    "tab_safety": "Safety",
+    "tab_health": "Health",
+    "tab_home": "Home",
+    "tab_claims": "Claims"
+  },
+  "preferences": {
+    "title": "Alert Preferences",
+    "radius_label": "Alert Distance Radius:",
+    "siren_label": "Critical Audio Siren for Danger",
+    "dam_label": "Dam Release Bulletins",
+    "translate_label": "Google Translate API Key (Online Fallback)",
+    "translate_desc": "Optional: Used when online to dynamically translate English safety guidance into natural Punjabi and Hindi. When offline or unset, FloodSaathi strictly uses the verified offline disaster cards.",
+    "save_btn": "Save",
+    "downloaded_maps": "Downloaded Offline Map Packs",
+    "no_maps": "No offline map packs downloaded yet."
+  },
+  "downloads": {
+    "title": "Offline Packs & Plugins",
+    "intro_title": "Local Storage & Plugins",
+    "intro_desc": "Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs directly to device cache for 100% offline emergency preparedness.",
+    "storage_cache": "Offline Cache Storage",
+    "legend_maps": "Maps:",
+    "legend_langs": "Languages:",
+    "legend_slm": "SLM AI:",
+    "legend_ready": "Offline Cache Ready",
+    "recommended": "Recommended",
+    "ready_to_cache": "Ready to Cache",
+    "ready_offline": "Ready Offline",
+    "downloaded": "Downloaded",
+    "not_downloaded": "Not Downloaded",
+    "active": "Active",
+    "map_title": "Punjab Offline Vector Map Pack",
+    "map_desc": "High-contrast OpenStreetMap vector tiles with rivers, embankments, elevation contours, and safe evacuation paths.",
+    "select_radius": "Select Area Radius:",
+    "selected_size": "Selected Download Size:",
+    "download_map_pack": "Download Map Pack",
+    "slm_title": "FloodSaathi SLM (Qwen2.5-0.5B-Instruct)",
+    "slm_desc": "On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.",
+    "slm_hardware": "Hardware:",
+    "slm_inference": "Inference Hook:",
+    "slm_enable": "Enable Local SLM Model:",
+    "download_model": "Download Model (~340 MB)",
+    "py_title": "Python Runtime & Hydrologic Compute Bridge",
+    "py_desc": "Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.",
+    "py_status": "Engine Status:",
+    "py_guidance_title": "Local Python Relay Setup Guidance:",
+    "py_guidance_desc": "Runs local Python 3.11 telemetry fetcher and hydrologic model engine on localhost:8000.",
+    "py_check_btn": "Check Engine Connection",
+    "lang_title": "Regional Language Packs (Hindi & Punjabi Gurmukhi)",
+    "lang_desc": "Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in default.",
+    "lang_en_title": "English",
+    "lang_en_sub": "Built-in System Default",
+    "lang_en_badge": "Active Default",
+    "lang_pa_title": "ਪੰਜਾਬੀ (Punjabi Gurmukhi)",
+    "lang_pa_sub": "~4.2 MB · Noto Sans Gurmukhi",
+    "lang_hi_title": "हिन्दी (Hindi Devanagari)",
+    "lang_hi_sub": "~3.9 MB · Noto Sans Devanagari",
+    "download_pack_btn": "Download ({size})",
+    "resync_packs": "Re-Sync Regional Packs"
+  },
+  "first_run": {
+    "welcome": "Welcome to FloodSaathi",
+    "welcome_sub": "ਫਲੱਡਸਾਥੀ ਵਿੱਚ ਜੀ ਆਇਆਂ · फ्लडसाथी में आपका स्वागत है",
+    "choose_lang": "Choose your language",
+    "desc": "Select your preferred language. Font and translation packs will be downloaded automatically if you're online.",
+    "get_started": "Get Started →",
+    "footer": "You can change language anytime in Settings. App works 100% offline after setup."
+  },
+  "toast": {
+    "slm_title": "AI Model Not Downloaded",
+    "slm_desc": "Ask Saathi is running on verified offline cards. Download the SLM model for full AI responses.",
+    "slm_download": "Download Model (340 MB)",
+    "slm_dismiss": "Dismiss"
   },
   "sos": {
     "title": "Emergency SOS",
+    "tap_prompt": "Tap to Send Emergency Alert",
+    "desc": "Sends pre-composed SMS with GPS coordinates and village name",
+    "call_112_btn": "Call 112",
+    "send_sms_btn": "Send SMS",
     "disclaimer": "Web SOS creates SMS and phone calls. Review and send via your device's dialer or messaging app.",
     "send_sms": "Send SMS to My Contacts",
     "call_112": "Call 112 Immediately",
-    "contacts_heading": "Emergency Contacts (stored on device)",
+    "contacts_heading": "My Emergency Contacts",
     "add_contact": "Add Contact",
     "name_placeholder": "Contact Name",
     "phone_placeholder": "Phone Number (e.g. 9876543210)",
@@ -108,6 +283,7 @@
     "minutes": "min",
     "meters": "m",
     "unknown": "Unavailable",
-    "unverified": "Unverified — confirm with district office"
+    "unverified": "Unverified — confirm with district office",
+    "back": "← Back"
   }
 }

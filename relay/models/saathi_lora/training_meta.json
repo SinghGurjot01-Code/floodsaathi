@@ -1,13 +1,14 @@
 {
   "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
-  "dataset": "C:\\Users\\Gurjotpal Singh\\Desktop\\FloodSaathi\\corpus\\flood_safety_dataset.jsonl",
-  "record_count": 64,
+  "dataset": "D:\\FloodSaathi_AI\\datasets\\compiled\\flood_safety_dataset.jsonl",
+  "record_count": 75,
   "lora_r": 16,
   "lora_alpha": 32,
-  "epochs": 3,
+  "epochs": 2,
   "learning_rate": 0.0002,
-  "batch_size": 4,
-  "context_window": 512,
-  "target_device": "mobile_npu_webgpu",
+  "batch_size": 2,
+  "final_loss": 1.0605,
+  "context_window": 384,
+  "target_device": "cuda",
   "safety_system_prompt": "You are FloodSaathi, an offline flood early-warning and disaster safety assistant for Punjab, India. Ground all guidance in official NDMA SOPs, Punjab SDMA Flood Preparedness manuals, CWC warnings, and WHO emergency water sanitation standards. Emergency numbers must strictly come from official government directories (112, 1078, 1070, 1077, 108, 1912). Never encourage walking or driving through flood waters. Never prescribe medical dosages."
 }

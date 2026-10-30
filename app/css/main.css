@@ -56,6 +56,14 @@ body {
   overflow-y: auto;
 }
 
+:lang(pa), html[lang="pa"] body {
+  font-family: 'Noto Sans Gurmukhi', Inter, system-ui, -apple-system, sans-serif;
+}
+
+:lang(hi), html[lang="hi"] body {
+  font-family: 'Noto Sans Devanagari', Inter, system-ui, -apple-system, sans-serif;
+}
+
 /* App Shell Canvas (Mobile-first, responsive multi-device on tablet and desktop) */
 .app-shell {
   position: relative;
@@ -1799,4 +1807,79 @@ body {
   font-size: 11px;
   color: var(--mut);
   margin-top: 4px;
+}
+
+/* Voice STT & Accessibility TTS */
+@keyframes pulse-mic {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 28, 36, 0.7); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 10px rgba(239, 28, 36, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 28, 36, 0); }
+}
+
+@keyframes pulse-speaker {
+  0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.6); }
+  70% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
+}
+
+.composer-mic.recording {
+  background: #fbe9ea !important;
+  color: #ef1c24 !important;
+  border-color: #ef1c24 !important;
+}
+
+.tts-speaker-btn {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  color: var(--navy);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+.tts-speaker-btn:hover {
+  background: #e2e8f0;
+}
+.tts-speaker-btn.speaking,
+#btn-hero-tts.speaking {
+  background: #eff6ff !important;
+  border-color: var(--blue) !important;
+  color: var(--blue) !important;
+  animation: pulse-speaker 1.5s infinite;
+}
+
+/* Location picker district buttons */
+.district-btn {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.15s ease;
+}
+.district-btn:hover {
+  background: #f1f5f9;
+  border-color: var(--blue);
+}
+.district-btn.active {
+  background: #eff6ff;
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.district-btn strong {
+  font-size: 13.5px;
+  color: var(--navy);
+}
+.district-btn span {
+  font-size: 11.5px;
+  color: var(--mut);
+  margin-top: 2px;
 }

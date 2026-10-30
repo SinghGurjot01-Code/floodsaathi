@@ -7,6 +7,8 @@ strictly grounded in:
 - Central Water Commission (CWC) Flood Forecasting Guidelines
 - World Health Organization (WHO) Guidelines for Drinking-water Quality in Emergencies
 - Ministry of Health & Family Welfare (MoHFW) National Snakebite Management Protocol
+- Punjab Department of Animal Husbandry Flood SOPs
+- Punjab Revenue & Disaster Management Department (Special Girdawari Directives)
 """
 
 import json
@@ -310,6 +312,204 @@ DATASET = [
         "response": "According to Central Water Commission and Punjab Drainage Department Engineering Manuals:\n1. Sand Boil Mechanism: A sand boil occurs when high river water pressure forces water to seep underneath an earthen embankment (Dhussi bund), emerging on the landward side carrying sand and silt. If left unchecked, it causes internal piping and catastrophic bund failure.\n2. Do NOT Plug Directly: Never dump sandbags directly on the boil hole itself, as this increases water pressure and expands the piping channel.\n3. Ring Bund Technique: Build a circular sandbag ring (ring dike) around the sand boil. Allow the water inside the ring to rise until the head of clear water inside counterbalances the river pressure and seepage stops discharging sand.\n4. Alert the Drainage and Revenue Authorities immediately via 1070 or 1077.",
         "category": "cwc_gauge_thresholds",
         "verified_source": "Central Water Commission Embankment Safety Manual & Punjab Drainage Dept"
+    },
+
+    # 11. BASIC SURVIVAL & EMERGENCY WATER PURIFICATION
+    {
+        "prompt": "If we run out of chlorine tablets and cooking gas during floods, how does Solar Water Disinfection (SODIS) work?",
+        "response": "According to WHO guidelines for emergency household water treatment, Solar Water Disinfection (SODIS) is a zero-fuel survival method:\n1. Container: Use clean, transparent PET plastic beverage bottles (up to 2 litres capacity). Glass bottles also work, but avoid cloudy or colored plastic.\n2. Preparation: Fill the bottle 3/4 full, shake vigorously for 20 seconds to aerate and oxygenate the water, then top it off completely and cap tightly.\n3. Exposure: Place the bottles horizontally on an elevated corrugated tin roof, black plastic sheet, or clean rock in direct sunlight.\n4. Time: Expose to full sun for at least 6 hours (e.g. 10 AM to 4 PM). If the sky is overcast or cloud cover exceeds 50%, leave for 2 consecutive full days (48 hours).\n5. Mechanism: Solar UV-A radiation and thermal heat synergistically destroy diarrheal pathogens, cholera bacteria, and rotaviruses.",
+        "category": "survival_water",
+        "verified_source": "WHO Guidelines on Solar Water Disinfection (SODIS) & UNICEF Emergency Tech Notes"
+    },
+    {
+        "prompt": "ਕੀ ਧੁੱਪ ਵਿੱਚ ਪਾਣੀ ਰੱਖ ਕੇ ਹੜ੍ਹਾਂ ਦੌਰਾਨ ਪੀਣ ਯੋਗ ਬਣਾਇਆ ਜਾ ਸਕਦਾ ਹੈ (SODIS ਤਰੀਕਾ)?",
+        "response": "ਹਾਂ, ਵਿਸ਼ਵ ਸਿਹਤ ਸੰਗਠਨ (WHO) ਦੇ SODIS ਨਿਯਮਾਂ ਅਨੁਸਾਰ ਜੇਕਰ ਬਾਲਣ ਜਾਂ ਗੈਸ ਨਾ ਹੋਵੇ:\n1. ਸਾਫ਼ ਪਾਰਦਰਸ਼ੀ ਪਲਾਸਟਿਕ ਦੀਆਂ ਬੋਤਲਾਂ (ਜਿਵੇਂ ਕੋਲਡ ਡਰਿੰਕ ਜਾਂ ਪਾਣੀ ਵਾਲੀਆਂ ਬੋਤਲਾਂ) ਲਵੋ।\n2. ਬੋਤਲ ਨੂੰ ਪੌਣੀ ਭਰ ਕੇ 20 ਸਕਿੰਟ ਚੰਗੀ ਤਰ੍ਹਾਂ ਹਿਲਾਓ ਤਾਂ ਜੋ ਆਕਸੀਜਨ ਘੁਲ ਸਕੇ, ਫਿਰ ਪੂਰੀ ਭਰ ਕੇ ਢੱਕਣ ਕੱਸ ਦਿਓ।\n3. ਬੋਤਲਾਂ ਨੂੰ ਸਵੇਰੇ 10 ਵਜੇ ਤੋਂ ਸ਼ਾਮ 4 ਵਜੇ ਤੱਕ (ਘੱਟੋ-ਘੱਟ 6 ਘੰਟੇ) ਪੱਕੀ ਛੱਤ ਜਾਂ ਟੀਨ ਦੀ ਚਾਦਰ 'ਤੇ ਤੇਜ਼ ਧੁੱਪ ਵਿੱਚ ਲਿਟਾ ਕੇ ਰੱਖੋ।\n4. ਸੂਰਜ ਦੀਆਂ ਪਰਾਬੈਂਗਣੀ (UV) ਕਿਰਨਾਂ ਅਤੇ ਗਰਮੀ ਪਾਣੀ ਦੇ ਕੀਟਾਣੂਆਂ ਨੂੰ ਮਾਰ ਦਿੰਦੀਆਂ ਹਨ। ਬੱਦਲਵਾਈ ਵਾਲੇ ਦਿਨ 2 ਦਿਨ ਧੁੱਪ ਲਗਵਾਓ।",
+        "category": "survival_water",
+        "verified_source": "WHO SODIS Technical Guidelines & UNICEF Water Hygiene"
+    },
+    {
+        "prompt": "बाढ़ में जब लकड़ी या गैस न हो तो गंदले पानी को 3-मटका विधि (3-Pot Method) से कैसे साफ करें?",
+        "response": "डब्ल्यूएचओ (WHO) और रेड क्रॉस की आपातकालीन 3-मटका जल शोधन विधि:\n1. व्यवस्था: तीन साफ मटके या बाल्टियां एक सीध में रखें (मटका 1, मटका 2, मटका 3)।\n2. मटका 1 (स्थिरीकरण): गंदले बाढ़ के पानी को सूती कपड़े से छानकर मटका 1 में भरें और 24 घंटे स्थिर रहने दें ताकि भारी गाद और मिट्टी नीचे बैठ जाए।\n3. मटका 2 (दूसरा चरण): 24 घंटे बाद ऊपर का साफ पानी मटका 2 में धीरे से पलटें और फिर 24 घंटे रहने दें। इससे 80% रोगाणु और परजीवी नीचे जम जाते हैं।\n4. मटका 3 (उपयोग): तीसरे दिन ऊपर का बिल्कुल साफ पानी मटका 3 में निकालें। अब इसे उबालें या क्लोरीन की गोली डालें।",
+        "category": "survival_water",
+        "verified_source": "WHO Emergency Household Water Treatment Guidelines"
+    },
+
+    # 12. FIELD HYGIENE & TRENCH LATRINES
+    {
+        "prompt": "How do we construct an emergency trench latrine on a canal embankment (Dhussi Bund) to stop diarrhea and cholera outbreaks?",
+        "response": "Under Sphere Humanitarian Standards and NDMA Camp Sanitation protocols:\n1. Location: Dig the trench at least 30 metres away from any river channel, well, or langar food preparation tent, and downslope from shelters.\n2. Dimensions: Dig a shallow trench 30 cm wide, 50 to 90 cm deep, and 2 to 3 metres long.\n3. Privacy & Cover: Frame the perimeter with bamboo poles and black tarpaulin/jute sheets for privacy. Place two parallel sturdy wooden planks across the trench for safe foot placement.\n4. Sanitation Protocol: Keep a heap of excavated dry soil, dry wood ash, or quicklime beside the trench with a tin scoop. After each defecation, immediately cover feces with a scoop of soil or ash to prevent flies from breeding and transmitting cholera.\n5. Hand Hygiene: Hang a jerrycan with a tap or punctured water bottle filled with clean water and soap/wood ash right outside the latrine entrance.",
+        "category": "survival_sanitation",
+        "verified_source": "Sphere Project Humanitarian Charter & NDMA Relief Camp Guidelines"
+    },
+    {
+        "prompt": "ਹੜ੍ਹਾਂ ਦੌਰਾਨ ਬੰਨ੍ਹਾਂ 'ਤੇ ਆਰਜ਼ੀ ਲੈਟਰੀਨ (ਟੋਆ ਪਖਾਨਾ) ਕਿਵੇਂ ਬਣਾਇਆ ਜਾਵੇ ਤਾਂ ਜੋ ਹੈਜ਼ਾ ਨਾ ਫੈਲੇ?",
+        "response": "ਸਰਕਾਰੀ ਰਾਹਤ ਕੈਂਪ ਅਤੇ ਸਿਹਤ ਵਿਭਾਗ ਦੇ ਨਿਯਮ:\n1. ਦੂਰੀ: ਪਖਾਨੇ ਦਾ ਟੋਆ ਪੀਣ ਵਾਲੇ ਪਾਣੀ ਦੇ ਸਰੋਤਾਂ ਅਤੇ ਲੰਗਰ/ਰਸੋਈ ਤੋਂ ਘੱਟੋ-ਘੱਟ 30 ਮੀਟਰ ਦੂਰ ਬਣਾਓ।\n2. ਟੋਏ ਦਾ ਆਕਾਰ: 1 ਫੁੱਟ ਚੌੜਾ, 2 ਤੋਂ 3 ਫੁੱਟ ਡੂੰਘਾ ਅਤੇ 6 ਤੋਂ 8 ਫੁੱਟ ਲੰਮਾ ਟੋਆ ਪੁੱਟੋ।\n3. ਪਰਦਾ: ਆਲੇ-ਦੁਆਲੇ ਬਾਂਸ ਗੱਡ ਕੇ ਤਰਪਾਲ ਜਾਂ ਬੋਰੀਆਂ ਦਾ ਪਰਦਾ ਲਗਾਓ। ਪੈਰ ਰੱਖਣ ਲਈ ਦੋਵੇਂ ਪਾਸੇ ਮਜ਼ਬੂਤ ਫੱਟੇ ਰੱਖੋ।\n4. ਮੱਖੀਆਂ ਅਤੇ ਬਦਬੂ ਤੋਂ ਬਚਾਅ: ਟੋਏ ਕੋਲ ਸੁੱਕੀ ਮਿੱਟੀ, ਸੁਆਹ ਜਾਂ ਕਲੀ (ਚੂਨਾ) ਰੱਖੋ। ਹਰ ਵਾਰ ਵਰਤੋਂ ਤੋਂ ਬਾਅਦ ਉੱਪਰ ਮਿੱਟੀ ਜਾਂ ਸੁਆਹ ਜ਼ਰੂਰ ਪਾਓ।\n5. ਹੱਥ ਧੋਣਾ: ਬਾਹਰ ਸਾਬਣ ਜਾਂ ਸਾਫ਼ ਸੁਆਹ ਅਤੇ ਪਾਣੀ ਦਾ ਪ੍ਰਬੰਧ ਰੱਖੋ ਤਾਂ ਜੋ ਦਸਤ ਅਤੇ ਹੈਜ਼ਾ ਨਾ ਫੈਲੇ।",
+        "category": "survival_sanitation",
+        "verified_source": "Punjab Health Department Camp Hygiene SOP & Sphere Standards"
+    },
+
+    # 13. TRENCH FOOT & HYPOTHERMIA SURVIVAL
+    {
+        "prompt": "What is trench foot (immersion foot) and how can farmers and rescue volunteers prevent their skin from rotting in flood water?",
+        "response": "Trench foot (immersion foot) is non-freezing tissue damage caused by prolonged exposure of feet to cold water and moisture (over 10-12 hours):\n1. Symptoms: Feet become pale, numb, wrinkled, cold, and swollen. Later, severe tingling, redness, blister formation, and fungal ulcerations develop.\n2. Prevention (NDMA & Military Field Medicine):\n   - Never sleep with wet socks or damp rubber gumboots on.\n   - Every 8 to 12 hours, wash feet with clean water, thoroughly dry between toes with a clean towel, and elevate legs above hip level for 30 minutes.\n   - Apply coconut oil, petroleum jelly (Vaseline), or zinc oxide powder to create a moisture barrier before entering water.\n3. Treatment: Warm feet gradually at room temperature. Do NOT immerse feet in hot water or massage numb skin, which tears fragile macerated tissues. If blisters burst, dress with clean Betadine gauze and call 108.",
+        "category": "survival_health",
+        "verified_source": "CDC Emergency Preparedness Directives & NDMA Field Hygiene SOP"
+    },
+    {
+        "prompt": "ਹੜ੍ਹ ਦੇ ਪਾਣੀ ਵਿੱਚ ਲਗਾਤਾਰ ਰਹਿਣ ਕਰਕੇ ਪੈਰ ਗਲ਼ਣ ਲੱਗ ਪਏ ਹਨ, ਇਸਦਾ ਦੇਸੀ ਅਤੇ ਡਾਕਟਰੀ ਇਲਾਜ ਕੀ ਹੈ?",
+        "response": "ਸਿਹਤ ਵਿਭਾਗ ਦੇ ਨਿਰਦੇਸ਼:\n1. ਪੈਰਾਂ ਨੂੰ ਗਿੱਲਾ ਨਾ ਰਹਿਣ ਦਿਓ: ਪਾਣੀ ਵਿੱਚੋਂ ਨਿਕਲਦੇ ਹੀ ਪੈਰਾਂ ਨੂੰ ਸਾਫ਼ ਪਾਣੀ ਨਾਲ ਧੋ ਕੇ ਸੁੱਕੇ ਕੱਪੜੇ ਨਾਲ ਉਂਗਲਾਂ ਦੇ ਵਿਚਕਾਰੋਂ ਚੰਗੀ ਤਰ੍ਹਾਂ ਸੁਕਾਓ।\n2. ਤੇਲ ਜਾਂ ਮਲਮ: ਸੁੱਕਣ ਤੋਂ ਬਾਅਦ ਨਾਰੀਅਲ ਦਾ ਤੇਲ ਜਾਂ ਸਰ੍ਹੋਂ ਦਾ ਤੇਲ ਲਗਾਓ। ਜੇਕਰ ਚਮੜੀ ਚਿੱਟੀ ਹੋ ਕੇ ਗਲ਼ ਰਹੀ ਹੋਵੇ ਤਾਂ ਬੀਟਾਡੀਨ (Betadine) ਜਾਂ ਐਂਟੀਫੰਗਲ ਪਾਊਡਰ ਛਿੜਕੋ।\n3. ਗਿੱਲੇ ਬੂਟ/ਜੁਰਾਬਾਂ ਨਾ ਪਾਓ: ਰਾਤ ਨੂੰ ਸੌਣ ਵੇਲੇ ਪੈਰਾਂ ਨੂੰ ਉੱਚਾ ਰੱਖੋ ਤਾਂ ਜੋ ਸੋਜ ਘਟ ਸਕੇ।\n4. ਪੈਰਾਂ ਨੂੰ ਸਿੱਧਾ ਅੱਗ ਜਾਂ ਬਹੁਤ ਗਰਮ ਪਾਣੀ ਵਿੱਚ ਨਾ ਸੇਕੋ, ਇਸ ਨਾਲ ਨਾਜ਼ੁਕ ਚਮੜੀ ਸੜ ਸਕਦੀ ਹੈ। ਗੰਭੀਰ ਜ਼ਖ਼ਮ ਹੋਣ 'ਤੇ 108 ਜਾਂ ਮੈਡੀਕਲ ਕੈਂਪ ਦਿਖਾਓ।",
+        "category": "survival_health",
+        "verified_source": "Punjab Health Services Field Protocol & NDMA First Aid"
+    },
+    {
+        "prompt": "How do I recognize and treat hypothermia in someone stranded in cold rain and flood water?",
+        "response": "Hypothermia occurs when core body temperature drops below 35°C (95°F) due to prolonged wet clothing and windchill:\n1. Warning Signs: Mild: violent uncontrollable shivering, pale cold skin, clumsiness. Severe: shivering stops, apathy, slurred speech, confusion, slow shallow pulse.\n2. Immediate Survival Treatment (Red Cross Protocol):\n   - Move person out of wind and rain into shelter or under tarpaulin immediately.\n   - Gently remove ALL wet clothing. Do NOT rub the skin vigorously.\n   - Wrap completely in dry wool blankets, dry straw, or sleeping bags, ensuring head and neck are insulated.\n   - Provide warm, sweet fluids (warm jaggery water, hot sweetened tea). NEVER give alcohol, caffeine, or hot food to an unconscious victim.\n   - Use shared body heat: have a dry person lie beside the victim under dry blankets.\n   - Call 112 / 108 for emergency resuscitation.",
+        "category": "survival_health",
+        "verified_source": "Red Cross Emergency First Aid & NDMA Disaster Medicine Manual"
+    },
+
+    # 14. EMERGENCY FOOD RATIONS & STORAGE
+    {
+        "prompt": "What are the best survival foods to keep stored during monsoon season in rural Punjab?",
+        "response": "Under NDMA Disaster Nutrition guidelines, non-perishable emergency rations must require zero refrigeration and minimal or no cooking fuel:\n1. High-Energy Survival Staples: Roasted gram (Bhuna Chana), Desi Jaggery (Gur), Sattu (barley/chana flour), Puffed rice (Murmura), Glucose powder, and Glucose biscuits (Parle-G).\n2. Storage Method: Store rations in airtight, food-grade plastic drums with rubber gasket lids, or double-layered heavy polythene bags sealed with heat. Keep drums raised on high wooden cots or suspended rafters at least 2 metres above ground.\n3. Infant Food: Store ready-to-feed commercial infant formula and clean feeding bottles. Never mix infant cereal with unboiled flood water.\n4. Spoilage Check: Discard any food that has come into direct contact with flood water or mud, including sealed Tetra Paks and metal cans with dents, rust, or bulging seams (severe botulism toxin hazard).",
+        "category": "survival_food",
+        "verified_source": "NDMA Emergency Food Guidelines & UNICEF Child Nutrition in Disasters"
+    },
+    {
+        "prompt": "ਹੜ੍ਹਾਂ ਦੌਰਾਨ ਆਟਾ, ਚੌਲ ਅਤੇ ਸੁੱਕਾ ਰਾਸ਼ਨ ਗਿੱਲਾ ਹੋਣ ਅਤੇ ਸੁੰਡੀ ਲੱਗਣ ਤੋਂ ਕਿਵੇਂ ਬਚਾਈਏ?",
+        "response": "NDMA ਅਤੇ ਪੰਜਾਬ ਆਫ਼ਤ ਪ੍ਰਬੰਧਨ ਨਿਰਦੇਸ਼:\n1. ਸੀਲਬੰਦ ਡਰੱਮ: ਆਟਾ, ਦਾਲਾਂ ਅਤੇ ਚੌਲ ਹਮੇਸ਼ਾ ਪਲਾਸਟਿਕ ਦੇ ਏਅਰ-ਟਾਈਟ ਨੀਲੇ ਡਰੱਮਾਂ ਵਿੱਚ ਰੱਖੋ ਜਿਨ੍ਹਾਂ ਦੇ ਢੱਕਣ ਨੂੰ ਰਬੜ ਦਾ ਛੱਲਾ ਅਤੇ ਕਲਿੱਪ ਲੱਗਾ ਹੋਵੇ।\n2. ਉੱਚਾਈ 'ਤੇ ਰੱਖੋ: ਡਰੱਮਾਂ ਨੂੰ ਜ਼ਮੀਨ 'ਤੇ ਨਾ ਰੱਖੋ; ਪੱਕੀਆਂ ਛੱਤਾਂ 'ਤੇ ਜਾਂ ਘਰ ਦੇ ਉੱਚੇ ਮਿਆਰਾਂ/ਲੈਂਟਰ ਹੇਠਾਂ ਲੱਕੜ ਦੇ ਤਖ਼ਤਿਆਂ ਉੱਤੇ ਰੱਖੋ।\n3. ਨਿੰਮ ਦੇ ਪੱਤੇ: ਸੁੱਕੇ ਅਨਾਜ ਵਿੱਚ ਸੁੱਕੇ ਨਿੰਮ ਦੇ ਪੱਤੇ ਜਾਂ ਮਾਚਿਸ ਦੀਆਂ ਡੱਬੀਆਂ ਰੱਖਣ ਨਾਲ ਨਮੀ ਵਿੱਚ ਕੀੜਾ ਜਾਂ ਸੁੰਡੀ ਨਹੀਂ ਲੱਗਦੀ।\n4. ਗੰਦਾ ਹੋਇਆ ਰਾਸ਼ਨ: ਜੇਕਰ ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਆਟੇ ਦੀ ਬੋਰੀ ਜਾਂ ਖੁੱਲ੍ਹੇ ਰਾਸ਼ਨ ਵਿੱਚ ਵੜ ਜਾਵੇ ਤਾਂ ਉਸਨੂੰ ਬਿਲਕੁਲ ਨਾ ਖਾਓ, ਕਿਉਂਕਿ ਉਸ ਵਿੱਚ ਸੀਵਰੇਜ ਅਤੇ ਜ਼ਹਿਰੀਲੇ ਕੀਟਾਣੂ ਹੁੰਦੇ ਹਨ।",
+        "category": "survival_food",
+        "verified_source": "Punjab SDMA Food Security SOP & NDMA Food Storage Protocol"
+    },
+
+    # 15. SANDBAGGING & FLOOD BARRIER DEFENCE
+    {
+        "prompt": "What is the correct way to fill and lay sandbags to defend a village street from rising water?",
+        "response": "Under US Army Corps of Engineers and Central Water Commission sandbagging standards:\n1. Filling Rule: Fill sandbags only 1/2 to 2/3 full (approx. 15 to 18 kg). Do NOT overfill; an overfilled bag is rigid and leaves gaps where water leaks through.\n2. Bag Tying: Do not tie the neck tightly. Simply fold the open flap of the bag under the bag itself.\n3. Placement Technique: Lay bags lengthwise, parallel to the direction of water flow. Place the folded flap under the weight of the bag, facing upstream.\n4. Staggering: Stagger each row like running-bond brick masonry so vertical joints do not align. Tamp each bag firmly in place with boots to seal voids.\n5. Pyramid Rule: If building higher than 30 cm (2 layers), build as a pyramid: the base width must be at least 3 times the height (e.g. for a 1-metre high barrier, the base must be 3 metres wide).\n6. Sealing: Place a heavy 6-mil plastic sheet on the water-facing slope and weigh it down with an extra row of sandbags to prevent seepage.",
+        "category": "community_defence",
+        "verified_source": "CWC Guidelines & USACE Flood Fighting Manual"
+    },
+    {
+        "prompt": "ਪਿੰਡ ਵੱਲ ਆ ਰਹੇ ਪਾਣੀ ਨੂੰ ਰੋਕਣ ਲਈ ਬੋਰੀਆਂ (ਰੇਤ ਦੇ ਥੈਲੇ) ਭਰਨ ਅਤੇ ਚਿਣਨ ਦਾ ਸਹੀ ਤਰੀਕਾ ਕੀ ਹੈ?",
+        "response": "ਸੈਂਟਰਲ ਵਾਟਰ ਕਮਿਸ਼ਨ (CWC) ਅਤੇ ਡਰੇਨੇਜ ਵਿਭਾਗ ਦੇ ਇੰਜੀਨੀਅਰਿੰਗ ਨਿਯਮ:\n1. ਬੋਰੀ ਅੱਧੀ ਜਾਂ ਪੌਣੀ ਭਰੋ: ਰੇਤ ਦੀ ਬੋਰੀ ਨੂੰ ਕਦੇ ਵੀ ਮੂੰਹ ਤੱਕ ਨਾ ਭਰੋ। ਸਿਰਫ਼ ਅੱਧੀ ਜਾਂ ਦੋ-ਤਿਹਾਈ (15-18 ਕਿਲੋ) ਭਰੋ ਤਾਂ ਜੋ ਬੋਰੀ ਲਚਕੀਲੀ ਰਹੇ ਅਤੇ ਆਪਸ ਵਿੱਚ ਜੁੜ ਸਕੇ।\n2. ਮੂੰਹ ਬੰਨ੍ਹਣ ਦੀ ਲੋੜ ਨਹੀਂ: ਬੋਰੀ ਦਾ ਖੁੱਲ੍ਹਾ ਮੂੰਹ ਮੋੜ ਕੇ ਬੋਰੀ ਦੇ ਹੇਠਾਂ ਦਬਾ ਦਿਓ।\n3. ਚਿਣਾਈ ਦਾ ਤਰੀਕਾ: ਬੋਰੀਆਂ ਦੀ ਚਿਣਾਈ ਇੱਟਾਂ ਵਾਂਗ ਕਰੋ (ਜੋੜ ਉੱਤੇ ਜੋੜ ਨਾ ਆਵੇ)। ਹਰ ਬੋਰੀ ਨੂੰ ਪੈਰ ਨਾਲ ਦਬਾ ਕੇ ਪੱਕਾ ਕਰੋ।\n4. ਪਿਰਾਮਿਡ ਨਿਯਮ: ਜੇਕਰ ਬੰਨ੍ਹ ਉੱਚਾ ਕਰਨਾ ਹੋਵੇ ਤਾਂ ਹੇਠਲਾ ਆਧਾਰ ਉੱਚਾਈ ਨਾਲੋਂ 3 ਗੁਣਾ ਚੌੜਾ ਹੋਣਾ ਚਾਹੀਦਾ ਹੈ।\n5. ਪਲਾਸਟਿਕ ਤਰਪਾਲ: ਪਾਣੀ ਵਾਲੇ ਪਾਸੇ ਮੋਟੀ ਪਲਾਸਟਿਕ ਤਰਪਾਲ ਵਿਛਾ ਕੇ ਉੱਪਰ ਬੋਰੀਆਂ ਰੱਖੋ ਤਾਂ ਜੋ ਪਾਣੀ ਮਿੱਟੀ ਵਿੱਚੋਂ ਨਾ ਰਿਸੇ।",
+        "category": "community_defence",
+        "verified_source": "Punjab Drainage Dept Sandbagging Manual & CWC Embankment Guide"
+    },
+
+    # 16. AGRICULTURAL & TUBE-WELL BOREHOLE REHABILITATION
+    {
+        "prompt": "How do farmers clear silt from a submerged tube-well bore before starting the submersible motor?",
+        "response": "Punjab Agricultural University (PAU) and Department of Water Resources directives:\n1. Sand Ingress Hazard: When river floods submerge rural agricultural tube-wells, fine silt and clay settle inside the casing pipe. Turning on the submersible pump will suck sand, instantly grinding the impellers and burning the motor winding.\n2. Compressor Surging: Call a specialized air-compressor rig. Lower an airline pipe into the bore and pump high-pressure compressed air (air-lift pumping) to blow out all accumulated sand and silt until water runs crystal clear for at least 30 minutes.\n3. Motor Inspection: Retrieve the submersible pump, flush the intake screen with clean pressurized water, check that shaft spins freely by hand, and perform a 500V Megger test (insulation resistance must exceed 1 Megaohm).\n4. Starter Panel: Open the motor starter box, blow out all mud with a dry blower, and clean copper contactors with fine emery paper.",
+        "category": "agriculture_recovery",
+        "verified_source": "Punjab Agricultural University (PAU) Flood Advisory & Bureau of Indian Standards"
+    },
+    {
+        "prompt": "ਹੜ੍ਹ ਤੋਂ ਬਾਅਦ ਟਿਊਬਵੈੱਲ ਦੇ ਬੋਰ ਵਿੱਚੋਂ ਰੇਤ ਕਿਵੇਂ ਕੱਢੀ ਜਾਵੇ ਤਾਂ ਜੋ ਮੋਟਰ ਸੜ ਨਾ ਜਾਵੇ?",
+        "response": "ਪੰਜਾਬ ਖੇਤੀਬਾੜੀ ਯੂਨੀਵਰਸਿਟੀ (PAU) ਲੁਧਿਆਣਾ ਦੀ ਐਡਵਾਈਜ਼ਰੀ:\n1. ਮੋਟਰ ਸਿੱਧੀ ਕਦੇ ਨਾ ਚਲਾਓ: ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਬੋਰ ਵਿੱਚ ਰੇਤ ਅਤੇ ਗਾਰ ਭਰ ਦਿੰਦਾ ਹੈ। ਜੇਕਰ ਸਿੱਧੀ ਮੋਟਰ ਚਲਾਈ ਤਾਂ ਰੇਤ ਪੰਖੜੀਆਂ (impellers) ਨੂੰ ਜਾਮ ਕਰਕੇ ਮੋਟਰ ਤੁਰੰਤ ਸਾੜ ਦੇਵੇਗੀ।\n2. ਕੰਪ੍ਰੈਸਰ ਨਾਲ ਬੋਰ ਸਾਫ਼ ਕਰਵਾਓ: ਪਹਿਲਾਂ ਏਅਰ ਕੰਪ੍ਰੈਸਰ ਮਸ਼ੀਨ ਲਗਾ ਕੇ ਬੋਰ ਵਿੱਚ ਹਵਾ ਦਾ ਪ੍ਰੈਸ਼ਰ ਮਾਰੋ ਅਤੇ ਸਾਰੀ ਰੇਤ ਬਾਹਰ ਕੱਢੋ ਜਦੋਂ ਤੱਕ ਸਾਫ਼ ਪਾਣੀ ਨਾ ਨਿਕਲਣ ਲੱਗ ਪਵੇ।\n3. ਮੋਟਰ ਦੀ ਜਾਂਚ: ਮੋਟਰ ਨੂੰ ਬਾਹਰ ਕੱਢ ਕੇ ਚੰਗੀ ਤਰ੍ਹਾਂ ਧੋਵੋ, ਹੱਥ ਨਾਲ ਘੁਮਾ ਕੇ ਦੇਖੋ ਕਿ ਜਾਮ ਤਾਂ ਨਹੀਂ, ਅਤੇ ਮੈਗਰ (Megger) ਨਾਲ ਕਰੰਟ ਟੈਸਟ ਕਰਵਾਓ।\n4. ਸਟਾਰਟਰ ਦੀ ਸਫ਼ਾਈ: ਬਿਜਲੀ ਦੇ ਸਟਾਰਟਰ ਨੂੰ ਸੁਕਾ ਕੇ ਪੈਟਰੋਲ ਜਾਂ ਸੁੱਕੇ ਕੱਪੜੇ ਨਾਲ ਸਾਫ਼ ਕਰੋ।",
+        "category": "agriculture_recovery",
+        "verified_source": "PAU Ludhiana Farm Machinery Advisory & PSPCL Directives"
+    },
+    {
+        "prompt": "What is the process to claim Special Girdawari flood crop damage compensation from the Punjab Government?",
+        "response": "Under Punjab State Disaster Response Fund (SDRF) and Revenue Department guidelines:\n1. Notification: The Deputy Commissioner (DC) declares affected sub-divisions as flood-hit and orders 'Special Girdawari' (vishesh girdawari).\n2. Field Survey: A joint inspection team comprising the Halqa Patwari, Kanungo, and Agriculture Development Officer (ADO) visits fields to record crop loss percentage (>33%, >50%, or 100% total loss).\n3. Required Documents: Farmer must keep ready: Aadhaar Card, Land Revenue Record (Jamabandi/Fard), Bank Passbook with active IFSC, and verification of cultivation (if tenant/contract farmer).\n4. Objections: If your field was missed or loss is underestimated, submit a written objection to the Naib Tehsildar or SDM within 7 days of list publication.\n5. Payout: SDRF compensation is transferred via Direct Benefit Transfer (DBT) directly into verified bank accounts.",
+        "category": "agriculture_recovery",
+        "verified_source": "Punjab Financial Commissioner Revenue (FCR) Disaster Relief Rules & SDRF Norms"
+    },
+    {
+        "prompt": "ਪੰਜਾਬ ਸਰਕਾਰ ਤੋਂ ਹੜ੍ਹ ਨਾਲ ਖ਼ਰਾਬ ਹੋਈਆਂ ਫ਼ਸਲਾਂ ਦਾ ਮੁਆਵਜ਼ਾ (ਸਪੈਸ਼ਲ ਗਿਰਦਾਵਰੀ) ਲੈਣ ਦਾ ਤਰੀਕਾ ਕੀ ਹੈ?",
+        "response": "ਪੰਜਾਬ ਸਰਕਾਰ ਦੇ ਮਾਲ ਵਿਭਾਗ (Revenue Department) ਅਨੁਸਾਰ:\n1. ਸਰਕਾਰੀ ਐਲਾਨ: ਡਿਪਟੀ ਕਮਿਸ਼ਨਰ (DC) ਵੱਲੋਂ ਹੜ੍ਹ ਪ੍ਰਭਾਵਿਤ ਇਲਾਕਿਆਂ ਵਿੱਚ 'ਸਪੈਸ਼ਲ ਗਿਰਦਾਵਰੀ' ਦੇ ਹੁਕਮ ਜਾਰੀ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।\n2. ਪਟਵਾਰੀ ਸਰਵੇ: ਹਲਕਾ ਪਟਵਾਰੀ, ਕਾਨੂੰਨਗੋ ਅਤੇ ਖੇਤੀਬਾੜੀ ਅਫ਼ਸਰ ਖੇਤਾਂ ਵਿੱਚ ਜਾ ਕੇ ਫ਼ਸਲ ਦੇ ਨੁਕਸਾਨ (33% ਤੋਂ ਵੱਧ, 50% ਜਾਂ 100% ਖ਼ਰਾਬਾ) ਦੀ ਰਿਪੋਰਟ ਤਿਆਰ ਕਰਦੇ ਹਨ।\n3. ਜ਼ਰੂਰੀ ਦਸਤਾਵੇਜ਼: ਆਪਣਾ ਆਧਾਰ ਕਾਰਡ, ਬੈਂਕ ਖਾਤੇ ਦੀ ਕਾਪੀ (IFSC ਕੋਡ ਵਾਲੀ), ਅਤੇ ਜ਼ਮੀਨ ਦੀ ਫ਼ਰਦ/ਜਮ੍ਹਾਂਬੰਦੀ ਤਿਆਰ ਰੱਖੋ।\n4. ਇਤਰਾਜ਼: ਜੇਕਰ ਤੁਹਾਡਾ ਨੁਕਸਾਨ ਘੱਟ ਲਿਖਿਆ ਜਾਵੇ ਤਾਂ ਸੂਚੀ ਜਾਰੀ ਹੋਣ ਦੇ 7 ਦਿਨਾਂ ਦੇ ਅੰਦਰ ਤਹਿਸੀਲਦਾਰ ਜਾਂ SDM ਕੋਲ ਲਿਖਤੀ ਦਰਖ਼ਾਸਤ ਦਿਓ।\n5. ਮੁਆਵਜ਼ਾ ਸਿੱਧਾ ਬੈਂਕ ਖਾਤੇ (DBT) ਵਿੱਚ ਆਉਂਦਾ ਹੈ। ਸਹਾਇਤਾ ਲਈ ਜ਼ਿਲ੍ਹਾ ਕੰਟਰੋਲ ਰੂਮ 1077 'ਤੇ ਸੰਪਰਕ ਕਰੋ।",
+        "category": "agriculture_recovery",
+        "verified_source": "Punjab Revenue Dept Special Girdawari Guidelines & SDRF Relief Norms"
+    },
+
+    # 17. STRUCTURAL SAFETY WHEN RETURNING HOME
+    {
+        "prompt": "What safety checks must be performed before entering a brick house after flood waters recede?",
+        "response": "Under NDMA Disaster Recovery and Building Safety protocols:\n1. Structural Integrity Check: Before entering, inspect exterior walls from a distance for deep diagonal foundation cracks, bowed brick walls, or sagging roof slabs. If walls are bulging, do NOT enter; call local municipal/revenue authorities.\n2. Gas Leak Detection: NEVER strike a match, lighter, or turn on electrical switches when first entering. Flood water can dislodge LPG cylinders or damage pipe fittings. Smell for the distinct rotten-egg odor of LPG. If smelled, immediately turn off cylinder valve, open windows, and retreat outside.\n3. Electrical Isolation: Confirm the main electrical breaker is completely OFF before stepping inside wet rooms.\n4. Toxic Silt & Air Quality: Ventilate the house for at least 15 minutes before lingering inside, as decaying silt generates hydrogen sulfide and methane gases in enclosed rooms.\n5. Wildlife Hazards: Use a long wooden stick to probe under cots, behind doors, and inside cupboards to check for sheltering venomous snakes or scorpions.",
+        "category": "structural_safety",
+        "verified_source": "NDMA Post-Flood Structural Assessment SOP & Central Public Works Dept (CPWD)"
+    },
+    {
+        "prompt": "ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਉਤਰਨ ਤੋਂ ਬਾਅਦ ਘਰ ਵੜਨ ਵੇਲੇ ਕੰਧਾਂ ਅਤੇ ਛੱਤ ਦੀ ਪਰਖ ਕਿਵੇਂ ਕਰੀਏ?",
+        "response": "NDMA ਅਤੇ ਲੋਕ ਨਿਰਮਾਣ ਵਿਭਾਗ (PWD) ਦੇ ਸੁਰੱਖਿਆ ਨਿਯਮ:\n1. ਬਾਹਰੋਂ ਕੰਧਾਂ ਦੇਖੋ: ਘਰ ਅੰਦਰ ਵੜਨ ਤੋਂ ਪਹਿਲਾਂ ਬਾਹਰੋਂ ਦੇਖੋ ਕਿ ਕੀ ਕੰਧਾਂ ਵਿੱਚ ਵੱਡੀਆਂ ਤਰੇੜਾਂ ਤਾਂ ਨਹੀਂ ਆਈਆਂ ਜਾਂ ਨੀਂਹ ਤਾਂ ਨਹੀਂ ਬੈਠੀ। ਜੇਕਰ ਕੰਧ ਝੁਕੀ ਹੋਵੇ ਤਾਂ ਅੰਦਰ ਨਾ ਜਾਓ।\n2. ਮਾਚਿਸ ਜਾਂ ਲਾਈਟਰ ਨਾ ਬਾਲੋ: ਹੜ੍ਹ ਕਾਰਨ ਗੈਸ ਸਿਲੰਡਰ ਲੀਕ ਹੋ ਸਕਦਾ ਹੈ। ਅੰਦਰ ਜਾਂਦੇ ਹੀ ਕੋਈ ਤੀਲੀ ਨਾ ਬਾਲੋ ਅਤੇ ਨਾ ਹੀ ਬਿਜਲੀ ਦਾ ਸਵਿੱਚ ਚਲਾਓ।\n3. ਖਿੜਕੀਆਂ ਖੋਲ੍ਹੋ: ਦਰਵਾਜ਼ੇ ਅਤੇ ਖਿੜਕੀਆਂ ਤੁਰੰਤ ਖੋਲ੍ਹ ਦਿਓ ਤਾਂ ਜੋ ਅੰਦਰਲੀ ਜ਼ਹਿਰੀਲੀ ਗੈਸ ਅਤੇ ਬਦਬੂ ਬਾਹਰ ਨਿਕਲ ਸਕੇ।\n4. ਸੱਪਾਂ ਦੀ ਜਾਂਚ: ਲੰਮੀ ਲੱਕੜੀ ਨਾਲ ਮੰਜਿਆਂ ਦੇ ਹੇਠਾਂ ਅਤੇ ਕਮਰਿਆਂ ਦੇ ਕੋਨਿਆਂ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿਉਂਕਿ ਸੱਪ ਅਕਸਰ ਸੁੱਕੀ ਥਾਂ ਲੱਭ ਕੇ ਅੰਦਰ ਵੜ ਜਾਂਦੇ ਹਨ।",
+        "category": "structural_safety",
+        "verified_source": "Punjab SDMA Home Return Safety Checklist"
+    },
+
+    # 18. RESCUE SIGNALING & HELICOPTER COMMUNICATION
+    {
+        "prompt": "How can stranded villagers signal rescue helicopters or NDRF boats during floods?",
+        "response": "Under NDRF and Indian Air Force disaster search & rescue protocols:\n1. International Ground-to-Air Signals: Lay out strips of white or bright colored cloth on an open flat rooftop or dry road in large letters (>3 metres long). A large 'V' means 'Require Assistance'. A large 'X' means 'Require Medical Assistance'. An arrow pointing toward a direction indicates 'Proceeding in this direction'.\n2. High-Visibility Signaling: Wave a brightly colored cloth, bright orange tarpaulin, or reflective mirror/sheet toward the aircraft when it approaches. At night, flash a torch or battery lantern directly upward in steady pulses.\n3. Whistle Protocol: The international emergency distress signal is 3 loud, distinct whistle blasts. Pause for 1 minute, then repeat 3 blasts. One long blast is the rescuer's acknowledgment signal ('Help is on the way').\n4. Helicopter Landing Danger: Stay at least 30 metres clear of approaching helicopter landing zones. Downwash rotor winds easily blow away loose tin sheets and plastic tarps, causing lethal flying debris.",
+        "category": "rescue_signaling",
+        "verified_source": "NDMA / NDRF Search and Rescue SOP & IAF Ground-to-Air Disaster Manual"
+    },
+    {
+        "prompt": "ਹੜ੍ਹ ਵਿੱਚ ਫਸੇ ਹੋਏ ਲੋਕ ਹੈਲੀਕਾਪਟਰ ਜਾਂ NDRF ਦੀਆਂ ਕਿਸ਼ਤੀਆਂ ਨੂੰ ਮਦਦ ਲਈ ਇਸ਼ਾਰਾ ਕਿਵੇਂ ਕਰਨ?",
+        "response": "NDRF ਅਤੇ ਭਾਰਤੀ ਹਵਾਈ ਫੌਜ (IAF) ਦੇ ਬਚਾਅ ਨਿਯਮ:\n1. ਛੱਤ 'ਤੇ ਵੱਡੇ ਅੱਖਰਾਂ ਦੇ ਨਿਸ਼ਾਨ: ਖੁੱਲ੍ਹੀ ਛੱਤ 'ਤੇ ਚਿੱਟੇ ਜਾਂ ਚਮਕਦਾਰ ਕੱਪੜੇ ਨਾਲ ਵੱਡਾ 'V' ਬਣਾਓ ਜਿਸਦਾ ਮਤਲਬ ਹੈ 'ਮਦਦ ਦੀ ਲੋੜ ਹੈ'। ਵੱਡਾ 'X' ਬਣਾਉਣ ਦਾ ਮਤਲਬ ਹੈ 'ਡਾਕਟਰੀ/ਮੈਡੀਕਲ ਮਦਦ ਚਾਹੀਦੀ ਹੈ'।\n2. ਚਮਕਦਾਰ ਕੱਪੜਾ ਅਤੇ ਸ਼ੀਸ਼ਾ: ਦਿਨ ਵੇਲੇ ਹੈਲੀਕਾਪਟਰ ਦੇਖ ਕੇ ਲਾਲ/ਸੰਤਰੀ ਤਰਪਾਲ ਜਾਂ ਸ਼ੀਸ਼ੇ ਦਾ ਚਮਕਾਰਾ ਮਾਰੋ। ਰਾਤ ਨੂੰ ਟਾਰਚ ਦੀ ਰੌਸ਼ਨੀ ਉੱਪਰ ਵੱਲ ਚਮਕਾਓ।\n3. ਸੀਟੀ ਦਾ ਨਿਯਮ: ਲਗਾਤਾਰ 3 ਵਾਰ ਤੇਜ਼ ਸੀਟੀ ਵਜਾਓ (ਇਹ ਅੰਤਰਰਾਸ਼ਟਰੀ ਖ਼ਤਰੇ ਦਾ ਇਸ਼ਾਰਾ ਹੈ), 1 ਮਿੰਟ ਰੁਕੋ ਅਤੇ ਫਿਰ 3 ਵਾਰ ਵਜਾਓ।\n4. ਹੈਲੀਕਾਪਟਰ ਦੇ ਪੱਖੇ ਦੀ ਹਵਾ ਤੋਂ ਬਚੋ: ਹੈਲੀਕਾਪਟਰ ਆਉਣ 'ਤੇ ਛੱਤ ਤੋਂ ਟੀਨ ਦੀਆਂ ਚਾਦਰਾਂ ਜਾਂ ਤਰਪਾਲਾਂ ਹਵਾ ਵਿੱਚ ਉੱਡ ਕੇ ਵੱਡਾ ਨੁਕਸਾਨ ਕਰ ਸਕਦੀਆਂ ਹਨ, ਇਸ ਲਈ ਸੁਰੱਖਿਅਤ ਦੂਰੀ ਬਣਾ ਕੇ ਰੱਖੋ।",
+        "category": "rescue_signaling",
+        "verified_source": "NDRF Disaster Rescue Protocols & Punjab SDMA"
+    },
+    {
+        "prompt": "बाढ़ में घिरे लोग बचाव दल (NDRF/हेलीकॉप्टर) को सहायता के लिए संकेत कैसे दें?",
+        "response": "एनडीआरएफ (NDRF) और वायु सेना के अधिकृत संकेत नियम:\n1. छत पर बड़े चिन्ह: छत पर सफेद या चमकीले कपड़े से 3 मीटर लंबा 'V' चिन्ह बनाएं (अर्थ: सहायता चाहिए)। 'X' चिन्ह बनाएं (अर्थ: गंभीर मेडिकल सहायता चाहिए)।\n2. चमकीले कपड़े या शीशे का प्रयोग: दिन में हेलिकॉप्टर की ओर लाल/नारंगी कपड़ा या शीशे की चमक (रिफ्लेक्शन) दिखाएं। रात में टॉर्च की रोशनी सीधे ऊपर की ओर चमकाएं।\n3. सीटी के 3 संकेत: लगातार 3 बार तेज सीटी बजाएं, 1 मिनट रुकें और फिर 3 बार बजाएं (यह आपातकालीन बचाव का सार्वभौमिक संकेत है)।\n4. आपातकालीन फोन: बचाव के लिए 112 या 1078 (NDMA) पर अपनी सही जीपीएस लोकेशन बताएं।",
+        "category": "rescue_signaling",
+        "verified_source": "NDRF SOP for Flood Evacuation & Air Rescue"
+    },
+
+    # 19. WOUND CARE, TETANUS & INFECTION IN CONTAMINATED WATER
+    {
+        "prompt": "What should I do if I get a cut or nail puncture in contaminated flood water?",
+        "response": "Under WHO and Ministry of Health (MoHFW) emergency trauma directives:\n1. Immediate Copious Irrigation: Immediately wash the wound thoroughly under clean, boiled or bottled drinking water with mild soap for at least 5 minutes. Never use river or flood water to rinse an open wound.\n2. Antiseptic Application: Apply Povidone Iodine 5% (Betadine) or sterile antiseptic liquid. NEVER apply cow dung, ash, kerosene, or wet mud to a wound; these traditional rural practices carry Clostridium tetani spores that cause fatal tetanus and gas gangrene.\n3. Sterile Dressing: Cover with a clean, sterile waterproof bandage to prevent immersion in flood water.\n4. Tetanus Toxoid Vaccine: If the puncture occurred in dirty mud, sewage, or rusty iron, receive an intramuscular Tetanus Toxoid (TT) booster within 48 hours at the nearest Civil Hospital or dispensary.\n5. Watch for Spreading Infection: If you notice spreading redness, warmth, swelling, pus, or fever, seek emergency medical care immediately (call 108/112).",
+        "category": "wound_care",
+        "verified_source": "WHO Guidelines on Essential Trauma Care & MoHFW Emergency Protocols"
+    },
+    {
+        "prompt": "ਜੇਕਰ ਹੜ੍ਹ ਦੇ ਗੰਦੇ ਪਾਣੀ ਵਿੱਚ ਪੈਰ ਜਾਂ ਹੱਥ 'ਤੇ ਕਿੱਲ ਲੱਗ ਜਾਵੇ ਜਾਂ ਕੱਟ ਲੱਗ ਜਾਵੇ ਤਾਂ ਕੀ ਕਰਨਾ ਚਾਹੀਦਾ ਹੈ?",
+        "response": "ਸਿਹਤ ਵਿਭਾਗ ਪੰਜਾਬ ਅਤੇ WHO ਦੇ ਨਿਰਦੇਸ਼:\n1. ਤੁਰੰਤ ਸਾਫ਼ ਪਾਣੀ ਨਾਲ ਧੋਵੋ: ਜ਼ਖ਼ਮ ਨੂੰ ਸਾਫ਼ ਪੀਣ ਵਾਲੇ ਜਾਂ ਉਬਲੇ ਹੋਏ ਪਾਣੀ ਅਤੇ ਸਾਬਣ ਨਾਲ ਘੱਟੋ-ਘੱਟ 5 ਮਿੰਟ ਚੰਗੀ ਤਰ੍ਹਾਂ ਧੋਵੋ। ਗੰਦੇ ਹੜ੍ਹ ਦੇ ਪਾਣੀ ਨਾਲ ਕਦੇ ਨਾ ਧੋਵੋ।\n2. ਬੀਟਾਡੀਨ (Betadine) ਲਗਾਓ: ਜ਼ਖ਼ਮ 'ਤੇ ਬੀਟਾਡੀਨ ਜਾਂ ਡਿਟੋਲ ਲਗਾ ਕੇ ਸਾਫ਼ ਪੱਟੀ ਬੰਨ੍ਹੋ।\n3. ਦੇਸੀ ਨੁਸਖੇ ਨਾ ਵਰਤੋ: ਜ਼ਖ਼ਮ ਉੱਤੇ ਗੋਹਾ, ਸੁਆਹ, ਜਾਂ ਮਿੱਟੀ ਕਦੇ ਨਾ ਲਗਾਓ, ਇਸ ਨਾਲ ਧਨੁਖਬਾਅ (ਟੈਟਨਸ/Tetanus) ਅਤੇ ਗੈਂਗਰੀਨ ਹੋਣ ਦਾ ਖ਼ਤਰਾ ਹੁੰਦਾ ਹੈ ਜੋ ਜਾਨਲੇਵਾ ਹੋ ਸਕਦਾ ਹੈ।\n4. ਟੈਟਨਸ ਦਾ ਟੀਕਾ: 48 ਘੰਟਿਆਂ ਦੇ ਅੰਦਰ ਨਜ਼ਦੀਕੀ ਸਰਕਾਰੀ ਹਸਪਤਾਲ ਜਾ ਕੇ ਟੈਟਨਸ (TT) ਦਾ ਟੀਕਾ ਜ਼ਰੂਰ ਲਗਵਾਓ। ਐਂਬੂਲੈਂਸ ਲਈ 108 'ਤੇ ਕਾਲ ਕਰੋ।",
+        "category": "wound_care",
+        "verified_source": "Punjab Health & Family Welfare Dept Trauma Guidelines"
+    },
+
+    # 20. CARBON MONOXIDE & GENERATOR / PUMP SAFETY
+    {
+        "prompt": "Can I operate a portable petrol/diesel generator or water pumping engine inside a flooded room or verandah?",
+        "response": "ABSOLUTELY NOT. Under NDMA and National Disaster Management Safety standards:\n1. Lethal Gas Hazard: Internal combustion engines (generators, de-watering pumps) discharge deadly Carbon Monoxide (CO). Carbon monoxide is colorless, odorless, tasteless, and non-irritating; inhalation in an enclosed room causes unconsciousness and death within minutes.\n2. Safe Operating Distance: Always position generators and fuel-powered water pumps OUTDOORS in an open, dry area at least 6 metres (20 feet) away from doors, windows, and ventilation openings.\n3. Exhaust Direction: Direct the exhaust pipe away from buildings and occupied tents.\n4. Refueling Hazard: Never add petrol or diesel while the engine is hot or running. Spilled fuel on hot engine manifolds causes sudden explosive flash fires. Allow the engine to cool for at least 15 minutes before refueling.",
+        "category": "generator_safety",
+        "verified_source": "NDMA Electrical and Mechanical Equipment Hazard SOP"
+    },
+    {
+        "prompt": "ਕੀ ਹੜ੍ਹ ਦੌਰਾਨ ਪਾਣੀ ਕੱਢਣ ਵਾਲਾ ਡੀਜ਼ਲ ਇੰਜਣ ਜਾਂ ਜਨਰੇਟਰ ਕਮਰੇ ਜਾਂ ਵਰਾਂਡੇ ਅੰਦਰ ਚਲਾਇਆ ਜਾ ਸਕਦਾ ਹੈ?",
+        "response": "ਬਿਲਕੁਲ ਨਹੀਂ! NDMA ਅਤੇ ਫਾਇਰ ਬ੍ਰਿਗੇਡ ਦੇ ਸਖ਼ਤ ਨਿਯਮ:\n1. ਜ਼ਹਿਰੀਲੀ ਗੈਸ (ਕਾਰਬਨ ਮੋਨੋਆਕਸਾਈਡ): ਜਨਰੇਟਰ ਅਤੇ ਡੀਜ਼ਲ ਪੰਪ ਦੇ ਧੂੰਏਂ ਵਿੱਚ ਕਾਰਬਨ ਮੋਨੋਆਕਸਾਈਡ ਗੈਸ ਹੁੰਦੀ ਹੈ। ਇਸ ਗੈਸ ਦੀ ਨਾ ਕੋਈ ਬਦਬੂ ਹੁੰਦੀ ਹੈ ਅਤੇ ਨਾ ਹੀ ਰੰਗ। ਬੰਦ ਕਮਰੇ ਜਾਂ ਵਰਾਂਡੇ ਵਿੱਚ ਚਲਾਉਣ ਨਾਲ ਸੌਂ ਰਹੇ ਲੋਕਾਂ ਦਾ ਸਾਹ ਘੁੱਟ ਕੇ ਮੌਤ ਹੋ ਜਾਂਦੀ ਹੈ।\n2. ਬਾਹਰ ਚਲਾਓ: ਜਨਰੇਟਰ ਜਾਂ ਪੰਪ ਨੂੰ ਹਮੇਸ਼ਾ ਖੁੱਲ੍ਹੇ ਅਸਮਾਨ ਹੇਠ, ਘਰ ਦੀਆਂ ਖਿੜਕੀਆਂ ਅਤੇ ਦਰਵਾਜ਼ਿਆਂ ਤੋਂ ਘੱਟੋ-ਘੱਟ 20 ਫੁੱਟ (6 ਮੀਟਰ) ਦੂਰ ਰੱਖ ਕੇ ਚਲਾਓ।\n3. ਤੇਲ ਪਾਉਣ ਦਾ ਨਿਯਮ: ਚਲਦੇ ਜਾਂ ਗਰਮ ਜਨਰੇਟਰ ਵਿੱਚ ਕਦੇ ਵੀ ਪੈਟਰੋਲ/ਡੀਜ਼ਲ ਨਾ ਪਾਓ। ਅੱਗ ਲੱਗਣ ਦਾ ਖ਼ਤਰਾ ਹੁੰਦਾ ਹੈ।",
+        "category": "generator_safety",
+        "verified_source": "NDMA Fire and Equipment Safety SOP & Punjab SDMA"
+    },
+
+    # 21. EMERGENCY IMPROVISED FLOTATION & RESCUE RAFTS
+    {
+        "prompt": "How can villagers construct an emergency flotation device or raft using household materials during sudden floods?",
+        "response": "Under Indian Red Cross and Civil Defence disaster improvisation protocols:\n1. 4-Canister Flotation Raft: Securely cap four empty 15-litre or 20-litre plastic edible oil/kerosene containers (canisters) after verifying airtightness. Lash them tightly with nylon rope to the four corners of a lightweight wooden cot (manji/charpai) or plastic crate. Four 20L canisters provide approximately 80 kg of positive buoyant lift, safely supporting an adult.\n2. Tractor / Truck Inner Tubes: Inflated rubber inner tubes make effective buoyant lifebuoys. Tie a 10-metre safety rope to the tube before entering water so bystanders on dry banks can pull the user to safety.\n3. Sealed Plastic Bottle Vest: Insert 12 to 16 empty, tightly capped 1-litre plastic water bottles into an airtight zip jacket or tied shirt to create an improvised life jacket for children.\n4. Critical Rule: Improvised flotation aids must only be used for passive floating while awaiting rescue boats, NOT for swimming across high-velocity main river currents.",
+        "category": "emergency_flotation",
+        "verified_source": "Punjab SDMA Civil Defence Manual & Indian Red Cross Society"
+    },
+    {
+        "prompt": "ਪਿੰਡ ਵਿੱਚ ਅਚਾਨਕ ਹੜ੍ਹ ਆਉਣ 'ਤੇ ਘਰੇਲੂ ਸਮਾਨ ਨਾਲ ਤੈਰਨ ਵਾਲੀ ਜਾਨ ਬਚਾਊ ਬੇੜੀ ਜਾਂ ਰਾਫਟ ਕਿਵੇਂ ਬਣਾਈਏ?",
+        "response": "ਸਿਵਲ ਡਿਫੈਂਸ ਅਤੇ ਰੈੱਡ ਕਰਾਸ ਦੇ ਐਮਰਜੈਂਸੀ ਬਚਾਅ ਤਰੀਕੇ:\n1. ਤੇਲ ਦੇ ਪਲਾਸਟਿਕ ਪੀਪੇ (ਕੈਨੀਆਂ): ਤੇਲ ਜਾਂ ਪਾਣੀ ਦੀਆਂ 4 ਖਾਲੀ 20 ਲੀਟਰ ਵਾਲੀਆਂ ਪਲਾਸਟਿਕ ਕੈਨੀਆਂ ਲਓ ਅਤੇ ਢੱਕਣ ਚੰਗੀ ਤਰ੍ਹਾਂ ਟਾਈਟ ਕਰੋ। ਇਹਨਾਂ ਨੂੰ ਇੱਕ ਹਲਕੇ ਮੰਜੇ (ਚਾਰਪਾਈ) ਦੇ ਚਾਰਾਂ ਪਾਵਿਆਂ ਨਾਲ ਮਜ਼ਬੂਤ ਰੱਸੀ ਨਾਲ ਬੰਨ੍ਹ ਦਿਓ। ਇਹ 80 ਕਿਲੋ ਭਾਰ ਆਰਾਮ ਨਾਲ ਤਾਰ ਲੈਂਦੀ ਹੈ।\n2. ਟਰੈਕਟਰ ਦੀ ਟਿਊਬ: ਹਵਾ ਨਾਲ ਭਰੀ ਟਰੈਕਟਰ ਜਾਂ ਟਰੱਕ ਦੀ ਟਿਊਬ ਵਧੀਆ ਲਾਈਫ-ਬੁਆਏ ਬਣਦੀ ਹੈ। ਟਿਊਬ ਨਾਲ ਲੰਮੀ ਰੱਸੀ ਜ਼ਰੂਰ ਬੰਨ੍ਹ ਕੇ ਰੱਖੋ।\n3. ਪਾਣੀ ਦੀਆਂ ਖਾਲੀ ਬੋਤਲਾਂ: 10-12 ਖਾਲੀ ਪਲਾਸਟਿਕ ਦੀਆਂ ਬੋਤਲਾਂ ਦੇ ਢੱਕਣ ਕਸ ਕੇ ਕੁੜਤੇ ਜਾਂ ਜੈਕੇਟ ਅੰਦਰ ਬੰਨ੍ਹਣ ਨਾਲ ਬੱਚਿਆਂ ਲਈ ਤੈਰਨ ਵਾਲੀ ਜੈਕੇਟ ਬਣ ਜਾਂਦੀ ਹੈ।\n4. ਸਾਵਧਾਨੀ: ਇਹ ਸਾਧਨ ਸਿਰਫ਼ ਪਾਣੀ ਵਿੱਚ ਉੱਪਰ ਰਹਿਣ ਲਈ ਹਨ, ਤੇਜ਼ ਵਗਦੇ ਦਰਿਆ ਦੇ ਪਾਣੀ ਵਿੱਚ ਉਤਰਨ ਦੀ ਗ਼ਲਤੀ ਨਾ ਕਰੋ।",
+        "category": "emergency_flotation",
+        "verified_source": "Civil Defence Punjab & Indian Red Cross Guidelines"
+    },
+
+    # 22. INFANT, MATERNAL & ELDERLY CARE DURING FLOOD EVACUATION
+    {
+        "prompt": "How should infants, pregnant women, and elderly family members be cared for during flood evacuation?",
+        "response": "Under NDMA Special Vulnerability Guidelines and National Health Mission protocols:\n1. Infant Nutrition: Continue exclusive breastfeeding. Mother's breastmilk provides essential sterile hydration and vital antibodies preventing life-threatening diarrhea. If formula milk must be used, boil water vigorously for 1 minute before mixing; never mix formula with unboiled tanker or bottled well water.\n2. Maternal Care: Keep Mother and Child Protection (MCP) card, clean linen sheets, cutting blade, sterile thread, and oral iron-folic acid tablets in the mother's waterproof pouch. If labor signs begin, alert District Control Room (1077) or dial 108 immediately for an emergency boat-ambulance transfer.\n3. Elderly & Persons with Disabilities (PwD): Tie a laminated identification tag with name, village, emergency contact phone, and chronic diseases (diabetes, hypertension, cardiac) around the neck or wrist. Ensure an unbroken 14-day supply of daily maintenance medications is packed in waterproof zip-bags.\n4. Improvised Stretcher: To carry bedridden elders across dry bunds, slide two sturdy wooden poles through the sleeves of two heavy coats or wrap inside a tough blanket.",
+        "category": "vulnerable_care",
+        "verified_source": "National Health Mission (NHM) Disaster Advisory & NDMA Vulnerable Groups SOP"
+    },
+    {
+        "prompt": "ਹੜ੍ਹ ਵੇਲੇ ਦੁੱਧ ਪੀਂਦੇ ਬੱਚਿਆਂ, ਗਰਭਵਤੀ ਔਰਤਾਂ ਅਤੇ ਬਜ਼ੁਰਗਾਂ ਦੀ ਸੰਭਾਲ ਕਿਵੇਂ ਕੀਤੀ ਜਾਵੇ?",
+        "response": "ਸਿਹਤ ਮਿਸ਼ਨ (NHM) ਅਤੇ NDMA ਦੇ ਜ਼ਰੂਰੀ ਦਿਸ਼ਾ-ਨਿਰਦੇਸ਼:\n1. ਛੋਟੇ ਬੱਚਿਆਂ ਦੀ ਖੁਰਾਕ: ਮਾਂ ਦਾ ਦੁੱਧ ਸਭ ਤੋਂ ਸੁਰੱਖਿਅਤ ਹੈ ਕਿਉਂਕਿ ਇਹ ਬੱਚੇ ਨੂੰ ਹੜ੍ਹ ਦੇ ਕੀਟਾਣੂਆਂ ਅਤੇ ਉਲਟੀਆਂ-ਦਸਤ ਤੋਂ ਬਚਾਉਂਦਾ ਹੈ। ਜੇਕਰ ਡੱਬੇ ਦਾ ਦੁੱਧ ਦੇਣਾ ਹੋਵੇ ਤਾਂ ਪਾਣੀ ਨੂੰ 1 ਮਿੰਟ ਪੂਰਾ ਉਬਾਲ ਕੇ ਹੀ ਠੰਢਾ ਕਰਕੇ ਮਿਲਾਓ।\n2. ਗਰਭਵਤੀ ਔਰਤਾਂ: ਮਮਤਾ ਕਾਰਡ ਅਤੇ ਜ਼ਰੂਰੀ ਦਵਾਈਆਂ ਪਲਾਸਟਿਕ ਦੇ ਲਿਫ਼ਾਫ਼ੇ ਵਿੱਚ ਰੱਖੋ। ਦਰਦਾਂ ਸ਼ੁਰੂ ਹੋਣ 'ਤੇ ਤੁਰੰਤ 108 ਐਂਬੂਲੈਂਸ ਜਾਂ 1070 'ਤੇ ਫੋਨ ਕਰੋ ਤਾਂ ਜੋ ਕਿਸ਼ਤੀ ਰਾਹੀਂ ਹਸਪਤਾਲ ਪਹੁੰਚਾਇਆ ਜਾ ਸਕੇ।\n3. ਬਜ਼ੁਰਗਾਂ ਦੀਆਂ ਦਵਾਈਆਂ: ਸ਼ੂਗਰ, ਬਲੱਡ ਪ੍ਰੈਸ਼ਰ ਜਾਂ ਦਿਲ ਦੀਆਂ ਦਵਾਈਆਂ ਦਾ 15 ਦਿਨਾਂ ਦਾ ਸਟਾਕ ਵਾਟਰਪ੍ਰੂਫ਼ ਲਿਫ਼ਾਫ਼ੇ ਵਿੱਚ ਰੱਖੋ। ਬਜ਼ੁਰਗ ਦੇ ਗਲ ਵਿੱਚ ਉਹਨਾਂ ਦਾ ਨਾਮ ਅਤੇ ਮੋਬਾਈਲ ਨੰਬਰ ਲਿਖ ਕੇ ਜ਼ਰੂਰ ਪਾਓ।",
+        "category": "vulnerable_care",
+        "verified_source": "NHM Punjab & NDMA Disaster Health Advisory"
     }
 ]
 
@@ -318,7 +518,19 @@ def build():
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         for entry in DATASET:
             f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    print(f"Successfully compiled {len(DATASET)} verified flood safety records to {OUTPUT_FILE}")
+    print(f"Successfully compiled {len(DATASET)} authoritative flood safety records to {OUTPUT_FILE}")
+
+    # Mirror to D: drive for training pipeline consistency
+    alt_dir = pathlib.Path("D:/FloodSaathi_AI/datasets/compiled")
+    if alt_dir.parent.parent.exists():
+        try:
+            alt_dir.mkdir(parents=True, exist_ok=True)
+            with open(alt_dir / "flood_safety_dataset.jsonl", "w", encoding="utf-8") as f:
+                for entry in DATASET:
+                    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            print(f"Mirrored {len(DATASET)} records to {alt_dir / 'flood_safety_dataset.jsonl'}")
+        except Exception as e:
+            print(f"Could not mirror to D: drive: {e}")
 
 if __name__ == "__main__":
     build()

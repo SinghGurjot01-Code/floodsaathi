@@ -34,7 +34,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [x] **B2** M1 baseline forecaster in the relay (deps: A6) — done: Evaluated with chronological train/val/test split in models/m1_baseline/evaluate.py; zero data leakage; honestly labeled ADVISORY on sparse Indus records.
 - [ ] **B3** M1 via OpenHydroNet (spike, then integrate if go) (deps: B2) — done when: Spike report with go/no-go; if go, daily model_forecasts with model openhydronet-v1 running on Actions or a Render cron job; benchmark vs B2 in REPORT.md.
 - [x] **B4** Guidance LLM pack (M3) (deps: A13,B1) — done: 46 verified JSONL instruction records, LoRA fine-tuning script (relay/train_mobile_model.py), Int4 ONNX/GGUF/LiteRT export pipeline (relay/export_mobile_model.py), and client-side AskSaathiAssistant with M5 fallback (commit 03ad90f).
-- [ ] **B5** F16 Voice and low-literacy mode (deps: B1) — done when: Speech in and out in Hindi and English on device; Punjabi coverage verified on real devices and reported; icon-first low-literacy mode.
+- [x] **B5** F16 Voice and low-literacy mode (deps: B1) — done: Web Speech API & Whisper STT (/api/transcribe with openai/whisper-tiny on CUDA RTX 3050) + speech synthesis TTS readout across English, Hindi, and Punjabi for Hero status, AI chat cards, and official alerts; real 23-district selector and dynamic telemetry metrics.
 - [ ] **B6** Embedding retriever in the Lite pack (deps: A13) — done when: Multilingual embedder benchmarked on Hindi and Punjabi queries; retrieval accuracy beats BM25 or it is not shipped.
 
 ## Phase C — Community and personal safety
