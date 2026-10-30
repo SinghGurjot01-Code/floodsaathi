@@ -617,6 +617,21 @@
               <input type="checkbox" id="pref-dam-release" checked style="width: 20px; height: 20px;">
             </div>
 
+            <!-- Google Cloud Translation API Configuration (R3) -->
+            <div style="margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid var(--line); border-radius: 14px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label for="pref-google-translate-key" style="font-size: 13.5px; font-weight: 700; color: var(--navy);">Google Translate API Key (Online Fallback)</label>
+                <span class="plugin-badge" id="translate-key-status" style="font-size:11px;">Offline Core</span>
+              </div>
+              <p style="font-size: 12px; color: var(--mut); margin-bottom: 8px; line-height: 1.4;">
+                Optional: Used when online to dynamically translate English safety guidance into natural Punjabi and Hindi. When offline or unset, FloodSaathi strictly uses the verified offline disaster cards.
+              </p>
+              <div style="display: flex; gap: 8px;">
+                <input type="password" id="pref-google-translate-key" placeholder="AIzaSy..." style="flex:1; height:38px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); font-family: monospace; font-size: 13px;">
+                <button class="btn-resync-gps" id="btn-save-translate-key" style="min-height:38px; padding:0 14px; font-weight:700;">Save</button>
+              </div>
+            </div>
+
             <div style="margin-top: 16px;">
               <h3 style="font-size: 15px; font-weight: 700; margin-bottom: 6px;">Downloaded Offline Map Packs</h3>
               <div id="offline-packs-list" style="font-size: 13px; color: var(--mut);">No offline map packs downloaded yet.</div>
@@ -630,12 +645,13 @@
            ========================================= -->
       <section class="view-section" id="view-downloads">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-downloads" style="width: auto; padding: 0 10px;">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;">Packs & Plugins Manager</h2>
+          <button class="btn-view-back" id="btn-back-from-downloads" aria-label="Back to home view">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;">Offline Packs & Plugins</h2>
         </div>
         <div class="downloads-container">
           <div class="downloads-header-intro">
-            <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45;">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs for 100% offline emergency preparedness.</p>
+            <h3 style="font-size: 20px; font-weight: 800; color: var(--navy);">Local Storage & Plugins</h3>
+            <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45; margin-top: 4px;">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs directly to device cache for 100% offline emergency preparedness.</p>
           </div>
 
           <div class="plugins-grid">
@@ -696,23 +712,41 @@
                 </div>
                 <div class="plugin-meta">
                   <div class="plugin-badge-row">
-                    <span class="plugin-badge active">Active Model</span>
+                    <span class="plugin-badge" style="background:#f3e8ff; color:#7c3aed;">On-Device SLM</span>
                     <span class="plugin-badge size">~340 MB (Int4)</span>
+                    <span class="plugin-badge" id="slm-download-status-badge">Not Downloaded</span>
+                    <span class="plugin-badge active" id="slm-active-status-badge">Standby (M5 Fallback)</span>
                   </div>
                   <h3 class="plugin-title">FloodSaathi SLM (Qwen2.5-0.5B-Instruct)</h3>
                   <p class="plugin-desc">On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.</p>
                 </div>
               </div>
               <div class="plugin-config-box">
-                <div class="plugin-stat-row">
-                  <span>Engine: <strong>ONNX Int4 / WebAssembly</strong></span>
-                  <span>Target: <strong>D:\FloodSaathi_AI\models</strong></span>
+                <div id="slm-webgpu-detection" style="font-size: 12px; color: var(--navy); margin-bottom: 4px;">
+                  <strong>Hardware:</strong> Detecting WebGPU acceleration...
                 </div>
-                <p style="font-size: 12px; color: var(--mut); margin-top: 6px;">Runs 100% locally in browser memory without sending private village data to any cloud.</p>
+                <div id="slm-endpoint-hook" style="font-size: 12px; color: var(--mut); margin-bottom: 8px;">
+                  <strong>Inference Hook:</strong> WebGPU / Client ONNX Runtime (D:\FloodSaathi_AI\models)
+                </div>
+                <label for="toggle-slm-model" style="min-height: 48px; display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: #f8fafc; border-radius: 10px; margin-top: 6px; cursor: pointer;">
+                  <span style="font-size:13px; font-weight:600;">Enable Local SLM Model:</span>
+                  <input type="checkbox" id="toggle-slm-model" style="width:20px; height:20px; cursor:pointer;" disabled>
+                </label>
+                <!-- SLM Download Progress -->
+                <div class="plugin-progress-wrap" id="slm-progress-wrap" style="display:none; margin-top: 8px;">
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="slm-progress-fill" style="width: 0%;"></div>
+                  </div>
+                  <div class="progress-info-row">
+                    <span id="slm-progress-msg">Downloading Qwen2.5-0.5B-Instruct Int4 (~340 MB)...</span>
+                    <span id="slm-progress-pct">0%</span>
+                  </div>
+                </div>
               </div>
               <div class="plugin-actions">
-                <button class="btn-plugin-download sec" id="btn-toggle-ai-model">
-                  <span>Model Active (M5 Deterministic Core Ready)</span>
+                <button class="btn-plugin-download" id="btn-download-slm">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  <span>Download Model (~340 MB)</span>
                 </button>
               </div>
             </div>
@@ -725,8 +759,9 @@
                 </div>
                 <div class="plugin-meta">
                   <div class="plugin-badge-row">
-                    <span class="plugin-badge">Local Engine</span>
+                    <span class="plugin-badge" style="background:#e0f2fe; color:#0369a1;">Local Sidecar</span>
                     <span class="plugin-badge size">~18 MB</span>
+                    <span class="plugin-badge" id="py-engine-status-badge">Browser Native</span>
                   </div>
                   <h3 class="plugin-title">Python Runtime & Hydrologic Compute Bridge</h3>
                   <p class="plugin-desc">Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.</p>
@@ -734,13 +769,22 @@
               </div>
               <div class="plugin-config-box">
                 <div class="plugin-stat-row">
-                  <span>Execution: <strong>Web Worker / Pyodide</strong></span>
-                  <span>Status: <strong style="color:var(--green);">Runtime Ready</strong></span>
+                  <span>Engine Status: <strong id="py-engine-status-text">Browser Native (Offline PWA)</strong></span>
+                </div>
+                <div id="py-engine-probe-result" style="font-size:12px; color:var(--mut); margin-top:4px;"></div>
+                <div class="py-setup-guidance" style="background:#f8fafc; border:1px solid var(--line); border-radius:8px; padding:10px; margin-top:8px; font-size:12px;">
+                  <strong style="color:var(--navy);">Local Python Relay Setup Guidance:</strong>
+                  <pre style="background:#1e293b; color:#f1f5f9; padding:8px; border-radius:6px; overflow-x:auto; margin:6px 0; font-size:11px;"># Run local FloodSaathi Python Relay & Engine
+git clone https://github.com/floodsaathi/relay
+cd FloodSaathi
+pip install -r relay/requirements.txt
+python relay/run.py --out app/data/latest/</pre>
+                  <span style="color:var(--mut);">Runs local Python 3.11 telemetry fetcher and hydrologic model engine on localhost:8000.</span>
                 </div>
               </div>
               <div class="plugin-actions">
                 <button class="btn-plugin-download sec" id="btn-check-python-runtime">
-                  <span>Runtime Verified & Active</span>
+                  <span>Check Engine Connection</span>
                 </button>
               </div>
             </div>
@@ -754,27 +798,59 @@
                 <div class="plugin-meta">
                   <div class="plugin-badge-row">
                     <span class="plugin-badge rec">Recommended</span>
-                    <span class="plugin-badge active">Installed</span>
+                    <span class="plugin-badge size">~8 MB Total</span>
+                    <span class="plugin-badge active" id="lang-packs-global-badge">Ready Offline</span>
                   </div>
                   <h3 class="plugin-title">Regional Language Packs (Hindi & Punjabi Gurmukhi)</h3>
-                  <p class="plugin-desc">Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in.</p>
+                  <p class="plugin-desc">Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in default.</p>
                 </div>
               </div>
               <div class="plugin-config-box">
                 <div style="display:flex; flex-direction:column; gap:8px;">
+                  <!-- English (Default) -->
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
+                    <div>
+                      <strong>English</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">Built-in System Default</span>
+                    </div>
+                    <span class="plugin-badge active" style="font-size:11px;">Active Default</span>
+                  </div>
+
+                  <!-- Punjabi Pack -->
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
                     <div>
                       <strong>ਪੰਜਾਬੀ (Punjabi Gurmukhi)</strong>
                       <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~4.2 MB · Noto Sans Gurmukhi</span>
                     </div>
-                    <span class="plugin-badge active" style="font-size:11px;">Active</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span class="plugin-badge" id="badge-lang-pa-status">Not Downloaded</span>
+                      <span class="plugin-badge active" id="badge-lang-pa-active" style="display:none; font-size:11px;">Active</span>
+                      <button class="btn-lang-action" id="btn-download-lang-pa">Download (4.2 MB)</button>
+                    </div>
                   </div>
+
+                  <!-- Hindi Pack -->
                   <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
                     <div>
                       <strong>हिन्दी (Hindi Devanagari)</strong>
                       <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~3.9 MB · Noto Sans Devanagari</span>
                     </div>
-                    <span class="plugin-badge active" style="font-size:11px;">Active</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                      <span class="plugin-badge" id="badge-lang-hi-status">Not Downloaded</span>
+                      <span class="plugin-badge active" id="badge-lang-hi-active" style="display:none; font-size:11px;">Active</span>
+                      <button class="btn-lang-action" id="btn-download-lang-hi">Download (3.9 MB)</button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Language Pack Download Progress -->
+                <div class="plugin-progress-wrap" id="lang-progress-wrap" style="display:none; margin-top:8px;">
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="lang-progress-fill" style="width: 0%;"></div>
+                  </div>
+                  <div class="progress-info-row">
+                    <span id="lang-progress-msg">Caching regional language assets...</span>
+                    <span id="lang-progress-pct">0%</span>
                   </div>
                 </div>
               </div>
@@ -795,8 +871,8 @@
     <!-- Floating Emergency SOS Button (always accessible from Home) -->
     <button class="floating-sos-btn" id="floating-sos-btn" aria-label="Quick SOS">SOS</button>
 
-    <!-- Bottom Tab Bar (Matches FloodSaathi 5-tab UI) -->
-    <nav class="nav-tab-bar" aria-label="Main Navigation">
+    <!-- Bottom Tab Bar (Mobile Navigation, >=48px touch targets) -->
+    <nav class="nav-tab-bar" style="grid-template-columns: repeat(6, 1fr);" aria-label="Main Navigation">
       <button class="nav-tab-btn active" data-tab="home">
         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3L3 11h2.5v9.5h5v-6h3v6h5V11H21z"/></svg>
         <span data-i18n="nav.home">Home</span>
@@ -812,6 +888,10 @@
       <button class="nav-tab-btn" data-tab="alerts">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg>
         <span data-i18n="nav.alerts">Alerts</span>
+      </button>
+      <button class="nav-tab-btn" data-tab="downloads">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span data-i18n="nav.downloads">Downloads</span>
       </button>
       <button class="nav-tab-btn" data-tab="more">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg>

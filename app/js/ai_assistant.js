@@ -239,11 +239,55 @@ export class AskSaathiAssistant {
     const retrieved = this.retriever.retrieve(q, 1);
     if (retrieved.length > 0) {
       const card = retrieved[0].card;
-      return this._formatCardResponse(card, lang, q);
+      return await this._formatCardResponse(card, lang, q, context.apiKey);
     }
 
     // Fallback if no specific card matched
     return this._formatGeneralHelpResponse(lang);
+  }
+
+  // ---------------------------------------------------------------------------
+  // ONLINE TRANSLATION INTEGRATION (Optional Google Cloud Fallback)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Optional Google Cloud Translation fallback (online only).
+   * Falls back to offline localized text if offline or on network failure.
+   *
+   * @param {string} text - Source text to translate
+   * @param {string} targetLang - Target language ('hi' or 'pa')
+   * @param {string} apiKey - Google Cloud Translation API key
+   * @returns {Promise<string|null>} Translated text or null
+   */
+  async translateWithGoogle(text, targetLang, apiKey) {
+    if (!apiKey || !navigator.onLine || !text || targetLang === "en") {
+      return null;
+    }
+
+    try {
+      const url = `https://translation.googleapis.com/language/translate/v2?key=${encodeURIComponent(apiKey)}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          q: text,
+          target: targetLang,
+          format: "text"
+        })
+      });
+
+      if (!res.ok) {
+        console.warn(`Google Translate API HTTP ${res.status}, falling back to offline core.`);
+        return null;
+      }
+
+      const data = await res.json();
+      const translated = data?.data?.translations?.[0]?.translatedText;
+      return translated || null;
+    } catch (err) {
+      console.warn("Google Translate network error, using offline cards:", err);
+      return null;
+    }
   }
 
   // ---------------------------------------------------------------------------
@@ -502,11 +546,23 @@ export class AskSaathiAssistant {
     };
   }
 
-  _formatCardResponse(card, lang, query) {
-    const title = (card.title && card.title[lang]) || card.title?.en || "Verified Flood Guidance";
+  async _formatCardResponse(card, lang, query, apiKey = null) {
+    let title = (card.title && card.title[lang]) || card.title?.en || "Verified Flood Guidance";
     const body = (card.body && card.body[lang]) || card.body?.en || "";
-    const summary = (card.summary && card.summary[lang]) || card.summary?.en || "";
+    let summary = (card.summary && card.summary[lang]) || card.summary?.en || "";
     const source = card.source || "NDMA / Punjab SDMA Flood Safety Guidelines";
+
+    // Dynamic online translation if target language translation is missing from card
+    if (apiKey && lang !== "en" && (!card.title || !card.title[lang]) && typeof navigator !== "undefined" && navigator.onLine) {
+      try {
+        const transTitle = await this.translateWithGoogle(title, lang, apiKey);
+        if (transTitle) title = transTitle;
+        if (summary) {
+          const transSummary = await this.translateWithGoogle(summary, lang, apiKey);
+          if (transSummary) summary = transSummary;
+        }
+      } catch {}
+    }
 
     const lines = body.split("\n").filter((l) => l.trim().length > 0);
     const steps = lines.map((l) => l.replace(/^\d+\.\s*/, "").trim());

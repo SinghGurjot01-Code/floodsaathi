@@ -47,12 +47,19 @@ self.addEventListener("install", (event) => {
   );
 });
 
+const PROTECTED_CACHES = new Set([
+  CACHE_NAME,
+  "floodsaathi-offline-maps-v1",
+  "floodsaathi-lang-packs-v1",
+  "floodsaathi-ai-models-v1"
+]);
+
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (!PROTECTED_CACHES.has(key) && key.startsWith("floodsaathi-v")) {
             return caches.delete(key);
           }
         })
@@ -60,6 +67,7 @@ self.addEventListener("activate", (event) => {
     }).then(() => self.clients.claim())
   );
 });
+
 
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
@@ -80,8 +88,8 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for application scripts and documents (so updates apply immediately when online, while remaining fully offline-first)
-  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith("/")) {
+  // Network-first for application scripts, documents, styles, and i18n configs (so updates apply immediately when online, while remaining fully offline-first)
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith(".json") || url.pathname.endsWith(".css") || url.pathname.endsWith("/")) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {

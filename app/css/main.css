@@ -337,8 +337,11 @@ body {
 .btn-resync-gps {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
-  padding: 5px 10px;
+  min-height: var(--touch-target, 48px);
+  min-width: 48px;
+  padding: 8px 12px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.92);
   border: 1px solid var(--line);
@@ -363,6 +366,21 @@ body {
   to { transform: rotate(360deg); }
 }
 
+.btn-resync-gps:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.btn-resync-gps.success {
+  border-color: #16a34a !important;
+  color: #16a34a !important;
+}
+
+.btn-resync-gps.stale {
+  border-color: #ef1c24 !important;
+  color: #ef1c24 !important;
+}
+
 .telemetry-proximity-banner {
   display: flex;
   align-items: center;
@@ -375,6 +393,17 @@ body {
   font-size: 12px;
   color: #1e3a8a;
   font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.telemetry-proximity-banner.stale {
+  border-color: rgba(239, 28, 36, 0.3);
+  background: rgba(254, 242, 242, 0.95);
+  color: #991b1b;
+}
+
+.telemetry-proximity-banner.stale svg {
+  stroke: #ef1c24;
 }
 
 .location-text {
@@ -402,8 +431,10 @@ body {
 
 .bell-btn {
   position: relative;
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: var(--touch-target, 48px);
   border-radius: 50%;
   border: 0;
   background: rgba(255, 255, 255, 0.8);
@@ -1579,12 +1610,17 @@ body {
 }
 
 .radius-pill {
-  padding: 6px 12px;
-  border-radius: 10px;
+  min-height: var(--touch-target, 48px);
+  min-width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 12px;
   border: 1px solid var(--line);
   background: #ffffff;
   color: var(--body);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1598,6 +1634,49 @@ body {
   background: var(--navy);
   color: #ffffff;
   border-color: var(--navy);
+}
+
+.btn-lang-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target, 48px);
+  min-width: 48px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--navy);
+  background: var(--navy);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-lang-action:hover {
+  background: var(--ink2);
+}
+
+.btn-view-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-target, 48px);
+  min-width: 48px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-view-back:hover {
+  border-color: #94a3b8;
+  background: #f8fafc;
 }
 
 .plugin-stat-row {
@@ -1614,12 +1693,13 @@ body {
 
 .btn-plugin-download {
   width: 100%;
-  height: 44px;
+  min-height: var(--touch-target, 48px);
+  height: 48px;
   border-radius: 12px;
   background: var(--navy);
   color: #ffffff;
   border: 0;
-  font-size: 13.5px;
+  font-size: 14px;
   font-weight: 700;
   display: flex;
   align-items: center;

@@ -39,7 +39,7 @@ export async function loadTranslations(lang) {
     lang = DEFAULT_LANG;
   }
   try {
-    const res = await fetch(`./i18n/${lang}.json`);
+    const res = await fetch(`./i18n/${lang}.json?v=1.6.0`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     translations = await res.json();
     currentLang = lang;

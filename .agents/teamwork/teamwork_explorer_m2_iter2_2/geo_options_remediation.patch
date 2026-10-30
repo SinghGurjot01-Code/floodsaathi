@@ -1,0 +1,228 @@
+--- a/app/js/main.js
++++ b/app/js/main.js
+@@ -894,8 +894,13 @@ export function updateProximityBanner(snapshot, isStaleGps = false) {
+ export function setupGpsResync() {
+   const btn = document.getElementById("btn-resync-gps");
+   if (!btn) return;
++  if (btn.dataset.resyncBound) return;
++  btn.dataset.resyncBound = "true";
+ 
+   let feedbackTimer = null;
+ 
+   btn.addEventListener("click", () => {
++    if (btn.disabled || btn.classList.contains("spinning")) {
++      return;
++    }
++
+     if (feedbackTimer) {
+       clearTimeout(feedbackTimer);
+       feedbackTimer = null;
+     }
+ 
+     const label = btn.querySelector("span");
+ 
+     if (typeof navigator === "undefined" || !navigator.geolocation) {
+       console.warn("Geolocation API is unavailable in this environment. Using saved profile: " + userProfile.village_name);
+       if (label) label.textContent = "GPS Unavailable";
+       btn.classList.remove("spinning", "success");
+       btn.classList.add("stale");
+       btn.style.borderColor = "#ef1c24";
+       btn.style.color = "#ef1c24";
+-      if (currentSnapshot) {
+-        updateProximityBanner(currentSnapshot, true);
+-      }
++      updateProximityBanner(currentSnapshot, true);
+       feedbackTimer = setTimeout(() => {
+         if (label) label.textContent = "Re-sync GPS";
+         btn.classList.remove("stale");
+         btn.style.borderColor = "";
+         btn.style.color = "";
+       }, 4000);
+       if (feedbackTimer && typeof feedbackTimer.unref === "function") {
+         feedbackTimer.unref();
+       }
+       return;
+     }
+ 
+     // Acquiring state: add .spinning class, disable button, set label to "Acquiring..."
+     btn.classList.add("spinning");
+     btn.classList.remove("success", "stale");
+     btn.disabled = true;
+     if (label) label.textContent = "Acquiring...";
+ 
+     const geoOptions = {
+       enableHighAccuracy: true,
+-      timeout: 12000, // timeout: 10000 fallback
+-      maximumAge: 0 // maximumAge: 60000 cached position window
++      timeout: 10000,
++      maximumAge: 60000
+     };
+ 
++    const handleGpsError = (err) => {
++      btn.classList.remove("spinning");
++      btn.disabled = false;
++
++      console.warn("GPS location error (" + (err?.message || "permission denied") + "). Using saved profile: " + userProfile.village_name);
++
++      // Red visual feedback: "GPS Stale" in red #ef1c24 for 4 seconds
++      if (label) label.textContent = "GPS Stale";
++      btn.classList.remove("success");
++      btn.classList.add("stale");
++      btn.style.borderColor = "#ef1c24";
++      btn.style.color = "#ef1c24";
++
++      // Mark proximity banner with [GPS Stale / Cached]
++      updateProximityBanner(currentSnapshot, true);
++
++      feedbackTimer = setTimeout(() => {
++        if (label) label.textContent = "Re-sync GPS";
++        btn.classList.remove("stale");
++        btn.style.borderColor = "";
++        btn.style.color = "";
++      }, 4000);
++      if (feedbackTimer && typeof feedbackTimer.unref === "function") {
++        feedbackTimer.unref();
++      }
++    };
++
+     navigator.geolocation.getCurrentPosition(
+       async (pos) => {
+-        btn.classList.remove("spinning");
+-        btn.disabled = false;
+-
+-        const { latitude, longitude, accuracy } = pos.coords;
+-        userProfile.lat = Math.round(latitude * 1000) / 1000;
+-        userProfile.lon = Math.round(longitude * 1000) / 1000;
+-        userProfile.accuracy_m = Math.round(accuracy || 0);
+-        userProfile.gps_synced_at = new Date().toISOString();
+-
+-        // Persist coordinates in store.js
+-        await setSetting("user_lat", userProfile.lat);
+-        await setSetting("user_lon", userProfile.lon);
+-        await setSetting("user_gps_synced_at", userProfile.gps_synced_at);
+-
+-        // Update #loc-village-name
+-        const villageEl = document.getElementById("loc-village-name");
+-        if (villageEl) {
+-          const baseName = userProfile.village_name.replace(/\s*\(GPS[^)]*\)/g, "").trim();
+-          userProfile.village_name = baseName;
+-          const accText = userProfile.accuracy_m > 0 ? ` (GPS ±${userProfile.accuracy_m}m)` : " (GPS Synced)";
+-          villageEl.textContent = `${baseName}${accText}`;
+-        }
+-
+-        // Trigger live proximity and metric recalculations
+-        if (currentSnapshot) {
+-          updateProximityBanner(currentSnapshot, false);
+-          if (typeof document !== "undefined" && document.getElementById("status-word")) {
+-            renderSnapshotData(currentSnapshot);
+-          }
+-        } else if (typeof navigator !== "undefined" && navigator.onLine) {
+-          fetchLiveRelayData();
+-        }
+-
+-        // Green visual feedback: "GPS Synced" in green #16a34a for 3 seconds
+-        if (label) label.textContent = "GPS Synced";
+-        btn.classList.remove("stale");
+-        btn.classList.add("success");
+-        btn.style.borderColor = "#16a34a";
+-        btn.style.color = "#16a34a";
+-
+-        feedbackTimer = setTimeout(() => {
+-          if (label) label.textContent = "Re-sync GPS";
+-          btn.classList.remove("success");
+-          btn.style.borderColor = "";
+-          btn.style.color = "";
+-        }, 3000);
+-        if (feedbackTimer && typeof feedbackTimer.unref === "function") {
+-          feedbackTimer.unref();
+-        }
++        try {
++          btn.classList.remove("spinning");
++          btn.disabled = false;
++
++          const { latitude, longitude, accuracy } = pos.coords;
++          userProfile.lat = Math.round(latitude * 1000) / 1000;
++          userProfile.lon = Math.round(longitude * 1000) / 1000;
++          userProfile.accuracy_m = Math.round(accuracy || 0);
++          userProfile.gps_synced_at = new Date().toISOString();
++
++          // Persist coordinates in store.js
++          await setSetting("user_lat", userProfile.lat);
++          await setSetting("user_lon", userProfile.lon);
++          await setSetting("user_gps_synced_at", userProfile.gps_synced_at);
++
++          // Update #loc-village-name
++          const villageEl = document.getElementById("loc-village-name");
++          if (villageEl) {
++            const baseName = userProfile.village_name.replace(/\s*\(GPS[^)]*\)/g, "").trim();
++            userProfile.village_name = baseName;
++            const accText = userProfile.accuracy_m > 0 ? ` (GPS ±${userProfile.accuracy_m}m)` : " (GPS Synced)";
++            villageEl.textContent = `${baseName}${accText}`;
++          }
++
++          // Trigger live proximity and metric recalculations
++          if (currentSnapshot) {
++            updateProximityBanner(currentSnapshot, false);
++            if (typeof document !== "undefined" && document.getElementById("status-word")) {
++              renderSnapshotData(currentSnapshot);
++            }
++          } else if (typeof navigator !== "undefined" && navigator.onLine) {
++            fetchLiveRelayData();
++          }
++
++          // Green visual feedback: "GPS Synced" in green #16a34a for 3 seconds
++          if (label) label.textContent = "GPS Synced";
++          btn.classList.remove("stale");
++          btn.classList.add("success");
++          btn.style.borderColor = "#16a34a";
++          btn.style.color = "#16a34a";
++
++          feedbackTimer = setTimeout(() => {
++            if (label) label.textContent = "Re-sync GPS";
++            btn.classList.remove("success");
++            btn.style.borderColor = "";
++            btn.style.color = "";
++          }, 3000);
++          if (feedbackTimer && typeof feedbackTimer.unref === "function") {
++            feedbackTimer.unref();
++          }
++        } catch (err) {
++          handleGpsError(err);
++        }
+       },
+-      (err) => {
+-        btn.classList.remove("spinning");
+-        btn.disabled = false;
+-
+-        console.warn("GPS location error (" + (err?.message || "permission denied") + "). Using saved profile: " + userProfile.village_name);
+-
+-        // Red visual feedback: "GPS Stale" in red #ef1c24 for 4 seconds
+-        if (label) label.textContent = "GPS Stale";
+-        btn.classList.remove("success");
+-        btn.classList.add("stale");
+-        btn.style.borderColor = "#ef1c24";
+-        btn.style.color = "#ef1c24";
+-
+-        // Mark proximity banner with [GPS Stale / Cached]
+-        if (currentSnapshot) {
+-          updateProximityBanner(currentSnapshot, true);
+-        } else {
+-          const bannerText = document.getElementById("telemetry-proximity-text");
+-          if (bannerText) {
+-            bannerText.textContent = `Your location: ${userProfile.village_name} [GPS Stale / Cached] · Hydrologic telemetry from: CWC Beas Gauge (3.8 km away)`;
+-          }
+-        }
+-
+-        feedbackTimer = setTimeout(() => {
+-          if (label) label.textContent = "Re-sync GPS";
+-          btn.classList.remove("stale");
+-          btn.style.borderColor = "";
+-          btn.style.color = "";
+-        }, 4000);
+-        if (feedbackTimer && typeof feedbackTimer.unref === "function") {
+-          feedbackTimer.unref();
+-        }
+-      },
++      handleGpsError,
+       geoOptions
+     );
