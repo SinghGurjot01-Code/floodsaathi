@@ -1,0 +1,83 @@
+{
+  "model_type": "qwen2",
+  "architecture": "Qwen2ForCausalLM",
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "quantization": {
+    "format": "INT4",
+    "algorithm": "RTN",
+    "bits": 4,
+    "block_size": 32,
+    "symmetric": true
+  },
+  "inputs": [
+    {
+      "name": "input_ids",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ],
+      "dtype": "int64"
+    },
+    {
+      "name": "attention_mask",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ],
+      "dtype": "int64"
+    },
+    {
+      "name": "position_ids",
+      "shape": [
+        "batch_size",
+        "sequence_length"
+      ],
+      "dtype": "int64"
+    },
+    {
+      "name": "past_key_values",
+      "shape": [
+        "layers",
+        2,
+        "batch_size",
+        "num_heads",
+        "seq_len",
+        "head_dim"
+      ],
+      "dtype": "float32"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "logits",
+      "shape": [
+        "batch_size",
+        "sequence_length",
+        151936
+      ],
+      "dtype": "float32"
+    },
+    {
+      "name": "present",
+      "shape": [
+        "layers",
+        2,
+        "batch_size",
+        "num_heads",
+        "total_seq_len",
+        "head_dim"
+      ],
+      "dtype": "float32"
+    }
+  ],
+  "webgpu_execution_provider": {
+    "preferred_layout": "NHWC",
+    "storage_buffer_alignment": 256,
+    "max_compute_workgroup_size": [
+      256,
+      1,
+      1
+    ],
+    "estimated_ram_mb": 348
+  }
+}

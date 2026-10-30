@@ -1,7 +1,7 @@
 // Service Worker for FloodSaathi
 // Provides offline capability for PWA shell and cached data snapshots.
 
-const CACHE_NAME = "floodsaathi-v1.1.1";
+const CACHE_NAME = "floodsaathi-v1.3.0";
 
 const PRECACHE_URLS = [
   "./",
@@ -22,8 +22,12 @@ const PRECACHE_URLS = [
   "./js/estimator.js",
   "./js/status.js",
   "./js/ask.js",
+  "./js/ai_assistant.js",
+  "./js/shelters.js",
+  "./js/map_downloader.js",
   "./corpus/cards/cards.json",
   "./corpus/helplines.json",
+  "./corpus/shelters_punjab.json",
   "./packs/region-amritsar/manifest.json",
   "./packs/region-amritsar/villages.json",
   "./packs/region-amritsar/helplines.json",
@@ -61,11 +65,27 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
 
   // Network-first for dynamic live relay data (punjab.json)
-  if (url.pathname.includes("/latest/") || url.pathname.endsWith(".json") && url.pathname.includes("/data/")) {
+  if (url.pathname.includes("/latest/") || (url.pathname.endsWith(".json") && url.pathname.includes("/data/"))) {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
           if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Network-first for application scripts and documents (so updates apply immediately when online, while remaining fully offline-first)
+  if (url.pathname.endsWith(".js") || url.pathname.endsWith(".html") || url.pathname.endsWith("/")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           }

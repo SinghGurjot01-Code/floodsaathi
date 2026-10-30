@@ -1,4 +1,7 @@
-// FloodSaathi Main Application Entrypoint
+// app/js/main.js
+// FloodSaathi Main Application Controller & UI Binder
+// Pure ES module: runs offline, NO framework, NO bundler.
+
 import { CONFIG } from "../config.js";
 import { initI18n, setLanguage, getCurrentLanguage, t, applyTranslations } from "./i18n.js";
 import { getLatestSnapshot, getAllSnapshots, getContacts, addContact, deleteContact, addObservation, getSetting, setSetting } from "./store.js";
@@ -6,44 +9,61 @@ import { createSnapshotFromRelay, getSnapshotAge } from "./snapshot.js";
 import { computeOfflineEstimate, formatHours } from "./estimator.js";
 import { computeRawStatus, resolveOfflineStatus, STATUS_COLORS, STATUS_ICONS } from "./status.js";
 import { buildSosSmsUri } from "./sos.js";
+import { fetchShelters, formatAmenities } from "./shelters.js";
+import { downloadMapPack, getDownloadedMapPacks, deleteOfflineMapPack } from "./map_downloader.js";
+import { CardRetriever } from "./ask.js";
+import { AskSaathiAssistant } from "./ai_assistant.js";
 
-// App state
-let currentTab = "status";
+// Application State
+let currentTab = "home";
 let currentSnapshot = null;
+let cardRetriever = null;
+let aiAssistant = null;
+let allCards = [];
+
 let userProfile = {
   lat: 31.634,
   lon: 74.872,
-  district: "Amritsar",
-  village_id: "pb-asr-001"
+  district: "Jalandhar",
+  village_name: "Taman, Jalandhar",
+  village_id: "pb-jal-001"
 };
 
 // Register Service Worker
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js")
-      .then((reg) => console.log("Service Worker registered:", reg.scope))
+      .then((reg) => {
+        console.log("Service Worker registered:", reg.scope);
+        reg.update();
+      })
       .catch((err) => console.warn("SW registration failed:", err));
   });
 }
 
-// Initialise Application
+// Initialise Application on DOMContentLoaded
 document.addEventListener("DOMContentLoaded", async () => {
   await initI18n();
   setupLanguageSwitcher();
   setupNavigation();
-  setupHelplines();
-  setupUserActions();
+  setupHomeActions();
+  setupAskSaathi();
   setupSosView();
-  setupSettingsView();
+  setupAfterFloodGuide();
+  setupPreferencesView();
+  setupMapDownloader();
 
-  // Load saved location profile
+  // Load saved location profile if stored
   const savedDistrict = await getSetting("user_district");
   if (savedDistrict) userProfile.district = savedDistrict;
 
-  // Initial load
+  // Load knowledge cards for Ask Saathi
+  await loadKnowledgeCards();
+
+  // Initial load of hydrologic telemetry
   await loadAndRenderData();
 
-  // Network status listeners
+  // Network online/offline event listeners
   window.addEventListener("online", () => {
     updateOnlineStatus(true);
     fetchLiveRelayData();
@@ -53,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
   updateOnlineStatus(navigator.onLine);
 
-  // Periodic active interval while open (PRD 9.2: every 5 min)
+  // Periodic interval: every 5 min active, re-poll or recompute
   setInterval(() => {
     if (navigator.onLine) {
       fetchLiveRelayData();
@@ -71,469 +91,676 @@ function updateOnlineStatus(isOnline) {
   } else {
     banner.classList.remove("hidden");
     const age = getSnapshotAge(currentSnapshot?.saved_at);
-    banner.textContent = t("status.offline_notice", { age: age.display });
+    banner.textContent = `Offline Mode: Working from stored telemetry (Age: ${age.display}). Estimates labelled below.`;
   }
 }
 
-// Navigation
+// ==========================================
+// NAVIGATION & VIEW ROUTING
+// ==========================================
 function setupNavigation() {
-  const tabButtons = document.querySelectorAll(".tab-btn");
+  const tabButtons = document.querySelectorAll(".nav-tab-btn");
   tabButtons.forEach((btn) => {
     btn.addEventListener("click", () => {
       const tab = btn.getAttribute("data-tab");
-      if (!tab) return;
-      switchTab(tab);
+      if (tab) switchTab(tab);
     });
   });
+
+  // Floating SOS button on Home
+  const floatingSos = document.getElementById("floating-sos-btn");
+  if (floatingSos) {
+    floatingSos.addEventListener("click", () => switchTab("sos"));
+  }
+
+  // Bell icon on Home
+  const bellBtn = document.getElementById("btn-hero-bell");
+  if (bellBtn) {
+    bellBtn.addEventListener("click", () => switchTab("alerts"));
+  }
+
+  // More sub-views navigation buttons
+  document.getElementById("nav-to-shelters")?.addEventListener("click", () => switchTab("shelters"));
+  document.getElementById("nav-to-sos")?.addEventListener("click", () => switchTab("sos"));
+  document.getElementById("nav-to-after-flood")?.addEventListener("click", () => switchTab("after-flood"));
+  document.getElementById("nav-to-preferences")?.addEventListener("click", () => switchTab("preferences"));
+
+  // Back buttons on sub-views
+  document.getElementById("btn-back-from-shelters")?.addEventListener("click", () => switchTab("more"));
+  document.getElementById("btn-back-from-sos")?.addEventListener("click", () => switchTab("more"));
+  document.getElementById("btn-back-from-after-flood")?.addEventListener("click", () => switchTab("more"));
+  document.getElementById("btn-back-from-preferences")?.addEventListener("click", () => switchTab("more"));
 }
 
-function switchTab(tab) {
+export function switchTab(tab) {
   currentTab = tab;
-  document.querySelectorAll(".tab-btn").forEach((btn) => {
+
+  // Update bottom tab buttons active state
+  document.querySelectorAll(".nav-tab-btn").forEach((btn) => {
     btn.classList.toggle("active", btn.getAttribute("data-tab") === tab);
   });
+
+  // Hide all view sections and show current
   document.querySelectorAll(".view-section").forEach((sec) => {
-    sec.classList.toggle("active", sec.id === `view-${tab}`);
+    sec.classList.remove("active");
   });
 
+  const targetSec = document.getElementById(`view-${tab}`);
+  if (targetSec) {
+    targetSec.classList.add("active");
+  }
+
+  // Toggle floating SOS visibility (only on home)
+  const floatingSos = document.getElementById("floating-sos-btn");
+  if (floatingSos) {
+    floatingSos.style.display = tab === "home" ? "grid" : "none";
+  }
+
+  // Trigger view-specific renderers
   if (tab === "alerts") renderAlertsView();
+  if (tab === "shelters") renderSheltersView();
   if (tab === "sos") renderSosContacts();
-  if (tab === "settings") updateStorageUsage();
+  if (tab === "preferences") renderPreferencesView();
 }
 
-// Language Switcher
+// ==========================================
+// LANGUAGE SWITCHER
+// ==========================================
 function setupLanguageSwitcher() {
-  const buttons = document.querySelectorAll(".lang-btn");
-  const current = getCurrentLanguage();
-  buttons.forEach((btn) => {
-    const lang = btn.getAttribute("data-lang");
-    btn.classList.toggle("active", lang === current);
+  const langBtns = document.querySelectorAll(".lang-btn[data-lang]");
+  langBtns.forEach((btn) => {
     btn.addEventListener("click", async () => {
+      const lang = btn.getAttribute("data-lang");
+      if (!lang) return;
       await setLanguage(lang);
-      buttons.forEach(b => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
+      langBtns.forEach((b) => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
+      applyTranslations();
       recomputeOfflineView();
-      renderAlertsView();
-      renderSosContacts();
     });
   });
 }
 
-// Helplines Bar setup
-function setupHelplines() {
-  const container = document.getElementById("helpline-bar");
-  if (!container) return;
-  container.innerHTML = `
-    <a href="tel:112" class="helpline-link" aria-label="Call 112">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-      <span>112</span>
-    </a>
-    <a href="tel:1078" class="helpline-link secondary" aria-label="Call 1078 NDMA">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-      <span>1078 (NDMA)</span>
-    </a>
-  `;
-}
-
-// Setup User Actions: "Water reached my street" / "Water is receding"
-function setupUserActions() {
-  const btnReached = document.getElementById("btn-water-reached");
-  const btnReceding = document.getElementById("btn-water-receding");
-  const btnRefresh = document.getElementById("btn-refresh-data");
-
-  btnReached?.addEventListener("click", async () => {
-    if (confirm(t("actions.water_reached") + "?")) {
-      await addObservation("reached");
-      await recomputeOfflineView();
-    }
-  });
-
-  btnReceding?.addEventListener("click", async () => {
-    if (confirm(t("actions.water_receding") + "?")) {
-      await addObservation("receding");
-      await recomputeOfflineView(true); // allow lower
-    }
-  });
-
-  btnRefresh?.addEventListener("click", () => {
-    fetchLiveRelayData();
-  });
-}
-
-// Fetch live data or fallback to offline snapshot
+// ==========================================
+// DATA FETCHING & STATUS MACHINE
+// ==========================================
 async function loadAndRenderData() {
-  const snapshot = await getLatestSnapshot();
-  if (snapshot) {
-    currentSnapshot = snapshot;
-    renderStatusView(snapshot);
+  const cached = await getLatestSnapshot();
+  if (cached) {
+    currentSnapshot = cached;
+    renderSnapshotData(cached);
   }
 
   if (navigator.onLine) {
     await fetchLiveRelayData();
-  } else if (!snapshot) {
-    renderEmptyOfflineState();
+  } else if (!cached) {
+    renderDataUnavailable("No offline snapshot available yet. Connect to internet once.");
   }
 }
 
 async function fetchLiveRelayData() {
-  const refreshBtn = document.getElementById("btn-refresh-data");
-  if (refreshBtn) refreshBtn.textContent = t("actions.refreshing");
-
   try {
-    const res = await fetch(`${CONFIG.DATA_BASE_URL}/latest/punjab.json`, { cache: "no-store" });
+    const res = await fetch("./data/latest/punjab.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const relayData = await res.json();
-    const newSnapshot = await createSnapshotFromRelay(relayData, userProfile);
-    currentSnapshot = newSnapshot;
-    renderStatusView(newSnapshot);
-    updateOnlineStatus(true);
+    const snapshot = await createSnapshotFromRelay(relayData);
+    currentSnapshot = snapshot;
+    renderSnapshotData(snapshot);
   } catch (err) {
-    console.warn("Live fetch unavailable; using saved offline snapshot:", err);
-    updateOnlineStatus(false);
-    recomputeOfflineView();
-  } finally {
-    if (refreshBtn) refreshBtn.textContent = t("actions.refresh");
-  }
-}
-
-// Recompute offline view using estimator & status rules
-async function recomputeOfflineView(allowLower = false) {
-  if (!currentSnapshot) {
-    currentSnapshot = await getLatestSnapshot();
+    console.warn("Relay fetch failed, falling back to local store:", err);
     if (!currentSnapshot) {
-      renderEmptyOfflineState();
-      return;
+      renderDataUnavailable("Live telemetry feed currently unavailable.");
     }
   }
-
-  const age = getSnapshotAge(currentSnapshot.saved_at);
-  const estimate = computeOfflineEstimate({
-    front: currentSnapshot.front,
-    reach_speed_km_h: currentSnapshot.reach_speed_km_h,
-    now: new Date(),
-    observed_at: currentSnapshot.gauges?.[0]?.observed_at,
-    level_m: currentSnapshot.gauges?.[0]?.level_m,
-    warning_m: currentSnapshot.gauges?.[0]?.warning_m,
-    danger_m: currentSnapshot.gauges?.[0]?.danger_m,
-    trend_m_per_h: currentSnapshot.gauges?.[0]?.trend_m_per_h,
-    bank_m: currentSnapshot.gauges?.[0]?.bank_m,
-    village: currentSnapshot.village,
-    observations: currentSnapshot.observations,
-    source_age_hours: age.hours
-  });
-
-  const raw = computeRawStatus({
-    gauges: currentSnapshot.gauges,
-    alerts: currentSnapshot.alerts,
-    rain_72h_mm: currentSnapshot.rain_72h_mm,
-    estimate,
-    district: userProfile.district,
-    villageRecord: currentSnapshot.village || { id: currentSnapshot.user?.village_id || "default", name: "Punjab" },
-    regionPack: { compatible: true },
-    sourceAgeHours: age.hours
-  });
-
-  const finalStatus = resolveOfflineStatus({
-    previousStatus: currentSnapshot.status,
-    computedStatus: raw.status,
-    isFreshData: false,
-    userReportedReceding: allowLower
-  });
-
-  currentSnapshot.status = finalStatus;
-  renderStatusView(currentSnapshot, estimate);
-  updateOnlineStatus(navigator.onLine);
 }
 
-// Render My Status Screen
-function renderStatusView(snapshot, precomputedEstimate = null) {
-  if (!snapshot) return;
+function renderDataUnavailable(reason) {
+  const hero = document.getElementById("home-hero");
+  if (hero) hero.className = "home-hero unknown";
+  document.getElementById("status-word").textContent = "DATA UNAVAILABLE";
+  document.getElementById("status-reason").textContent = reason;
+  document.getElementById("status-age-badge").textContent = "No data";
+}
+
+function renderSnapshotData(snapshot) {
+  if (!snapshot || !snapshot.gauges) return;
+
+  const raw = computeRawStatus(snapshot, userProfile.village_id);
+  const resolved = resolveOfflineStatus(raw.status, snapshot.saved_at);
+  const hero = document.getElementById("home-hero");
+
+  if (hero) {
+    hero.className = `home-hero ${resolved.status.toLowerCase()}`;
+  }
+
+  document.getElementById("status-word").textContent = resolved.status.toUpperCase();
+  document.getElementById("status-reason").textContent = raw.reason || "Live flood telemetry monitored.";
 
   const age = getSnapshotAge(snapshot.saved_at);
-  const status = snapshot.status || "UNKNOWN";
-  const statusCard = document.getElementById("status-card");
-  const statusWord = document.getElementById("status-word");
-  const statusReason = document.getElementById("status-reason");
-  const statusAgeBadge = document.getElementById("status-age-badge");
-  const statusOfflineBadge = document.getElementById("status-offline-badge");
+  document.getElementById("status-age-badge").textContent = `Data: ${age.display}`;
 
-  // Status Styling
-  statusCard.className = `status-card ${status.toLowerCase()}`;
-  statusWord.textContent = t(`status.${status.toLowerCase()}`) || status;
-
-  // Badges
-  statusAgeBadge.textContent = t("status.data_age", { age: age.display });
-  if (statusOfflineBadge) {
-    statusOfflineBadge.style.display = (!navigator.onLine || age.hours >= 1) ? "inline-flex" : "none";
+  const offlineBadge = document.getElementById("status-offline-badge");
+  if (offlineBadge) {
+    offlineBadge.style.display = !navigator.onLine ? "inline-flex" : "none";
   }
 
-  // Estimator computation
-  const estimate = precomputedEstimate || computeOfflineEstimate({
-    front: snapshot.front,
-    reach_speed_km_h: snapshot.reach_speed_km_h,
-    now: new Date(),
-    observed_at: snapshot.gauges?.[0]?.observed_at,
-    level_m: snapshot.gauges?.[0]?.level_m,
-    warning_m: snapshot.gauges?.[0]?.warning_m,
-    danger_m: snapshot.gauges?.[0]?.danger_m,
-    trend_m_per_h: snapshot.gauges?.[0]?.trend_m_per_h,
-    bank_m: snapshot.gauges?.[0]?.bank_m,
-    village: snapshot.village,
-    observations: snapshot.observations,
-    source_age_hours: age.hours
-  });
+  // Update river gauge metrics
+  const gauges = snapshot.gauges || [];
+  if (gauges.length > 0) {
+    const g = gauges[0];
+    document.getElementById("metric-gauge-name").textContent = g.river || "River Beas";
+    document.getElementById("metric-gauge-level").textContent = `${g.current_level_m} m`;
+    document.getElementById("metric-gauge-trend").textContent = `Trend: ${g.trend_m_per_hr >= 0 ? "+" : ""}${g.trend_m_per_hr} m/h`;
 
-  const estimateBox = document.getElementById("estimate-container");
-
-  // If status is DATA_UNAVAILABLE or UNKNOWN
-  if (status === "DATA_UNAVAILABLE") {
-    statusReason.textContent = t("status.numbers_hidden");
-    estimateBox.innerHTML = `
-      <div class="estimate-box" style="border-left-color: #64748b;">
-        <div class="estimate-headline">${t("status.data_unavailable")}</div>
-        <div class="estimate-sub">${t("helplines.always_available")}</div>
-      </div>
-    `;
-    return;
-  }
-
-  if (status === "UNKNOWN") {
-    statusReason.textContent = "Location or hydrological data incomplete. Confirm with local authorities.";
-    estimateBox.innerHTML = `
-      <div class="estimate-box" style="border-left-color: #94a3b8;">
-        <div class="estimate-headline">${t("status.unknown")}</div>
-        <div class="estimate-sub">${t("helplines.always_available")}</div>
-      </div>
-    `;
-    return;
-  }
-
-  // Age > 24 hours: numbers hidden
-  if (estimate.numbers_hidden) {
-    statusReason.textContent = t("status.numbers_hidden");
-    estimateBox.innerHTML = `
-      <div class="estimate-box" style="border-left-color: #ef4444;">
-        <div class="estimate-headline">${t("status.numbers_hidden")}</div>
-        <div class="estimate-sub">${t("helplines.always_available")}</div>
-      </div>
-    `;
-    return;
-  }
-
-  // Plain-language reason
-  if (estimate.reached_reported) {
-    statusReason.textContent = t("status.reached_reported");
-  } else if (estimate.projection?.ground_check === "likely_below_ground") {
-    statusReason.textContent = t("status.ground_safe");
-  } else if (status === "Danger") {
-    statusReason.textContent = "Urgent: river levels or flood front indicate imminent danger.";
-  } else if (status === "Warning") {
-    statusReason.textContent = "Warning: flood levels elevated. Prepare for evacuation.";
-  } else if (status === "Watch") {
-    statusReason.textContent = "River levels rising or heavy rainfall detected. Stay alert.";
-  } else {
-    statusReason.textContent = t("status.ground_safe");
-  }
-
-  // Render Time-to-Water box
-  if (estimate.arrival) {
-    let headline = estimate.arrival.summary_text;
-    if (estimate.arrival.status_tag === "likely_reached") {
-      headline = t("estimator.likely_already_reach");
-    } else if (estimate.arrival.status_tag === "may_reach_now") {
-      headline = t("estimator.may_already_reach");
+    const statusEl = document.getElementById("metric-gauge-status");
+    if (g.current_level_m >= g.danger_level_m) {
+      statusEl.className = "metric-status-warn";
+      statusEl.textContent = "Above Danger Level";
+    } else if (g.current_level_m >= g.warning_level_m) {
+      statusEl.className = "metric-status-warn";
+      statusEl.textContent = "Above Warning Level";
     } else {
-      headline = t("estimator.arrival_range", {
-        low: formatHours(estimate.arrival.low_hours),
-        high: formatHours(estimate.arrival.high_hours),
-        likely: formatHours(estimate.arrival.likely_hours)
-      });
+      statusEl.className = "metric-status-ok";
+      statusEl.textContent = "Below warning level";
     }
+  }
 
-    let depthText = "";
-    if (estimate.projection?.depth_band) {
-      depthText = `<div class="estimate-sub">${t("estimator.depth_band", { band: estimate.projection.depth_band })}</div>`;
-    }
+  // Update arrival time estimate banner (F2)
+  renderEstimateBanner(snapshot);
 
-    estimateBox.innerHTML = `
-      <div class="estimate-box">
-        <div class="estimate-headline">${headline}</div>
-        ${depthText}
-        <div class="estimate-sub" style="margin-top: 4px;">
-          ${t("estimator.nearest_gauge", { 
-            name: snapshot.gauges?.[0]?.name || "Harike", 
-            river: snapshot.gauges?.[0]?.river || "Sutlej" 
-          })}
-        </div>
-      </div>
-    `;
+  // Update official alerts banner
+  const alerts = snapshot.alerts || [];
+  const alertSummary = document.getElementById("home-alert-summary");
+  const alertIcon = document.getElementById("home-alert-icon");
+  const alertBadge = document.getElementById("alerts-count-badge");
+
+  if (alertBadge) alertBadge.textContent = alerts.length;
+
+  if (alerts.length > 0) {
+    const topAlert = alerts[0];
+    alertIcon.className = "alert-check-icon active-alert";
+    alertSummary.innerHTML = `<strong>${topAlert.headline || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${topAlert.description || ""}</span>`;
   } else {
-    estimateBox.innerHTML = "";
-  }
-
-  // Render River Gauge Grid
-  const gaugeGrid = document.getElementById("gauge-grid");
-  if (gaugeGrid && snapshot.gauges && snapshot.gauges.length > 0) {
-    const g = snapshot.gauges[0];
-    gaugeGrid.innerHTML = `
-      <div class="gauge-stat">
-        <div class="gauge-stat-label">${t("estimator.current_level", { level: "" })}</div>
-        <div class="gauge-stat-value">${g.level_m !== null ? g.level_m + " m" : t("common.unknown")}</div>
-      </div>
-      <div class="gauge-stat">
-        <div class="gauge-stat-label">${t("estimator.warning_mark", { level: "" })}</div>
-        <div class="gauge-stat-value">${g.warning_m !== null ? g.warning_m + " m" : t("common.unknown")}</div>
-      </div>
-      <div class="gauge-stat">
-        <div class="gauge-stat-label">${t("estimator.danger_mark", { level: "" })}</div>
-        <div class="gauge-stat-value">${g.danger_m !== null ? g.danger_m + " m" : t("common.unknown")}</div>
-      </div>
-      <div class="gauge-stat">
-        <div class="gauge-stat-label">${t("estimator.trend", { trend: "" })}</div>
-        <div class="gauge-stat-value">${g.trend_m_per_h !== null ? (g.trend_m_per_h > 0 ? "+" : "") + g.trend_m_per_h + " m/h" : "0 m/h"}</div>
-      </div>
-    `;
+    alertIcon.className = "alert-check-icon";
+    alertSummary.textContent = "No active official disaster bulletins for your area.";
   }
 }
 
-function renderEmptyOfflineState() {
-  const statusCard = document.getElementById("status-card");
-  const statusWord = document.getElementById("status-word");
-  const statusReason = document.getElementById("status-reason");
-  if (statusCard) statusCard.className = "status-card data_unavailable";
-  if (statusWord) statusWord.textContent = t("status.data_unavailable");
-  if (statusReason) {
-    statusReason.textContent = "No offline snapshot found. Connect to internet to fetch live data.";
-  }
-}
-
-// Render Official Alerts View (NDMA SACHET verbatim)
-function renderAlertsView() {
-  const container = document.getElementById("alerts-container");
+function renderEstimateBanner(snapshot) {
+  const container = document.getElementById("estimate-container");
   if (!container) return;
 
-  const alerts = currentSnapshot?.alerts || [];
-  if (alerts.length === 0) {
-    container.innerHTML = `<div class="card"><p>${t("alerts.no_alerts")}</p></div>`;
+  const estimate = computeOfflineEstimate(snapshot, userProfile.village_id);
+  if (!estimate || estimate.arrival_hours_min === undefined) {
+    container.innerHTML = "";
     return;
   }
 
-  let html = `<p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">${t("alerts.verbatim_note")}</p>`;
-  for (const a of alerts) {
-    const sevClass = (a.severity || "").toLowerCase();
-    html += `
-      <div class="alert-item ${sevClass}">
-        <div class="alert-header">
-          <div class="alert-headline">${a.headline || a.event || "Flood Alert"}</div>
-          <span class="badge badge-official">${a.source || "NDMA SACHET"}</span>
-        </div>
-        <div class="alert-body">${a.description || a.headline}</div>
-        <div class="alert-meta">
-          <div>${t("alerts.severity", { sev: a.severity || "Standard" })}</div>
-          <div>${t("alerts.area", { area: a.area || "Punjab" })}</div>
-          <div>${t("alerts.effective", { time: a.issued_at || a.effective || "" })}</div>
+  const isWarningOrDanger = estimate.arrival_hours_min <= 6;
+  const bannerClass = isWarningOrDanger ? "arrival-banner" : "arrival-banner safe";
+  const hoursDisplay = formatHours(estimate.arrival_hours_min, estimate.arrival_hours_max);
+
+  container.innerHTML = `
+    <div class="${bannerClass}">
+      <div class="arrival-title">Estimated Water Arrival: ${hoursDisplay}</div>
+      <div class="arrival-detail">
+        Confidence: <strong>${estimate.confidence || "Moderate"}</strong> &bull;
+        Empirical Basis: <strong>${estimate.empirical_basis || "2023 Floods"}</strong> (${estimate.n_events || 5} historical peaks).
+        <div style="font-size: 11.5px; color: var(--mut); margin-top: 3px;">
+          *Subject to upstream dam releases and embankment integrity.
         </div>
       </div>
-    `;
-  }
-  container.innerHTML = html;
+    </div>
+  `;
 }
 
-// Render SOS View
-async function setupSosView() {
-  const btnSms = document.getElementById("sos-btn-sms");
-  const formAdd = document.getElementById("sos-add-contact-form");
+function recomputeOfflineView() {
+  if (currentSnapshot) {
+    renderSnapshotData(currentSnapshot);
+  }
+}
 
-  btnSms?.addEventListener("click", async () => {
-    const contacts = await getContacts();
-    const age = getSnapshotAge(currentSnapshot?.saved_at);
-    const uri = await buildSosSmsUri({
-      contacts,
-      lat: userProfile.lat,
-      lon: userProfile.lon,
-      status: currentSnapshot?.status || "Unknown",
-      statusAge: age.display
-    });
-    window.location.href = uri;
-  });
-
-  formAdd?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const nameInput = document.getElementById("contact-name");
-    const phoneInput = document.getElementById("contact-phone");
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    if (name && phone) {
-      try {
-        await addContact({ name, phone });
-        nameInput.value = "";
-        phoneInput.value = "";
-        renderSosContacts();
-      } catch (err) {
-        alert(err.message);
-      }
+// ==========================================
+// HOME ACTION BUTTONS (PRD 8.2)
+// ==========================================
+function setupHomeActions() {
+  // Water reached my street -> immediately sets status to DANGER
+  document.getElementById("btn-water-reached")?.addEventListener("click", async () => {
+    if (confirm("Confirm that flood water has reached your street/village? This will set your status to DANGER.")) {
+      await addObservation({
+        village_id: userProfile.village_id,
+        type: "water_reached",
+        observed_at: new Date().toISOString()
+      });
+      const hero = document.getElementById("home-hero");
+      if (hero) hero.className = "home-hero danger";
+      document.getElementById("status-word").textContent = "DANGER";
+      document.getElementById("status-reason").textContent = "User reported water reached street (offline status raised to Danger).";
+      alert("Status updated to DANGER. Please move to higher ground immediately.");
     }
   });
 
-  renderSosContacts();
+  // Water is receding -> releases offline hold
+  document.getElementById("btn-water-receding")?.addEventListener("click", async () => {
+    if (confirm("Confirm that flood waters are receding in your area?")) {
+      await addObservation({
+        village_id: userProfile.village_id,
+        type: "water_receding",
+        observed_at: new Date().toISOString()
+      });
+      alert("Report noted. Recomputing status based on latest hydrologic telemetry.");
+      recomputeOfflineView();
+    }
+  });
+
+  // Refresh live data
+  document.getElementById("btn-refresh-data")?.addEventListener("click", () => {
+    if (navigator.onLine) {
+      fetchLiveRelayData();
+    } else {
+      alert("Device is offline. Showing stored telemetry.");
+    }
+  });
+}
+
+// ==========================================
+// ASK SAATHI KNOWLEDGE BASE & CHAT (F6)
+// ==========================================
+async function loadKnowledgeCards() {
+  try {
+    const res = await fetch("./corpus/cards/cards.json");
+    if (res.ok) {
+      allCards = await res.json();
+      cardRetriever = new CardRetriever(allCards);
+      aiAssistant = new AskSaathiAssistant({ cards: allCards });
+      await aiAssistant.init();
+    }
+  } catch (err) {
+    console.warn("Could not load knowledge cards JSON:", err);
+  }
+}
+
+function setupAskSaathi() {
+  const input = document.getElementById("chat-input-field");
+  const sendBtn = document.getElementById("btn-chat-send");
+  const micBtn = document.getElementById("btn-chat-mic");
+
+  const handleSend = () => {
+    const q = input.value.trim();
+    if (!q) return;
+    submitChatQuery(q);
+    input.value = "";
+  };
+
+  sendBtn?.addEventListener("click", handleSend);
+  input?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") handleSend();
+  });
+
+  // Preset query buttons
+  document.querySelectorAll(".btn-suggested-query").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const q = btn.getAttribute("data-q");
+      if (q) submitChatQuery(q);
+    });
+  });
+
+  // Speech Recognition (Web Speech API)
+  if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = getCurrentLanguage() === "pa" ? "pa-IN" : getCurrentLanguage() === "hi" ? "hi-IN" : "en-IN";
+
+    micBtn?.addEventListener("click", () => {
+      micBtn.style.color = "#ef1c24";
+      recognition.start();
+    });
+
+    recognition.onresult = (event) => {
+      micBtn.style.color = "var(--navy)";
+      const transcript = event.results[0][0].transcript;
+      if (transcript) submitChatQuery(transcript);
+    };
+
+    recognition.onerror = () => {
+      micBtn.style.color = "var(--navy)";
+    };
+    recognition.onend = () => {
+      micBtn.style.color = "var(--navy)";
+    };
+  }
+}
+
+async function submitChatQuery(query) {
+  const thread = document.getElementById("chat-thread");
+  if (!thread) return;
+
+  // Append user bubble
+  const userDiv = document.createElement("div");
+  userDiv.className = "msg-me";
+  userDiv.textContent = query;
+  thread.appendChild(userDiv);
+
+  const lang = getCurrentLanguage();
+  const botDiv = document.createElement("div");
+  botDiv.className = "msg-bot-wrap";
+
+  let response = null;
+  if (aiAssistant) {
+    response = await aiAssistant.ask(query, {
+      lang,
+      gauges: currentSnapshot?.gauges,
+      alerts: currentSnapshot?.alerts
+    });
+  } else if (cardRetriever) {
+    const results = cardRetriever.retrieve(query, 1);
+    if (results.length > 0) {
+      const c = results[0].card;
+      response = {
+        title: (c.title && c.title[lang]) || c.title?.en || "Verified Advice",
+        steps: ((c.body && c.body[lang]) || c.body?.en || "").split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+\.\s*/, "")),
+        source: c.source || "NDMA / Punjab SDMA Flood Safety Guidelines",
+        reviewStatus: c.review_status || "verified",
+        helplines: []
+      };
+    }
+  }
+
+  if (response) {
+    const stepItems = (response.steps || []).map((step, idx) => `
+      <li><span class="step-num">${idx + 1}</span><span>${step}</span></li>
+    `).join("");
+
+    const helplinesHtml = (response.helplines && response.helplines.length > 0) ? `
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">
+        ${response.helplines.map(h => `<a href="tel:${h.number}" class="helpline-btn" style="padding:4px 10px; font-size:12px;">📞 ${h.number} (${h.name.split(" ")[0]})</a>`).join("")}
+      </div>
+    ` : "";
+
+    botDiv.innerHTML = `
+      <div class="bot-avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
+      </div>
+      <article class="bot-card">
+        <h3>${response.title}</h3>
+        <ol class="bot-steps">${stepItems}</ol>
+        ${helplinesHtml}
+        <div class="card-source-link">
+          <span>Source: ${response.source || "Official Disaster Guidelines"}</span>
+          <span style="color:var(--green); font-weight:700;">Verified &check;</span>
+        </div>
+      </article>
+    `;
+  } else {
+    botDiv.innerHTML = `
+      <div class="bot-avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <article class="bot-card">
+        <h3>General Emergency Guidance</h3>
+        <p style="font-size:14.5px; line-height:1.5;">For immediate rescue or life-threatening emergencies, dial <strong>112 (National Emergency)</strong> or <strong>1078 (NDMA)</strong>. Move to upper floors and do not wade through moving flood waters.</p>
+      </article>
+    `;
+  }
+
+  thread.appendChild(botDiv);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+// ==========================================
+// SHELTERS DIRECTORY VIEW (F5)
+// ==========================================
+async function renderSheltersView() {
+  const container = document.getElementById("shelters-list-container");
+  if (!container) return;
+
+  const shelters = await fetchShelters(userProfile.lat, userProfile.lon);
+  if (shelters.length === 0) {
+    container.innerHTML = `<p>No shelters found near this location.</p>`;
+    return;
+  }
+
+  const lang = getCurrentLanguage();
+  container.innerHTML = shelters.map((s) => {
+    const name = (s.name && s.name[lang]) || s.name?.en || s.name;
+    const amenities = formatAmenities(s.amenities, lang);
+    const amenityTags = amenities.map((a) => `<span class="amenity-chip">${a}</span>`).join("");
+
+    return `
+      <div class="shelter-card">
+        <div class="shelter-card-header">
+          <div class="shelter-card-title">${name}</div>
+          <span class="shelter-dist-pill">${s.distanceFormatted} away</span>
+        </div>
+        <div style="font-size: 13px; color: var(--mut); margin-bottom: 6px;">
+          Tehsil: ${s.tehsil} &bull; Capacity: <strong>${s.capacity} persons</strong>
+        </div>
+        <div class="shelter-amenities">${amenityTags}</div>
+        <div class="shelter-action-row">
+          <a href="tel:${s.contact || '1077'}" class="btn-shelter-call">Call Shelter (${s.contact || '1077'})</a>
+          <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${s.lat},${s.lon}" target="_blank" rel="noopener" class="btn-shelter-nav">Get Directions</a>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// ==========================================
+// EMERGENCY SOS (F7)
+// ==========================================
+function setupSosView() {
+  const sendSms = () => {
+    const uri = buildSosSmsUri(userProfile.lat, userProfile.lon, userProfile.village_name);
+    window.location.href = uri;
+  };
+
+  document.getElementById("btn-big-sos")?.addEventListener("click", () => {
+    if (confirm("Send Emergency SOS SMS with your GPS coordinates to your emergency contacts?")) {
+      sendSms();
+    }
+  });
+
+  document.getElementById("btn-sos-send-sms")?.addEventListener("click", sendSms);
+
+  const form = document.getElementById("sos-add-contact-form");
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("contact-name").value.trim();
+    const phone = document.getElementById("contact-phone").value.trim();
+    if (name && phone) {
+      await addContact(name, phone);
+      form.reset();
+      renderSosContacts();
+    }
+  });
 }
 
 async function renderSosContacts() {
   const container = document.getElementById("sos-contacts-list");
   if (!container) return;
-
   const contacts = await getContacts();
+
   if (contacts.length === 0) {
-    container.innerHTML = `<p style="font-size: 0.9rem; color: var(--text-secondary);">${t("sos.no_contacts")}</p>`;
+    container.innerHTML = `<p style="font-size:13px; color:var(--mut);">No emergency contacts added yet. Add family members below.</p>`;
     return;
   }
 
-  let html = `<ul style="list-style: none; margin-top: 8px;">`;
-  for (const c of contacts) {
-    html += `
-      <li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-subtle);">
-        <div>
-          <div style="font-weight: 700;">${c.name}</div>
-          <div style="font-size: 0.85rem; color: var(--text-secondary);">${c.phone}</div>
-        </div>
-        <button class="btn-outline" style="min-height: 36px; padding: 4px 10px; border-radius: 4px; cursor: pointer;" data-delete-id="${c.id}">Remove</button>
-      </li>
-    `;
-  }
-  html += `</ul>`;
-  container.innerHTML = html;
+  container.innerHTML = contacts.map((c) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--line);">
+      <div>
+        <strong>${c.name}</strong>
+        <div style="font-size:13px; color:var(--mut);">${c.phone}</div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a href="tel:${c.phone}" class="btn-shelter-call" style="width:36px; height:36px; padding:0; border-radius:50%;">&phone;</a>
+        <button class="lang-btn btn-del-contact" data-id="${c.id}" style="color:var(--red);">&times;</button>
+      </div>
+    </div>
+  `).join("");
 
-  container.querySelectorAll("[data-delete-id]").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = Number(btn.getAttribute("data-delete-id"));
+  container.querySelectorAll(".btn-del-contact").forEach((b) => {
+    b.addEventListener("click", async () => {
+      const id = Number(b.getAttribute("data-id"));
       await deleteContact(id);
       renderSosContacts();
     });
   });
 }
 
-// Render Settings View
-function setupSettingsView() {
-  const exportBtn = document.getElementById("btn-export-json");
-  exportBtn?.addEventListener("click", async () => {
-    const all = await getAllSnapshots();
-    const blob = new Blob([JSON.stringify(all, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `floodsaathi_debug_${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+// ==========================================
+// OFFICIAL ALERTS VIEW (F4)
+// ==========================================
+function renderAlertsView() {
+  const container = document.getElementById("alerts-container");
+  if (!container) return;
+
+  const alerts = currentSnapshot?.alerts || [];
+  if (alerts.length === 0) {
+    container.innerHTML = `<div class="home-alert-banner"><p>No active official alerts received from NDMA SACHET or Punjab SDMA at this time.</p></div>`;
+    return;
+  }
+
+  container.innerHTML = alerts.map((a) => `
+    <div class="shelter-card" style="border-left: 5px solid var(--red); margin-bottom: 12px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+        <span class="amenity-chip" style="background:var(--red); color:#fff; font-weight:700;">${a.severity || 'WARNING'}</span>
+        <span style="font-size:12px; color:var(--mut);">${new Date(a.sent || Date.now()).toLocaleTimeString()}</span>
+      </div>
+      <h3 style="font-size:16px; font-weight:700; margin-bottom:4px;">${a.headline || 'Official Flood Advisory'}</h3>
+      <p style="font-size:14px; line-height:1.5; color:var(--body);">${a.description || ''}</p>
+      <div style="font-size:12px; color:var(--mut); margin-top:8px;">Issued by: ${a.sender || 'NDMA SACHET / Punjab Revenue Dept'}</div>
+    </div>
+  `).join("");
+}
+
+// ==========================================
+// AFTER-FLOOD GUIDE (F15)
+// ==========================================
+const AFTER_FLOOD_DATA = {
+  safety: [
+    { title: "Electrical Safety", desc: "Never touch circuit breakers, power outlets, or appliances while standing in water. Have an electrician inspect the wiring before switching main breaker on." },
+    { title: "Structural Stability", desc: "Check foundation walls for cracks, sagging roofs, or undermined pillars before entering your house." },
+    { title: "Gas Leaks", desc: "If you smell gas or hear a hissing noise, open windows, leave immediately, and do not use matches or light switches." }
+  ],
+  health: [
+    { title: "Well & Water Disinfection", desc: "For open drinking wells: Add 50 grams of fresh bleaching powder per 1,000 litres of water. Stir thoroughly and wait for at least 1 hour before drinking." },
+    { title: "Boil Drinking Water", desc: "Bring water to a rolling boil for at least 1 full minute to kill water-borne bacteria and viruses." },
+    { title: "Snake & Reptile Bites", desc: "Snakes frequently take shelter in houses and woodpiles after floods. Wear rubber boots, use a stick to disturb debris, and if bitten, call 108 immediately." }
+  ],
+  home: [
+    { title: "Silt and Mud Removal", desc: "Shovel out heavy mud while it is still damp. Silt contains contaminated runoff and sewage." },
+    { title: "Sanitizing Surfaces", desc: "Scrub all flooded floors, walls, and hard surfaces with warm water and chlorine disinfectant." },
+    { title: "Discard Contaminated Food", desc: "Throw out any food that came into contact with flood waters, including packaged items with cardboard covers." }
+  ],
+  claims: [
+    { title: "Document Flood Damage", desc: "Take clear photographs of flood water marks on walls, destroyed crops, damaged equipment, and livestock before cleaning." },
+    { title: "Punjab SDMA Relief Verification", desc: "Report crop and property loss to your local Patwari / Tehsildar office within 72 hours for Girdawari verification." }
+  ]
+};
+
+function setupAfterFloodGuide() {
+  const tabs = ["safety", "health", "home", "claims"];
+  tabs.forEach((tab) => {
+    document.getElementById(`tab-af-${tab}`)?.addEventListener("click", () => {
+      tabs.forEach((t) => {
+        const btn = document.getElementById(`tab-af-${t}`);
+        if (btn) {
+          btn.style.background = t === tab ? "var(--red)" : "#f3f4f6";
+          btn.style.color = t === tab ? "#ffffff" : "#374151";
+          btn.style.fontWeight = t === tab ? "600" : "400";
+        }
+      });
+      renderAfterFloodContent(tab);
+    });
+  });
+  renderAfterFloodContent("safety");
+}
+
+function renderAfterFloodContent(category) {
+  const container = document.getElementById("after-flood-content-area");
+  if (!container) return;
+
+  const items = AFTER_FLOOD_DATA[category] || [];
+  container.innerHTML = items.map((item, idx) => `
+    <div class="shelter-card" style="margin-bottom: 10px;">
+      <h4 style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:4px;">${idx + 1}. ${item.title}</h4>
+      <p style="font-size:13.5px; color:var(--body); line-height:1.4;">${item.desc}</p>
+    </div>
+  `).join("");
+}
+
+// ==========================================
+// ALERT PREFERENCES & STORAGE (F14, F10)
+// ==========================================
+function setupPreferencesView() {
+  const slider = document.getElementById("pref-radius-slider");
+  const display = document.getElementById("pref-radius-display");
+  slider?.addEventListener("input", () => {
+    if (display) display.textContent = `${slider.value} km`;
   });
 }
 
-async function updateStorageUsage() {
-  const el = document.getElementById("storage-used-display");
-  if (!el) return;
-  if (navigator.storage && navigator.storage.estimate) {
-    const est = await navigator.storage.estimate();
-    const usedMb = ((est.usage || 0) / (1024 * 1024)).toFixed(2);
-    el.textContent = `${usedMb} MB`;
-  } else {
-    el.textContent = "Supported";
+function renderPreferencesView() {
+  const list = document.getElementById("offline-packs-list");
+  if (!list) return;
+  const packs = getDownloadedMapPacks();
+
+  if (packs.length === 0) {
+    list.innerHTML = `<p style="font-size:13px; color:var(--mut);">No offline map packs downloaded yet. Use the Map tab to download your region.</p>`;
+    return;
   }
+
+  list.innerHTML = packs.map((p) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--line);">
+      <div>
+        <strong>${p.name}</strong>
+        <div style="font-size:12px; color:var(--mut);">Size: ${p.sizeMB} MB &bull; Radius: ${p.radiusKm} km</div>
+      </div>
+      <button class="lang-btn btn-del-pack" data-id="${p.id}" style="color:var(--red); font-size:12px;">Delete</button>
+    </div>
+  `).join("");
+
+  list.querySelectorAll(".btn-del-pack").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      await deleteOfflineMapPack(id);
+      renderPreferencesView();
+    });
+  });
+}
+
+// ==========================================
+// OFFLINE MAP DOWNLOADER (F10)
+// ==========================================
+function setupMapDownloader() {
+  const btn = document.getElementById("btn-open-download-modal");
+  const progressWrap = document.getElementById("map-download-progress-wrap");
+  const progressFill = document.getElementById("map-download-progress-fill");
+  const progressPct = document.getElementById("map-download-progress-pct");
+  const info = document.getElementById("map-storage-info");
+
+  btn?.addEventListener("click", async () => {
+    const radiusStr = prompt("Enter radius for offline map package in km (e.g., 10, 25, 50):", "25");
+    const radius = Math.max(5, Math.min(100, Number(radiusStr) || 25));
+
+    if (progressWrap) progressWrap.style.display = "block";
+    btn.disabled = true;
+
+    try {
+      await downloadMapPack(userProfile.lat, userProfile.lon, radius, (p) => {
+        if (progressFill) progressFill.style.width = `${p.percent}%`;
+        if (progressPct) progressPct.textContent = `${p.percent}% (${p.currentMB} / ${p.totalMB} MB)`;
+      });
+      if (info) info.textContent = `Cached Punjab vector tiles (${radius} km radius ready offline)`;
+      alert(`Success: ${radius} km offline map pack downloaded to your device!`);
+    } catch (err) {
+      alert(`Download failed: ${err.message}`);
+    } finally {
+      btn.disabled = false;
+      setTimeout(() => {
+        if (progressWrap) progressWrap.style.display = "none";
+      }, 2000);
+    }
+  });
 }

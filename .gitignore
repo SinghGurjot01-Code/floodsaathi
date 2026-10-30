@@ -15,3 +15,5 @@ packs/**/*.gguf
 packs/**/*.task
 android/**/build/
 .agent/
+ui_preview/
+*.zip

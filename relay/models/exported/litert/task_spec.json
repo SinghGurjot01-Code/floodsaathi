@@ -1,0 +1,18 @@
+{
+  "engine": "Google LiteRT-LM (TensorFlow Lite GenAI)",
+  "model_name": "floodsaathi_qwen_0.5b_litert.bin",
+  "version": "1.0.0",
+  "supported_delegates": [
+    "GPU (OpenCL / Vulkan)",
+    "NPU (Qualcomm QNN / MediaTek NeuroPilot)",
+    "XNNPACK CPU"
+  ],
+  "tensor_quantization": {
+    "weight_bits": 4,
+    "activation_bits": 16,
+    "scheme": "INT4_DYNAMIC_ASYMMETRIC"
+  },
+  "system_prompt_slot": true,
+  "max_seq_len": 1024,
+  "target_apk_overhead_mb": 360
+}

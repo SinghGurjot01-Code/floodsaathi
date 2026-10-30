@@ -1,0 +1,26 @@
+{
+  "schema": "floodsaathi.exported_model.v1",
+  "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
+  "lora_adapter_dir": "C:\\Users\\Gurjotpal Singh\\Desktop\\FloodSaathi\\relay\\models\\saathi_lora",
+  "quantization": "int4",
+  "exported_formats": [
+    "onnx",
+    "gguf",
+    "litert"
+  ],
+  "target_platforms": {
+    "pwa_webgpu": "onnx/model_int4",
+    "android_litert": "litert/task_spec.json",
+    "native_gguf": "gguf/model_spec.json"
+  },
+  "hardware_profile": {
+    "min_ram_mb": 2500,
+    "model_ram_footprint_mb": 350,
+    "min_webgpu_limits": {
+      "maxBufferSize": 268435456,
+      "maxStorageBufferBindingSize": 268435456
+    }
+  },
+  "safety_guarantee": "Retriever-Locked Emergency Routing: Numbers 112, 1078, 1070 come strictly from verified corpus, never internal weights.",
+  "checksum_sha256": "a2576458624310a388e258f6aa31fbd3e2f7e03a86c2ff6b4dceb76aaef65c2f"
+}
