@@ -8,7 +8,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [x] **P0-1** Environment setup (run /setup-env) (deps: -) — done: Toolchain installed & verified (Node v24.13.1, Python 3.12.0 in .venv, Wrangler 4.156.0, Render v2.33.0, pmtiles 1.31.2, hf 2.4.0, JDK 21, Android SDK adb 37.0.1); docs/ENVIRONMENT.md written.
 - [ ] **P0-2** Platform logins and accounts (run /login-platforms) (deps: P0-1) — done when: gh, wrangler, render, huggingface-cli all report an authenticated user (whoami output recorded without secrets); Copernicus Data Space and NASA Earthdata accounts exist; anything only the human can do is in docs/RUNBOOK.md.
 - [ ] **P0-3** Create the GitHub repo and CI (deps: P0-2) — done when: Public repo `floodsaathi` exists with the kit committed; CI runs node tests, pytest, JSON-schema validation and scripts/check_no_mock.py and is green.
-- [ ] **P0-4** Real data-source audit (run /data-audit) (deps: P0-1) — done when: docs/DATA_SOURCES.md has, for every source in section 12, a live fetch result (URL, UTC timestamp, record count); real list of Punjab CWC stations with warning/danger marks; Punjab SACHET feed URL; GUARDIAN coverage and end date for those stations; Flood Hub gauge check; every failure has its exact error and a chosen workaround.
+- [x] **P0-4** Real data-source audit (run /data-audit) (deps: P0-1) — done: 13 sources probed live; docs/DATA_SOURCES.md written with CWC marks, SACHET feed, GUARDIAN gap and workarounds; check_no_mock passed.
 
 ## Phase A — MVP live (F1–F8, Punjab PWA)
 
