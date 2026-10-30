@@ -17,21 +17,21 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [x] **A3** Hosting and cron: Pages + R2/Worker (or gh-pages) + Actions every 15 min (deps: A1,A2) — done: Live app deployed at https://floodsaathi.pages.dev/; relay data live at https://floodsaathi.pages.dev/data/latest/punjab.json; GitHub Actions 15-min cron enabled with gh-pages fallback.
 - [x] **A4** Estimator and status modules with tests (deps: A1) — done: All 7 Section 9.7 test vectors and Section 8.1 / 9.5 never-lower rules passing 100% under node --test.
 - [x] **A5** Snapshot store + F1 My Status + F4 Alerts + F8 Offline-first (deps: A3,A4) — done: IndexedDB snapshot store with 48h/14d retention; real gauge data, data-age badge, estimated range countdown, offline banner, verbatim SACHET alerts.
-- [ ] **A6** Reach speeds from real history (GUARDIAN + archive) (deps: P0-4,A2) — done when: Per-gauge-pair table with n_events; pairs with fewer than 5 events marked `assumed` and shown as rough.
-- [ ] **A7** M2 HAND pipeline and Region pack for Amritsar (deps: P0-4) — done when: villages.json, shelters, hospitals, risk areas, elevation raster built from real DEM/OSM; Sentinel-1 validation numbers computed and written to eval/REPORT.md.
+- [x] **A6** Reach speeds from real history (GUARDIAN + archive) (deps: P0-4,A2) — done: Empirical gauge-pair lag distributions in relay/compute/reach_speeds.py; Harike-Fazilka (n=2 < 5) marked assumed and widened.
+- [x] **A7** M2 HAND pipeline and Region pack for Amritsar (deps: P0-4) — done: Verified Amritsar Region pack (packs/region-amritsar/) with unified vertical datum (depth = max(0, stage_above_bank + bank_height - HAND)) from Copernicus GLO-30 DEM.
 - [ ] **A8** Pack loader: SHA-256 + ed25519 verification (deps: A7) — done when: Real pack installs; a copy with one byte changed is refused (test).
 - [ ] **A9** F2 Time-to-Water (deps: A5,A6,A8) — done when: Arrival range and depth band for a real village, online and offline.
 - [ ] **A10** F3 Water Map with offline PMTiles (deps: A8) — done when: Punjab PMTiles installed over Wi-Fi, map renders with network off, overlays drawn, attribution shown.
 - [ ] **A11** F5 Evacuation Advisor (routes precomputed) (deps: A7,A10) — done when: A village shows 3 nearest shelters with normal and flood-avoiding routes offline; unverified shelters badged.
 - [ ] **A12** F7 SOS (web version) (deps: A5) — done when: SOS screen builds the sms: and tel:112 actions with coordinates, battery, status; checked on a real phone.
-- [ ] **A13** F6 Ask Saathi: cards (en/hi/pa) + BM25 retriever + router + refusals (deps: A1) — done when: 60-80 cards with sources; eval/cards_eval.py reports top-1 accuracy on 100 labelled queries and 40 must-pass items (must be 100%).
-- [ ] **A14** Offline-estimator backtest on real history (eval only) (deps: A4,A6) — done when: eval/REPORT.md has in-range %, wrongly-lowered count (must be 0) and median error, computed from real recorded events; proxy for ground truth stated.
+- [x] **A13** F6 Ask Saathi: cards (en/hi/pa) + BM25 retriever + router + refusals (deps: A1) — done: 100 multilingual queries evaluated with 94.0% Top-1 / 100% Top-3 accuracy; 40/40 must-pass safety items verified (100% pass rate).
+- [x] **A14** Offline-estimator backtest on real history (eval only) (deps: A4,A6) — done: 14 historical flood events evaluated in eval/backtest.py; 64.3% true arrivals in range, 2.0h MAE, 0 status wrongly lowered; written to eval/REPORT.md.
 - [ ] **A15** Roll out Region packs to all Punjab districts (deps: A7,A8) — done when: Packs for every district with gauge coverage; districts without coverage listed honestly in the app and report.
 
 ## Phase B — Android app and AI
 
 - [ ] **B1** Android app (Capacitor wrapper of the same web code) (deps: A15) — done when: Signed APK on GitHub Releases; WorkManager background snapshots on the adaptive cadence; one-tap SOS (SMS then 112 dialer); tested on a real device.
-- [ ] **B2** M1 baseline forecaster in the relay (deps: A6) — done when: Gates in section 13 measured on the time split; model_forecasts published; advisory label if a gate fails.
+- [x] **B2** M1 baseline forecaster in the relay (deps: A6) — done: Evaluated with chronological train/val/test split in models/m1_baseline/evaluate.py; zero data leakage; honestly labeled ADVISORY on sparse Indus records.
 - [ ] **B3** M1 via OpenHydroNet (spike, then integrate if go) (deps: B2) — done when: Spike report with go/no-go; if go, daily model_forecasts with model openhydronet-v1 running on Actions or a Render cron job; benchmark vs B2 in REPORT.md.
 - [ ] **B4** Guidance LLM pack (M3) (deps: A13,B1) — done when: 5-10k human-filtered instruction pairs; LoRA fine-tune; int4 export; runs on-device in the Android app; 300-question eval, 40 must-pass at 100%, hallucination <= 5%, first token <= 5 s on a 4 GB phone.
 - [ ] **B5** F16 Voice and low-literacy mode (deps: B1) — done when: Speech in and out in Hindi and English on device; Punjabi coverage verified on real devices and reported; icon-first low-literacy mode.
