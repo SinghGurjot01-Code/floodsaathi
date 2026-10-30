@@ -72,6 +72,11 @@ def load_and_verify_dataset(path: pathlib.Path) -> List[Dict[str, Any]]:
             if not line:
                 continue
             item = json.loads(line)
+            # Normalize field names
+            if "prompt" not in item and "instruction" in item:
+                item["prompt"] = item["instruction"]
+            if "verified_source" not in item and "source" in item:
+                item["verified_source"] = item["source"]
             for req in ["prompt", "response", "category", "verified_source"]:
                 if req not in item or not item[req]:
                     raise ValueError(f"Line {idx} missing required field '{req}'")

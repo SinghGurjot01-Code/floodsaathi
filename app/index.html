@@ -8,8 +8,8 @@
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
   <title>FloodSaathi – Offline Flood Early-Warning</title>
-  <link rel="stylesheet" href="./css/main.css?v=1.5.0">
-  <link rel="stylesheet" href="./css/status.css?v=1.5.0">
+  <link rel="stylesheet" href="./css/main.css?v=1.6.0">
+  <link rel="stylesheet" href="./css/status.css?v=1.6.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script>
     if ('serviceWorker' in navigator) {
@@ -71,6 +71,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span>Preferences</span>
         </button>
+        <button class="nav-tab-btn" data-tab="downloads">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span data-i18n="nav.downloads">Downloads</span>
+        </button>
         <button class="nav-tab-btn desktop-sos-tab-btn" data-tab="sos">
           <span>SOS</span>
         </button>
@@ -121,7 +125,19 @@
                     <div class="location-sub" id="loc-state-name">Punjab (Beas Basin)</div>
                   </div>
                 </div>
-                <button class="bell-btn" id="btn-hero-bell" aria-label="Alerts Notification"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg><i id="alerts-count-badge">0</i></button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <button class="btn-resync-gps" id="btn-resync-gps" title="Re-sync device GPS location" aria-label="Re-sync GPS">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M23 12a11.05 11.05 0 0 0-22 0zm-5 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"/><circle cx="12" cy="12" r="2"/></svg>
+                    <span>Re-sync GPS</span>
+                  </button>
+                  <button class="bell-btn" id="btn-hero-bell" aria-label="Alerts Notification"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg><i id="alerts-count-badge">0</i></button>
+                </div>
+              </div>
+
+              <!-- Transparent Telemetry Proximity Indicator (R2) -->
+              <div class="telemetry-proximity-banner" id="telemetry-proximity-banner">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+                <span id="telemetry-proximity-text">Your location: Taman, Jalandhar · Hydrologic telemetry from: CWC Beas Gauge (3.8 km away)</span>
               </div>
 
               <div class="status-headline-wrap">
@@ -487,6 +503,17 @@
                 <div style="font-size: 13px; color: var(--mut);">Notification radius, dam release, offline packs</div>
               </div>
             </button>
+
+            <!-- Offline Packs & Plugins Downloader Link (R1) -->
+            <button class="action-report-btn" style="flex-direction: row; justify-content: flex-start; padding: 16px;" id="nav-to-downloads">
+              <div class="metric-icon" style="background:#eff6ff; color:#2563eb; width:40px; height:40px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              </div>
+              <div style="text-align: left; margin-left: 10px;">
+                <strong style="font-size: 16px;">Offline Packs & Plugins</strong>
+                <div style="font-size: 13px; color: var(--mut);">Offline maps, AI model, language packs, python engine</div>
+              </div>
+            </button>
           </div>
 
           <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--mut); line-height: 1.5;">
@@ -598,6 +625,171 @@
         </div>
       </section>
 
+      <!-- =========================================
+           SUB-VIEW: PACKS & PLUGINS DOWNLOADER (R1)
+           ========================================= -->
+      <section class="view-section" id="view-downloads">
+        <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
+          <button class="lang-btn" id="btn-back-from-downloads" style="width: auto; padding: 0 10px;">&larr; Back</button>
+          <h2 style="font-size: 18px; font-weight: 700;">Packs & Plugins Manager</h2>
+        </div>
+        <div class="downloads-container">
+          <div class="downloads-header-intro">
+            <p style="font-size: 13.5px; color: var(--mut); line-height: 1.45;">Download offline map tiles, local SLM AI model weights, execution engines, and regional language packs for 100% offline emergency preparedness.</p>
+          </div>
+
+          <div class="plugins-grid">
+            <!-- 1. Offline Map Pack (RECOMMENDED) -->
+            <div class="plugin-card recommended">
+              <div class="plugin-card-top">
+                <div class="plugin-icon" style="background:#eff6ff; color:#2563eb;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+                </div>
+                <div class="plugin-meta">
+                  <div class="plugin-badge-row">
+                    <span class="plugin-badge rec">Recommended</span>
+                    <span class="plugin-badge" id="map-pack-status-badge">Ready to Cache</span>
+                  </div>
+                  <h3 class="plugin-title">Punjab Offline Vector Map Pack</h3>
+                  <p class="plugin-desc">High-contrast OpenStreetMap vector tiles with rivers, embankments, elevation contours, and safe evacuation paths.</p>
+                </div>
+              </div>
+
+              <div class="plugin-config-box">
+                <label style="font-size: 12.5px; font-weight: 700; color: var(--navy); display: block; margin-bottom: 6px;">Select Area Radius:</label>
+                <div class="radius-selector-row">
+                  <button class="radius-pill" data-radius="10" data-mb="12">10 km (~12 MB)</button>
+                  <button class="radius-pill active" data-radius="25" data-mb="28">25 km (~28 MB)</button>
+                  <button class="radius-pill" data-radius="50" data-mb="65">50 km (~65 MB)</button>
+                  <button class="radius-pill" data-radius="100" data-mb="140">100 km (~140 MB)</button>
+                </div>
+                <div class="plugin-stat-row">
+                  <span>Selected Download Size: <strong id="map-selected-size-text">28 MB</strong></span>
+                  <span id="map-storage-usage-text">Storage: IndexedDB Cached</span>
+                </div>
+              </div>
+
+              <div class="plugin-actions">
+                <button class="btn-plugin-download" id="btn-download-map-pack-plugin">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                  <span>Download Map Pack</span>
+                </button>
+              </div>
+
+              <!-- Progress bar -->
+              <div class="plugin-progress-wrap" id="map-plugin-progress-wrap" style="display:none;">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill" id="map-plugin-progress-fill" style="width: 0%;"></div>
+                </div>
+                <div class="progress-info-row">
+                  <span id="map-plugin-progress-msg">Caching vector tiles...</span>
+                  <span id="map-plugin-progress-pct">0%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. FloodSaathi SLM AI Model -->
+            <div class="plugin-card">
+              <div class="plugin-card-top">
+                <div class="plugin-icon" style="background:#f3e8ff; color:#7c3aed;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/></svg>
+                </div>
+                <div class="plugin-meta">
+                  <div class="plugin-badge-row">
+                    <span class="plugin-badge active">Active Model</span>
+                    <span class="plugin-badge size">~340 MB (Int4)</span>
+                  </div>
+                  <h3 class="plugin-title">FloodSaathi SLM (Qwen2.5-0.5B-Instruct)</h3>
+                  <p class="plugin-desc">On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.</p>
+                </div>
+              </div>
+              <div class="plugin-config-box">
+                <div class="plugin-stat-row">
+                  <span>Engine: <strong>ONNX Int4 / WebAssembly</strong></span>
+                  <span>Target: <strong>D:\FloodSaathi_AI\models</strong></span>
+                </div>
+                <p style="font-size: 12px; color: var(--mut); margin-top: 6px;">Runs 100% locally in browser memory without sending private village data to any cloud.</p>
+              </div>
+              <div class="plugin-actions">
+                <button class="btn-plugin-download sec" id="btn-toggle-ai-model">
+                  <span>Model Active (M5 Deterministic Core Ready)</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Python Runtime / Local Engine -->
+            <div class="plugin-card">
+              <div class="plugin-card-top">
+                <div class="plugin-icon" style="background:#fef3c7; color:#d97706;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <div class="plugin-meta">
+                  <div class="plugin-badge-row">
+                    <span class="plugin-badge">Local Engine</span>
+                    <span class="plugin-badge size">~18 MB</span>
+                  </div>
+                  <h3 class="plugin-title">Python Runtime & Hydrologic Compute Bridge</h3>
+                  <p class="plugin-desc">Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.</p>
+                </div>
+              </div>
+              <div class="plugin-config-box">
+                <div class="plugin-stat-row">
+                  <span>Execution: <strong>Web Worker / Pyodide</strong></span>
+                  <span>Status: <strong style="color:var(--green);">Runtime Ready</strong></span>
+                </div>
+              </div>
+              <div class="plugin-actions">
+                <button class="btn-plugin-download sec" id="btn-check-python-runtime">
+                  <span>Runtime Verified & Active</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- 4. Regional Language Packs (RECOMMENDED) -->
+            <div class="plugin-card recommended">
+              <div class="plugin-card-top">
+                <div class="plugin-icon" style="background:#eefbf4; color:#16a34a;">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div class="plugin-meta">
+                  <div class="plugin-badge-row">
+                    <span class="plugin-badge rec">Recommended</span>
+                    <span class="plugin-badge active">Installed</span>
+                  </div>
+                  <h3 class="plugin-title">Regional Language Packs (Hindi & Punjabi Gurmukhi)</h3>
+                  <p class="plugin-desc">Offline disaster vocabulary, Devanagari & Gurmukhi script fonts, and pre-translated emergency cards. English is built-in.</p>
+                </div>
+              </div>
+              <div class="plugin-config-box">
+                <div style="display:flex; flex-direction:column; gap:8px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
+                    <div>
+                      <strong>ਪੰਜਾਬੀ (Punjabi Gurmukhi)</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~4.2 MB · Noto Sans Gurmukhi</span>
+                    </div>
+                    <span class="plugin-badge active" style="font-size:11px;">Active</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:#f8fafc; border-radius:10px; font-size:13px;">
+                    <div>
+                      <strong>हिन्दी (Hindi Devanagari)</strong>
+                      <span style="font-size:11.5px; color:var(--mut); margin-left:6px;">~3.9 MB · Noto Sans Devanagari</span>
+                    </div>
+                    <span class="plugin-badge active" style="font-size:11px;">Active</span>
+                  </div>
+                </div>
+              </div>
+              <div class="plugin-actions">
+                <button class="btn-plugin-download" id="btn-sync-lang-packs">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6M3 12a9 9 0 0 1 15-6.7L21 8M3 22v-6h6M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+                  <span>Re-Sync Regional Packs</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
     </div>
 
     <!-- Floating Emergency SOS Button (always accessible from Home) -->
@@ -629,6 +821,6 @@
 
   </div>
 
-  <script type="module" src="./js/main.js?v=1.5.0"></script>
+  <script type="module" src="./js/main.js?v=1.6.0"></script>
 </body>
 </html>

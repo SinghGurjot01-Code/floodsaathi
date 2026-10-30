@@ -331,7 +331,50 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
+}
+
+.btn-resync-gps {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--line);
+  color: var(--navy);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-resync-gps:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+}
+
+.btn-resync-gps.spinning svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.telemetry-proximity-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(37, 99, 235, 0.15);
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #1e3a8a;
+  font-weight: 500;
 }
 
 .location-text {
@@ -1404,4 +1447,206 @@ body {
     margin: 0 auto;
     padding: 24px;
   }
+}
+
+/* =========================================================
+   DOWNLOADS & PLUGINS VIEW (R1)
+   ========================================================= */
+.downloads-container {
+  padding: 20px;
+  overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.downloads-header-intro {
+  margin-bottom: 20px;
+}
+
+.plugins-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .plugins-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+.plugin-card {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 2px 10px rgba(18, 23, 43, 0.04);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.plugin-card.recommended {
+  border-color: #93c5fd;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+}
+
+.plugin-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(18, 23, 43, 0.08);
+}
+
+.plugin-card-top {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.plugin-icon {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.plugin-meta {
+  flex: 1;
+}
+
+.plugin-badge-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 6px;
+  flex-wrap: wrap;
+}
+
+.plugin-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #f1f3f7;
+  color: var(--mut);
+}
+
+.plugin-badge.rec {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.plugin-badge.active {
+  background: #eefbf4;
+  color: #16a34a;
+}
+
+.plugin-badge.size {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.plugin-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+
+.plugin-desc {
+  font-size: 12.5px;
+  color: var(--mut);
+  line-height: 1.4;
+}
+
+.plugin-config-box {
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 14px;
+}
+
+.radius-selector-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.radius-pill {
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #ffffff;
+  color: var(--body);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.radius-pill:hover {
+  border-color: #94a3b8;
+}
+
+.radius-pill.active {
+  background: var(--navy);
+  color: #ffffff;
+  border-color: var(--navy);
+}
+
+.plugin-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--mut);
+}
+
+.plugin-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-plugin-download {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--navy);
+  color: #ffffff;
+  border: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-plugin-download:hover {
+  background: var(--ink2);
+}
+
+.btn-plugin-download.sec {
+  background: #f1f3f7;
+  color: var(--navy);
+  cursor: default;
+}
+
+.plugin-progress-wrap {
+  margin-top: 10px;
+}
+
+.progress-info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--mut);
+  margin-top: 4px;
 }
