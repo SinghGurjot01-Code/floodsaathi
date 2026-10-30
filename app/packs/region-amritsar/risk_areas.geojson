@@ -1,0 +1,42 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "risk-ravi-ajnala",
+      "properties": {
+        "hazard": "riverine_flood",
+        "river": "Ravi",
+        "risk_level": "High",
+        "description": "Low-lying river meander active floodplain adjacent to Ajnala"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              74.71,
+              31.83
+            ],
+            [
+              74.74,
+              31.87
+            ],
+            [
+              74.77,
+              31.86
+            ],
+            [
+              74.74,
+              31.81
+            ],
+            [
+              74.71,
+              31.83
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

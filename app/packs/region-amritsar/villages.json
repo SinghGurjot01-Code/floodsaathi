@@ -1,0 +1,275 @@
+[
+  {
+    "id": "pb-asr-ajnala",
+    "name": {
+      "en": "Ajnala",
+      "hi": "अजनाला",
+      "pa": "ਅਜਨਾਲਾ"
+    },
+    "lat": 31.84,
+    "lon": 74.76,
+    "elevation_m": 231.0,
+    "channel_bed_m": 226.0,
+    "bank_m": 229.5,
+    "bank_height_above_channel": 3.5,
+    "river_id": "ravi",
+    "river_dist_km": 4.2,
+    "hand_m": 5.0,
+    "river_km_from_gauge": {
+      "G_RSD": 78.5,
+      "G_HARIKE": 94.0
+    },
+    "stage_depth": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.5,
+        0.0
+      ],
+      [
+        2.0,
+        0.5
+      ],
+      [
+        3.0,
+        1.5
+      ],
+      [
+        4.0,
+        2.5
+      ]
+    ],
+    "shelters": [
+      "shelter-asr-001",
+      "shelter-asr-002"
+    ]
+  },
+  {
+    "id": "pb-asr-ramdas",
+    "name": {
+      "en": "Ramdas",
+      "hi": "रामदास",
+      "pa": "ਰਾਮਦਾਸ"
+    },
+    "lat": 31.97,
+    "lon": 74.92,
+    "elevation_m": 235.0,
+    "channel_bed_m": 230.5,
+    "bank_m": 233.5,
+    "bank_height_above_channel": 3.0,
+    "river_id": "ravi",
+    "river_dist_km": 3.1,
+    "hand_m": 4.5,
+    "river_km_from_gauge": {
+      "G_RSD": 58.0,
+      "G_HARIKE": 115.0
+    },
+    "stage_depth": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.5,
+        0.0
+      ],
+      [
+        2.0,
+        0.5
+      ],
+      [
+        3.0,
+        1.5
+      ],
+      [
+        4.0,
+        2.5
+      ]
+    ],
+    "shelters": [
+      "shelter-asr-001"
+    ]
+  },
+  {
+    "id": "pb-asr-lopoke",
+    "name": {
+      "en": "Lopoke",
+      "hi": "लोपोके",
+      "pa": "ਲੋਪੋਕੇ"
+    },
+    "lat": 31.73,
+    "lon": 74.62,
+    "elevation_m": 224.0,
+    "channel_bed_m": 220.0,
+    "bank_m": 223.0,
+    "bank_height_above_channel": 3.0,
+    "river_id": "ravi",
+    "river_dist_km": 5.8,
+    "hand_m": 4.0,
+    "river_km_from_gauge": {
+      "G_RSD": 96.0,
+      "G_HARIKE": 78.0
+    },
+    "stage_depth": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.5,
+        0.5
+      ],
+      [
+        2.0,
+        1.0
+      ],
+      [
+        3.0,
+        2.0
+      ],
+      [
+        4.0,
+        3.0
+      ]
+    ],
+    "shelters": [
+      "shelter-asr-003"
+    ]
+  },
+  {
+    "id": "pb-asr-majitha",
+    "name": {
+      "en": "Majitha",
+      "hi": "मजीठा",
+      "pa": "ਮਜੀਠਾ"
+    },
+    "lat": 31.76,
+    "lon": 74.95,
+    "elevation_m": 237.0,
+    "channel_bed_m": 229.0,
+    "bank_m": 233.0,
+    "bank_height_above_channel": 4.0,
+    "river_id": "ravi_tributary",
+    "river_dist_km": 14.5,
+    "hand_m": 8.0,
+    "river_km_from_gauge": {
+      "G_RSD": 82.0,
+      "G_HARIKE": 86.0
+    },
+    "stage_depth": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.5,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        0.0
+      ],
+      [
+        4.0,
+        0.0
+      ]
+    ],
+    "shelters": [
+      "shelter-asr-002",
+      "shelter-asr-004"
+    ]
+  },
+  {
+    "id": "pb-asr-attari",
+    "name": {
+      "en": "Attari",
+      "hi": "अटारी",
+      "pa": "ਅਟਾਰੀ"
+    },
+    "lat": 31.6,
+    "lon": 74.6,
+    "elevation_m": 223.0,
+    "channel_bed_m": 218.0,
+    "bank_m": 221.0,
+    "bank_height_above_channel": 3.0,
+    "river_id": "ravi_basin",
+    "river_dist_km": 11.2,
+    "hand_m": 5.0,
+    "river_km_from_gauge": {
+      "G_RSD": 112.0,
+      "G_HARIKE": 64.0
+    },
+    "stage_depth": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.5,
+        0.0
+      ],
+      [
+        1.0,
+        0.0
+      ],
+      [
+        1.5,
+        0.0
+      ],
+      [
+        2.0,
+        0.0
+      ],
+      [
+        3.0,
+        1.0
+      ],
+      [
+        4.0,
+        2.0
+      ]
+    ],
+    "shelters": [
+      "shelter-asr-003",
+      "shelter-asr-004"
+    ]
+  }
+]

@@ -189,16 +189,20 @@ export function computeOfflineEstimate({
       projectedCrossingH = (danger_m - level_m) / trend_m_per_h;
     }
 
-    // Ground check: rise = projected_level - bank_m
-    // If bank_m and village.hand_m exist and rise < hand_m -> "likely below ground level"
+    // Unified Vertical Datum Ground Check (Phase 3 P1 correction)
+    // water_head = (projected_level - bank_m) + bank_height_above_channel
+    // If water_head < village.hand_m -> water remains below village ground level.
     let groundCheck = null;
     const effectiveBankM = (bank_m !== null && bank_m !== undefined) 
       ? bank_m 
       : (village && village.bank_m !== null && village.bank_m !== undefined ? village.bank_m : null);
 
     if (effectiveBankM !== null && village && village.hand_m !== null && village.hand_m !== undefined) {
-      const rise = projectedLevel - effectiveBankM;
-      if (rise < village.hand_m) {
+      const stageAboveBank = projectedLevel - effectiveBankM;
+      const bankHeight = village.bank_height_above_channel ?? 0.0;
+      const effectiveWaterHead = stageAboveBank + bankHeight;
+
+      if (effectiveWaterHead < village.hand_m) {
         groundCheck = "likely_below_ground"; // "Water likely to stay below your ground level"
       } else {
         groundCheck = "potential_inundation";

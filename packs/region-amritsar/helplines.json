@@ -1,0 +1,36 @@
+{
+  "schema": "floodsaathi.helplines.v1",
+  "note": "Numbers from PRD section 9/14. State and district numbers vary: verify per state and set last_verified. Unverified entries must not be shown as fact.",
+  "items": [
+    {
+      "number": "112",
+      "name": "National emergency number",
+      "scope": "national",
+      "last_verified": null,
+      "verified": false
+    },
+    {
+      "number": "1078",
+      "name": "NDMA",
+      "scope": "national",
+      "last_verified": null,
+      "verified": false
+    },
+    {
+      "number": "1070",
+      "name": "State disaster control room",
+      "scope": "state",
+      "state": null,
+      "last_verified": null,
+      "verified": false
+    },
+    {
+      "number": "1077",
+      "name": "District disaster control room",
+      "scope": "district",
+      "district": null,
+      "last_verified": null,
+      "verified": false
+    }
+  ]
+}

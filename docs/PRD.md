@@ -402,12 +402,23 @@ Honest caveats: this is a daily-resolution model, so it cannot give hourly arriv
 
 ### 10.3 M2 HAND pipeline (Python, `models/m2_hand/`)
 1. Download Copernicus GLO-30 tiles covering the pilot district plus margin (SRTM as fallback).
+   - **Vertical Datum**: EGM2008 geoid (Copernicus DEM GLO-30).
+   - **Definitions**:
+     * `channel_bed_m`: Elevation of river channel thalweg bed relative to DEM datum (m).
+     * `bank_m`: Elevation of river channel bank crest relative to DEM datum (m).
+     * `bank_height_above_channel`: Height of bank above channel bed ($H_{\text{bank}} = \text{bank\_m} - \text{channel\_bed\_m}$).
+     * `ground_m`: Local village ground elevation relative to DEM datum (m).
+     * `hand_m`: Height Above Nearest Drainage ($\text{HAND} = \text{ground\_m} - \text{channel\_bed\_m}$).
+     * `stage_above_bank`: Water stage above bank crest ($h_{\text{above\_bank}}$).
 2. Condition the DEM, derive flow direction/accumulation, extract channels (threshold tuned so Beas/Sutlej/Ravi main stems appear), compute HAND (`pysheds` or WhiteboxTools).
 3. For each village (from OSM `place=village|hamlet`, deduplicate; names in en/hi/pa where tagged, else transliterate and mark `name_auto: true`) sample elevation and HAND at the centroid (and p10 of cells in a 300 m radius).
 4. `river_km_from_gauge`: snap each village to the nearest main-stem channel cell and compute along-river distance to each pilot gauge. Fallback: straight-line × 1.3, flagged rough.
-5. `stage_depth`: for stages `h = 0, 0.5, 1, 1.5, 2, 3, 4 m` above bank, depth at village = max(0, h − hand_m).
+5. **Unified Stage-Depth Formulation**:
+   For stages $h_{\text{above\_bank}} = 0, 0.5, 1, 1.5, 2, 3, 4\text{ m}$ above bank:
+   $$\text{depth} = \max\left(0, (h_{\text{above\_bank}} + H_{\text{bank}}) - \text{HAND}\right)$$
+   This ensures river stage and floodplain water elevation are not treated as interchangeable, and the channel bed datum cancels out cleanly: $(h_{\text{above\_bank}} + \text{bank\_m} - \text{channel\_bed\_m}) - (\text{ground\_m} - \text{channel\_bed\_m}) = h_{\text{above\_bank}} + \text{bank\_m} - \text{ground\_m}$.
 6. Validate: compare cells flooded at the 2025 peak stage against Sentinel-1 flood masks you build (Copernicus Data Space or Google Earth Engine). Report village recall and pixel IoU in `eval/REPORT.md`.
-Caveat: Punjab is flat and a 30 m DEM's vertical error is comparable to flood depths, so HAND is indicative. If recall < 80% or IoU < 0.6, label depth bands "advisory" in the app.
+Caveat: Punjab is flat and a 30 m DEM's vertical error ($\pm 1\text{--}2\text{ m}$) is comparable to flood depths, so HAND is indicative. If recall < 80% or IoU < 0.6, label depth bands "advisory" in the app.
 
 ### 10.4 Reach speeds
 For each consecutive gauge pair, from history (GUARDIAN or archive): find events where the upstream gauge crossed warning, find the downstream crossing, compute lag, convert to km/h with the river-km between gauges. Store median, p25, p75, `n_events`. If `n_events < 5`, set `basis: "assumed"` and widen the range, shown as "rough".

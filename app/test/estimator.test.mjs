@@ -183,6 +183,34 @@ test("Vector 7: bank_m null -> ground check skipped, no below ground level text"
   assert.equal(res.projection.ground_check, null, "Ground check must be null when bank_m is null");
 });
 
+test("Vector 8: Unified vertical datum HAND ground check", () => {
+  // Case A: Stage above bank (1.0m) + bank_height (3.0m) = 4.0m < HAND (4.5m) -> likely_below_ground
+  const resA = computeOfflineEstimate({
+    now: "2026-08-30T12:00:00+05:30",
+    observed_at: "2026-08-30T10:00:00+05:30",
+    level_m: 234.5,
+    warning_m: 234.0,
+    danger_m: 236.0,
+    bank_m: 233.5,
+    village: { hand_m: 4.5, bank_m: 233.5, bank_height_above_channel: 3.0 },
+    source_age_hours: 2
+  });
+  assert.equal(resA.projection.ground_check, "likely_below_ground");
+
+  // Case B: Stage above bank (2.0m) + bank_height (3.0m) = 5.0m >= HAND (4.5m) -> potential_inundation
+  const resB = computeOfflineEstimate({
+    now: "2026-08-30T12:00:00+05:30",
+    observed_at: "2026-08-30T10:00:00+05:30",
+    level_m: 235.5,
+    warning_m: 234.0,
+    danger_m: 236.0,
+    bank_m: 233.5,
+    village: { hand_m: 4.5, bank_m: 233.5, bank_height_above_channel: 3.0 },
+    source_age_hours: 2
+  });
+  assert.equal(resB.projection.ground_check, "potential_inundation");
+});
+
 test("Status rules: Extreme SACHET alert triggers Danger", () => {
   const raw = computeRawStatus({
     gauges: [{ id: "G1", level_m: 2.0, warning_m: 3.5, danger_m: 4.0, trend_m_per_h: 0 }],

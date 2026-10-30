@@ -1,0 +1,59 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "hosp-asr-001",
+      "properties": {
+        "name": "Civil Hospital Amritsar",
+        "phone": "0183-2563333",
+        "verified": true,
+        "beds": 250,
+        "source": "Government of Punjab Health Department"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.876,
+          31.631
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hosp-asr-002",
+      "properties": {
+        "name": "Guru Nanak Dev Hospital / Govt Medical College",
+        "phone": "0183-2571734",
+        "verified": true,
+        "beds": 1000,
+        "source": "Government of Punjab Health Department"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.858,
+          31.649
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "hosp-asr-003",
+      "properties": {
+        "name": "Sub-Divisional Hospital Ajnala",
+        "phone": "01858-221234",
+        "verified": true,
+        "beds": 50,
+        "source": "Amritsar District Administration"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.762,
+          31.838
+        ]
+      }
+    }
+  ]
+}

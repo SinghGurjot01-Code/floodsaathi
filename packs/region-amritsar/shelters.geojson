@@ -1,0 +1,77 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "shelter-asr-001",
+      "properties": {
+        "name": "Govt Senior Secondary School Ajnala (High Ground)",
+        "elevation_m": 233.0,
+        "capacity": 500,
+        "verified": true,
+        "source": "Punjab SDMA District Disaster Management Plan"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.765,
+          31.842
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shelter-asr-002",
+      "properties": {
+        "name": "Community Centre Majitha",
+        "elevation_m": 238.0,
+        "capacity": 400,
+        "verified": true,
+        "source": "Amritsar District Administration"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.952,
+          31.762
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shelter-asr-003",
+      "properties": {
+        "name": "Govt College Attari",
+        "elevation_m": 225.0,
+        "capacity": 600,
+        "verified": true,
+        "source": "Amritsar District Administration"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.605,
+          31.602
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "shelter-asr-004",
+      "properties": {
+        "name": "Red Cross Bhawan Amritsar",
+        "elevation_m": 234.0,
+        "capacity": 300,
+        "verified": false,
+        "source": "Unverified — confirm with district office"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          74.872,
+          31.633
+        ]
+      }
+    }
+  ]
+}

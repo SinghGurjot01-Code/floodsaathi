@@ -1,0 +1,92 @@
+{
+  "pb-asr-ajnala": {
+    "normal": [
+      {
+        "shelter_id": "shelter-asr-001",
+        "km": 0.8,
+        "minutes": 10,
+        "geometry": [
+          [
+            74.76,
+            31.84
+          ],
+          [
+            74.765,
+            31.842
+          ]
+        ],
+        "description": "Via Main Market Road to High School ground"
+      }
+    ],
+    "avoid": [
+      {
+        "shelter_id": "shelter-asr-001",
+        "km": 1.2,
+        "minutes": 15,
+        "geometry": [
+          [
+            74.76,
+            31.84
+          ],
+          [
+            74.768,
+            31.845
+          ],
+          [
+            74.765,
+            31.842
+          ]
+        ],
+        "description": "Via Eastern Bypass ridge (elevated road avoiding western nallah)"
+      }
+    ],
+    "avoid_status": "ok"
+  },
+  "pb-asr-ramdas": {
+    "normal": [
+      {
+        "shelter_id": "shelter-asr-001",
+        "km": 18.5,
+        "minutes": 35,
+        "geometry": [
+          [
+            74.92,
+            31.97
+          ],
+          [
+            74.84,
+            31.9
+          ],
+          [
+            74.765,
+            31.842
+          ]
+        ],
+        "description": "Via SH 21 Ramdas-Ajnala Highway"
+      }
+    ],
+    "avoid": [
+      {
+        "shelter_id": "shelter-asr-001",
+        "km": 22.0,
+        "minutes": 45,
+        "geometry": [
+          [
+            74.92,
+            31.97
+          ],
+          [
+            74.95,
+            31.88
+          ],
+          [
+            74.765,
+            31.842
+          ]
+        ],
+        "description": "Via Majitha ridge road avoiding Ravi embankment low ground"
+      }
+    ],
+    "avoid_status": "ok"
+  }
+}

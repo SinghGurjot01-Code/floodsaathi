@@ -1,0 +1,51 @@
+{
+  "id": "region-amritsar",
+  "name": "Amritsar District Hydrologic Pack",
+  "region": "punjab",
+  "district": "amritsar",
+  "version": "1.1.0",
+  "size_bytes": 11104,
+  "min_ram_mb": 64,
+  "languages": [
+    "en",
+    "hi",
+    "pa"
+  ],
+  "licence": "ODbL (OSM) / Open Government Data (OGD) / Copernicus DEM",
+  "vertical_datum": "EGM2008 (Copernicus DEM GLO-30)",
+  "accuracy_label": "Advisory (Flat floodplain indicative HAND)",
+  "files": [
+    {
+      "path": "villages.json",
+      "sha256": "10968e4dca2e541da9ee3e8975e5153dfe7cf01d372a27d513ca9cd9ff306a33",
+      "size_bytes": 4424
+    },
+    {
+      "path": "hospitals.geojson",
+      "sha256": "894910b3be9933b00e87d2879e4975c6c33ffc500727d6e02056589088cc46f9",
+      "size_bytes": 1341
+    },
+    {
+      "path": "shelters.geojson",
+      "sha256": "c8ddb6edad4fd172ff124e584af6281d0dc6f2878a507e8525f9b881678d277c",
+      "size_bytes": 1779
+    },
+    {
+      "path": "risk_areas.geojson",
+      "sha256": "c2e986b7737bee6d92c455607082a33e27b6faeb48b928caa376c9525bce4d57",
+      "size_bytes": 835
+    },
+    {
+      "path": "routes.json",
+      "sha256": "87b5d09c36eee7e244ad3434bcec246376a3e109a4dae3f8ed6fb49c15169c08",
+      "size_bytes": 1801
+    },
+    {
+      "path": "helplines.json",
+      "sha256": "0f87c4de96590d0a02b5f37cf487ba295d022c000da5fcd2b9251f8c9c1fc2dc",
+      "size_bytes": 924
+    }
+  ],
+  "created_at": "2026-10-30T16:53:00+05:30",
+  "changelog": "v1.1.0: Corrected unified vertical datum (bank_height_above_channel) and real surveyed OSM nodes."
+}
