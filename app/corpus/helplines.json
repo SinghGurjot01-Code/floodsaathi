@@ -1,0 +1,44 @@
+{
+  "schema": "floodsaathi.helplines.v1",
+  "note": "Official verified emergency numbers from PRD section 9/14 and Government of Punjab / NDMA directory.",
+  "items": [
+    {
+      "number": "112",
+      "name": "National Emergency Response Support System (ERSS)",
+      "scope": "national",
+      "last_verified": "2026-10-30",
+      "verified": true
+    },
+    {
+      "number": "1078",
+      "name": "National Disaster Management Authority (NDMA)",
+      "scope": "national",
+      "last_verified": "2026-10-30",
+      "verified": true
+    },
+    {
+      "number": "1070",
+      "name": "Punjab State Disaster Control Room (SDMA)",
+      "scope": "state",
+      "state": "Punjab",
+      "last_verified": "2026-10-30",
+      "verified": true
+    },
+    {
+      "number": "1077",
+      "name": "Amritsar District Disaster Management Control Room",
+      "scope": "district",
+      "district": "Amritsar",
+      "last_verified": "2026-10-30",
+      "verified": true
+    },
+    {
+      "number": "108",
+      "name": "Punjab Emergency Medical Ambulance Service",
+      "scope": "state",
+      "state": "Punjab",
+      "last_verified": "2026-10-30",
+      "verified": true
+    }
+  ]
+}

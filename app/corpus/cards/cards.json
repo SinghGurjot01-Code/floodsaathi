@@ -1,0 +1,156 @@
+[
+  {
+    "id": "card-water-crossing",
+    "category": "safety",
+    "source": "NDMA / Punjab SDMA Guidelines",
+    "review_status": "verified",
+    "title": {
+      "en": "Never Walk or Drive Through Flood Waters",
+      "hi": "बाढ़ के पानी में कभी न चलें या गाड़ी न चलाएं",
+      "pa": "ਹੜ੍ਹ ਦੇ ਪਾਣੀ ਵਿੱਚ ਕਦੇ ਵੀ ਨਾ ਤੁਰੋ ਜਾਂ ਗੱਡੀ ਨਾ ਚਲਾਓ"
+    },
+    "summary": {
+      "en": "Never walk, wade, swim, or drive through flood waters. Turn around, don't drown.",
+      "hi": "बाढ़ के बहते पानी में कभी प्रवेश न करें। 15 सेमी बहता पानी आपको गिरा सकता है।",
+      "pa": "ਹੜ੍ਹ ਦੇ ਵਗਦੇ ਪਾਣੀ ਵਿੱਚ ਕਦੇ ਵੀ ਨਾ ਵੜੋ। 15 ਸੈਂਟੀਮੀਟਰ ਵਗਦਾ ਪਾਣੀ ਤੁਹਾਨੂੰ ਡੇਗ ਸਕਦਾ ਹੈ।"
+    },
+    "body": {
+      "en": "1. NEVER walk, swim, or drive through moving flood water.\n2. Just 15 cm (6 inches) of moving water can knock you off your feet.\n3. 30 cm (12 inches) can float a car; 60 cm (2 feet) will sweep away SUVs and trucks.\n4. Hidden hazards beneath water include open drains, washed-away culverts, and live electrical cables.\n5. If trapped in a stalled vehicle in rising water, leave the vehicle immediately and seek higher ground.",
+      "hi": "1. बहते बाढ़ के पानी में कभी न चलें, तैरें या गाड़ी न चलाएं।\n2. मात्र 15 सेमी गहरा बहता पानी किसी भी वयस्क को गिरा सकता है।\n3. 30 सेमी पानी कार को बहा सकता है और 60 सेमी पानी बड़े वाहनों को बहा ले जाता है।\n4. पानी के नीचे टूटी सड़कें, खुले गटर और बिजली के तार छिपे हो सकते हैं।\n5. यदि वाहन पानी में फंस जाए तो तुरंत बाहर निकलकर ऊंचे स्थान पर जाएं।",
+      "pa": "1. ਵਗਦੇ ਹੜ੍ਹ ਦੇ ਪਾਣੀ ਵਿੱਚ ਕਦੇ ਵੀ ਨਾ ਤੁਰੋ, ਤੈਰੋ ਜਾਂ ਵਾਹਨ ਨਾ ਚਲਾਓ।\n2. ਸਿਰਫ਼ 15 ਸੈਂਟੀਮੀਟਰ ਡੂੰਘਾ ਵਗਦਾ ਪਾਣੀ ਕਿਸੇ ਵੀ ਵਿਅਕਤੀ ਨੂੰ ਡੇਗ ਸਕਦਾ ਹੈ।\n3. 30 ਸੈਂਟੀਮੀਟਰ ਪਾਣੀ ਕਾਰ ਨੂੰ ਵਹਾ ਸਕਦਾ ਹੈ ਅਤੇ 60 ਸੈਂਟੀਮੀਟਰ ਪਾਣੀ ਵੱਡੀਆਂ ਗੱਡੀਆਂ ਨੂੰ ਰੋੜ੍ਹ ਸਕਦਾ ਹੈ।\n4. ਪਾਣੀ ਹੇਠਾਂ ਟੁੱਟੀਆਂ ਸੜਕਾਂ, ਖੁੱਲ੍ਹੇ ਨਾਲੇ ਅਤੇ ਬਿਜਲੀ ਦੀਆਂ ਨੰਗੀਆਂ ਤਾਰਾਂ ਹੋ ਸਕਦੀਆਂ ਹਨ।\n5. ਜੇਕਰ ਤੁਹਾਡੀ ਗੱਡੀ ਪਾਣੀ ਵਿੱਚ ਫਸ ਜਾਵੇ ਤਾਂ ਤੁਰੰਤ ਬਾਹਰ ਨਿਕਲ ਕੇ ਉੱਚੀ ਥਾਂ 'ਤੇ ਜਾਓ।"
+    },
+    "keywords": ["cross", "crossing", "walk through water", "drive through", "knee deep", "waist deep", "bridge", "swim", "पार करना", "पानी में चलना", "ਗੱਡੀ", "ਲੰਘਣਾ", "ਪਾਣੀ ਵਿੱਚ ਤੁਰਨਾ"]
+  },
+  {
+    "id": "card-drinking-water",
+    "category": "health",
+    "source": "WHO / NDMA Safe Water in Emergencies",
+    "review_status": "verified",
+    "title": {
+      "en": "Safe Drinking Water During Floods",
+      "hi": "बाढ़ के दौरान सुरक्षित पेयजल",
+      "pa": "ਹੜ੍ਹ ਦੌਰਾਨ ਪੀਣ ਵਾਲਾ ਸੁਰੱਖਿਅਤ ਪਾਣੀ"
+    },
+    "summary": {
+      "en": "Do not drink untreated flood or well water. Boil vigorously for at least 1 minute.",
+      "hi": "बाढ़ या कुएं का बिना उबला पानी न पिएं। कम से कम 1 मिनट तक उबालें।",
+      "pa": "ਬਿਨਾਂ ਉਬਾਲਿਆ ਹੜ੍ਹ ਜਾਂ ਖੂਹ ਦਾ ਪਾਣੀ ਨਾ ਪੀਓ। ਘੱਟੋ-ਘੱਟ 1 ਮਿੰਟ ਪਾਣੀ ਨੂੰ ਜ਼ਰੂਰ ਉਬਾਲੋ।"
+    },
+    "body": {
+      "en": "1. Flood water contaminates wells, hand pumps, and pipes with sewage and chemicals.\n2. Never drink tap or well water until declared safe by authorities.\n3. Boil water rapidly for at least 1 full minute before drinking or cooking.\n4. If boiling is impossible, use certified chlorine or water purification tablets according to government instructions.\n5. Store treated water in clean, covered containers.",
+      "hi": "1. बाढ़ का पानी कुओं, हैंडपंपों और पाइपलाइनों को सीवेज से दूषित कर देता है।\n2. जब तक प्रशासन अनुमति न दे, नलों या कुओं का पानी न पिएं।\n3. पीने या खाना बनाने से पहले पानी को कम से कम 1 मिनट तक अच्छी तरह उबालें।\n4. यदि उबालना संभव न हो तो क्लोरीन की गोलियों का उपयोग करें।\n5. साफ पानी को हमेशा ढके हुए बर्तनों में रखें।",
+      "pa": "1. ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਖੂਹਾਂ, ਨਲਕਿਆਂ ਅਤੇ ਪਾਈਪਾਂ ਨੂੰ ਸੀਵਰੇਜ ਨਾਲ ਦੂਸ਼ਿਤ ਕਰ ਦਿੰਦਾ ਹੈ।\n2. ਜਦੋਂ ਤੱਕ ਪ੍ਰਸ਼ਾਸਨ ਨਾ ਕਹੇ, ਨਲਕੇ ਜਾਂ ਖੂਹ ਦਾ ਪਾਣੀ ਸਿੱਧਾ ਨਾ ਪੀਓ।\n3. ਪੀਣ ਜਾਂ ਖਾਣਾ ਬਣਾਉਣ ਤੋਂ ਪਹਿਲਾਂ ਪਾਣੀ ਨੂੰ ਘੱਟੋ-ਘੱਟ 1 ਮਿੰਟ ਚੰਗੀ ਤਰ੍ਹਾਂ ਉਬਾਲੋ।\n4. ਜੇਕਰ ਉਬਾਲਣਾ ਸੰਭਵ ਨਾ ਹੋਵੇ ਤਾਂ ਕਲੋਰੀਨ ਦੀਆਂ ਗੋਲੀਆਂ ਵਰਤੋ।\n5. ਸਾਫ਼ ਪਾਣੀ ਨੂੰ ਹਮੇਸ਼ਾ ਢੱਕ ਕੇ ਸਾਫ਼ ਭਾਂਡਿਆਂ ਵਿੱਚ ਰੱਖੋ।"
+    },
+    "keywords": ["drinking water", "boil water", "contaminated", "well water", "hand pump", "purify", "chlorine", "peene ka pani", "ubalna", "ਪੀਣ ਵਾਲਾ ਪਾਣੀ", "ਉਬਾਲਣਾ", "ਪਾਣੀ ਸਾਫ਼"]
+  },
+  {
+    "id": "card-electrical-safety",
+    "category": "safety",
+    "source": "NDMA Electrical Hazard Guidelines",
+    "review_status": "verified",
+    "title": {
+      "en": "Electrical Hazards & Downed Power Lines",
+      "hi": "बिजली के खतरे और टूटे हुए तार",
+      "pa": "ਬਿਜਲੀ ਦੇ ਖ਼ਤਰੇ ਅਤੇ ਡਿੱਗੀਆਂ ਤਾਰਾਂ"
+    },
+    "summary": {
+      "en": "Stay at least 10 metres away from downed power lines. Turn off main breaker if dry.",
+      "hi": "टूटे हुए बिजली के तारों से कम से कम 10 मीटर दूर रहें। गीले स्विचबोर्ड को न छुएं।",
+      "pa": "ਬਿਜਲੀ ਦੀਆਂ ਟੁੱਟੀਆਂ ਤਾਰਾਂ ਤੋਂ ਘੱਟੋ-ਘੱਟ 10 ਮੀਟਰ ਦੂਰ ਰਹੋ। ਗਿੱਲੇ ਸਵਿੱਚਾਂ ਨੂੰ ਨਾ ਛੂਹੋ।"
+    },
+    "body": {
+      "en": "1. Assume all downed wires and submerged poles are live and lethal.\n2. Maintain a minimum distance of 10 metres (33 feet) from fallen power lines.\n3. Do NOT enter a flooded basement or room if electrical wires or outlets are submerged.\n4. Turn off the main electrical breaker ONLY if you can do so while standing on completely dry ground.\n5. Report fallen wires to Punjab State Power Corporation (PSPCL) helpline 1912 or 112.",
+      "hi": "1. जमीन पर गिरे या पानी में डूबे सभी बिजली के तारों को चालू और जानलेਵਾ समझें।\n2. टूटे हुए बिजली के तारों से कम से कम 10 मीटर की दूरी बनाए रखें।\n3. यदि घर में पानी भर गया हो तो गीले फर्श पर खड़े होकर बिजली के मुख्य स्विच को न छुएं।\n4. बिजली के उपकरणों को पानी से दूर रखें।\n5. गिरे हुए तारों की सूचना तुरंत 1912 या आपातकालीन नंबर 112 पर दें।",
+      "pa": "1. ਜ਼ਮੀਨ 'ਤੇ ਡਿੱਗੀਆਂ ਜਾਂ ਪਾਣੀ ਵਿੱਚ ਡੁੱਬੀਆਂ ਬਿਜਲੀ ਦੀਆਂ ਤਾਰਾਂ ਤੋਂ ਕਰੰਟ ਲੱਗਣ ਦਾ ਪੂਰਾ ਖ਼ਤਰਾ ਹੁੰਦਾ ਹੈ।\n2. ਡਿੱਗੀਆਂ ਹੋਈਆਂ ਤਾਰਾਂ ਤੋਂ ਘੱਟੋ-ਘੱਟ 10 ਮੀਟਰ ਦੀ ਦੂਰੀ ਬਣਾ ਕੇ ਰੱਖੋ।\n3. ਜੇਕਰ ਘਰ ਵਿੱਚ ਪਾਣੀ ਵੜ ਜਾਵੇ ਤਾਂ ਗਿੱਲੇ ਫਰਸ਼ 'ਤੇ ਖੜ੍ਹੇ ਹੋ ਕੇ ਮੇਨ ਸਵਿੱਚ ਨੂੰ ਹੱਥ ਨਾ ਲਗਾਓ।\n4. ਬਿਜਲੀ ਦੇ ਉਪਕਰਨਾਂ ਨੂੰ ਪਾਣੀ ਤੋਂ ਬਚਾਓ।\n5. ਟੁੱਟੀਆਂ ਤਾਰਾਂ ਦੀ ਜਾਣਕਾਰੀ ਤੁਰੰਤ ਪਾਵਰਕਾਮ ਹੈਲਪਲਾਈਨ 1912 ਜਾਂ 112 'ਤੇ ਦਿਓ।"
+    },
+    "keywords": ["electricity", "power line", "shock", "wire", "current", "switch", "meter", "bijli", "current lagna", "ਬਿਜਲੀ", "ਤਾਰਾਂ", "ਕਰੰਟ", "ਸਵਿੱਚ"]
+  },
+  {
+    "id": "card-medical-refusal",
+    "category": "refusal",
+    "source": "Clinical Safety Protocols / PRD Invariant 14",
+    "review_status": "verified",
+    "title": {
+      "en": "Medical Emergencies & First Aid",
+      "hi": "चिकित्सा आपातकाल और प्राथमिक चिकित्सा",
+      "pa": "ਡਾਕਟਰੀ ਐਮਰਜੈਂਸੀ ਅਤੇ ਮੁੱਢਲੀ ਸਹਾਇਤਾ"
+    },
+    "summary": {
+      "en": "FloodSaathi cannot diagnose medical conditions or advise medicine dosages. Call 112 or 108.",
+      "hi": "ऐप चिकित्सा सलाह या दवा की खुराक नहीं दे सकता। तुरंत 112 या 108 पर कॉल करें।",
+      "pa": "ਐਪ ਡਾਕਟਰੀ ਸਲਾਹ ਜਾਂ ਦਵਾਈ ਦੀ ਮਾਤਰਾ ਨਹੀਂ ਦੱਸ ਸਕਦੀ। ਤੁਰੰਤ 112 ਜਾਂ 108 'ਤੇ ਕਾਲ ਕਰੋ।"
+    },
+    "body": {
+      "en": "1. FloodSaathi CANNOT provide medical diagnosis, drug dosages, or prescriptions.\n2. For acute medical emergencies, injuries, snakebites, or sudden illness, call 108 (Ambulance) or 112 immediately.\n3. If someone has ingested contaminated flood water and shows signs of cholera, diarrhea, or poisoning, transport them immediately to the nearest government civil hospital.\n4. Keep patients warm, hydrated with clean boiled water or ORS, and do not administer unverified medications.",
+      "hi": "1. यह ऐप कोई चिकित्सा निदान, दवा या खुराक निर्धारित नहीं कर सकता है।\n2. किसी भी चोट, सांप के काटने या गंभीर बीमारी के लिए तुरंत 108 (एंबुलेंस) या 112 पर कॉल करें।\n3. दूषित पानी पीने से उल्टी या दस्त होने पर मरीज को ओआरएस दें और तुरंत अस्पताल ले जाएं।\n4. मरीज को सूखा और गर्म रखें।",
+      "pa": "1. ਇਹ ਐਪ ਕਿਸੇ ਵੀ ਬਿਮਾਰੀ ਦੀ ਜਾਂਚ ਜਾਂ ਦਵਾਈ ਦੀ ਖੁਰਾਕ ਨਹੀਂ ਦੱਸ ਸਕਦੀ।\n2. ਕਿਸੇ ਵੀ ਸੱਟ, ਸੱਪ ਦੇ ਡੰਗਣ ਜਾਂ ਗੰਭੀਰ ਬਿਮਾਰੀ ਲਈ ਤੁਰੰਤ 108 (ਐਂਬੂਲੈਂਸ) ਜਾਂ 112 'ਤੇ ਕਾਲ ਕਰੋ।\n3. ਦੂਸ਼ਿਤ ਪਾਣੀ ਕਾਰਨ ਉਲਟੀਆਂ ਜਾਂ ਦਸਤ ਲੱਗਣ 'ਤੇ ਮਰੀਜ਼ ਨੂੰ ਓਆਰਐਸ ਦਿਓ ਅਤੇ ਨੇੜਲੇ ਹਸਪਤਾਲ ਲੈ ਕੇ ਜਾਓ।\n4. ਮਰੀਜ਼ ਨੂੰ ਸੁੱਕੀ ਅਤੇ ਗਰਮ ਥਾਂ 'ਤੇ ਰੱਖੋ।"
+    },
+    "keywords": ["medicine", "doctor", "tablet", "dose", "dosage", "fever", "diarrhea", "vomiting", "dawa", "dawai", "ilaj", "ਦਵਾਈ", "ਡਾਕਟਰ", "ਇਲਾਜ", "ਬੁਖਾਰ", "ਦਸਤ"]
+  },
+  {
+    "id": "card-evacuation-readiness",
+    "category": "evacuation",
+    "source": "NDMA Evacuation Standard Operating Procedures",
+    "review_status": "verified",
+    "title": {
+      "en": "Evacuation & Emergency Go-Bag",
+      "hi": "निकासी और आपातकालीन बैग",
+      "pa": "ਸੁਰੱਖਿਅਤ ਨਿਕਾਸੀ ਅਤੇ ਜ਼ਰੂਰੀ ਸਾਮਾਨ"
+    },
+    "summary": {
+      "en": "Pack emergency essentials and proceed along verified high ground routes to designated shelters.",
+      "hi": "आपातकालीन बैग तैयार रखें और केवल प्रशासन द्वारा बताए गए सुरक्षित आश्रयों की ओर जाएं।",
+      "pa": "ਜ਼ਰੂਰੀ ਸਾਮਾਨ ਦਾ ਬੈਗ ਤਿਆਰ ਰੱਖੋ ਅਤੇ ਸਿਰਫ਼ ਪ੍ਰਸ਼ਾਸਨ ਵੱਲੋਂ ਨਿਰਧਾਰਿਤ ਰਾਹਤ ਕੈਂਪਾਂ ਵੱਲ ਜਾਓ।"
+    },
+    "body": {
+      "en": "1. When an evacuation advisory or warning is issued by authorities, leave early before roads are inundated.\n2. Pack an Emergency Go-Bag: identity documents (Aadhaar, voter ID) in waterproof pouches, 3 days of dry food, 3 litres water per person, essential prescription medicines, torch with spare batteries, and power bank.\n3. Lock doors and shut off main gas cylinder valve and electric breaker.\n4. Follow designated community routes to official government relief shelters (schools, community centres on high ground).\n5. Never take shortcuts across low-lying agricultural fields or canal bunds.",
+      "hi": "1. प्रशासन द्वारा चेतावनी जारी किए जाने पर तुरंत सुरक्षित स्थान के लिए निकलें।\n2. आवश्यक दस्तावेज वाटरप्रूफ थैली में रखें, साथ में सूखा राशन, पानी, जरूरी दवाइयां, टॉर्च और मोबाइल पावर बैंक लें।\n3. घर से निकलते समय गैस सिलेंडर का रेगुलेटर और बिजली का मुख्य स्विच बंद करें।\n4. केवल निर्धारित पक्की सड़कों से ही सरकारी राहत शिविरों (स्कूलों, कम्युनिटी सेंटरों) में जाएं।\n5. खेतों या कच्ची पगडंडियों से होकर न जाएं।",
+      "pa": "1. ਪ੍ਰਸ਼ਾਸਨ ਵੱਲੋਂ ਚੇਤਾਵਨੀ ਮਿਲਣ 'ਤੇ ਬਿਨਾਂ ਦੇਰੀ ਉੱਚੀਆਂ ਅਤੇ ਸੁਰੱਖਿਅਤ ਥਾਵਾਂ ਵੱਲ ਨਿਕਲੋ।\n2. ਜ਼ਰੂਰੀ ਦਸਤਾਵੇਜ਼ ਵਾਟਰਪਰੂਫ਼ ਲਿਫਾਫੇ ਵਿੱਚ ਰੱਖੋ, ਸੁੱਕਾ ਰਾਸ਼ਨ, ਪੀਣ ਵਾਲਾ ਪਾਣੀ, ਜ਼ਰੂਰੀ ਦਵਾਈਆਂ, ਟਾਰਚ ਅਤੇ ਪਾਵਰ ਬੈਂਕ ਨਾਲ ਲਵੋ।\n3. ਘਰੋਂ ਨਿਕਲਣ ਤੋਂ ਪਹਿਲਾਂ ਗੈਸ ਸਿਲੰਡਰ ਅਤੇ ਬਿਜਲੀ ਦਾ ਮੇਨ ਸਵਿੱਚ ਬੰਦ ਕਰੋ।\n4. ਸਿਰਫ਼ ਪੱਕੀਆਂ ਸੜਕਾਂ ਰਾਹੀਂ ਹੀ ਸਰਕਾਰੀ ਰਾਹਤ ਕੈਂਪਾਂ (ਸਕੂਲਾਂ ਜਾਂ ਧਰਮਸ਼ਾਲਾਵਾਂ) ਵਿੱਚ ਪਹੁੰਚੋ।\n5. ਖੇਤਾਂ ਜਾਂ ਨਹਿਰਾਂ ਦੀਆਂ ਕੱਚੀਆਂ ਪਟੜੀਆਂ ਰਾਹੀਂ ਜਾਣ ਤੋਂ ਬਚੋ।"
+    },
+    "keywords": ["evacuate", "evacuation", "leave home", "shelter", "go bag", "bag", "nikalna", "surakshit sthan", "ashray", "ਨਿਕਾਸੀ", "ਰਾਹਤ ਕੈਂਪ", "ਘਰ ਛੱਡਣਾ", "ਸੁਰੱਖਿਅਤ ਥਾਂ"]
+  },
+  {
+    "id": "card-snakes-reptiles",
+    "category": "safety",
+    "source": "State Disaster Management Wildlife Safety",
+    "review_status": "verified",
+    "title": {
+      "en": "Snake & Reptile Hazards During Floods",
+      "hi": "बाढ़ में सांप और विषैले जीवों से बचाव",
+      "pa": "ਹੜ੍ਹ ਦੌਰਾਨ ਸੱਪਾਂ ਅਤੇ ਜ਼ਹਿਰੀਲੇ ਜੀਵਾਂ ਤੋਂ ਬਚਾਅ"
+    },
+    "summary": {
+      "en": "Flood waters displace venomous snakes seeking dry high ground. Carry a stick and watch foot placement.",
+      "hi": "बाढ़ के पानी से सांप ऊंचे स्थानों पर आते हैं। चलते समय छड़ी का उपयोग करें।",
+      "pa": "ਪਾਣੀ ਚੜ੍ਹਨ ਕਾਰਨ ਸੱਪ ਸੁੱਕੀਆਂ ਥਾਵਾਂ 'ਤੇ ਆਉਂਦੇ ਹਨ। ਤੁਰਨ ਵੇਲੇ ਹੱਥ ਵਿੱਚ ਡੰਡਾ ਰੱਖੋ।"
+    },
+    "body": {
+      "en": "1. Floods force venomous snakes (cobras, kraits, Russell's vipers) out of burrows onto roads, trees, and house roofs.\n2. Never step into tall grass, debris piles, or muddy water without probing first with a sturdy stick.\n3. Always carry a flashlight when moving outdoors at night.\n4. If bitten: do NOT cut, suck the wound, or apply a tourniquet. Keep the patient completely still and transport immediately to a civil hospital with anti-snake venom (call 108/112).\n5. Keep children away from floating debris piles and thatched rooftops.",
+      "hi": "1. बाढ़ के कारण सांप और बिच्छू बिलों से निकलकर छतों, पेड़ों और ऊंचे सूखे स्थानों पर शरण लेते हैं।\n2. झाड़ियों, मलबे या पानी में बिना छड़ी से टटोले पैर न रखें।\n3. रात के समय टॉर्च का प्रयोग अवश्य करें।\n4. सांप काटने पर घाव को न काटें, न चूसें। मरीज को शांत रखें और तुरंत 108 पर कॉल कर अस्पताल ले जाएं।\n5. बच्चों को पानी में तैरते कचरे या मलबे के पास न जाने दें।",
+      "pa": "1. ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਆਉਣ 'ਤੇ ਸੱਪ ਅਤੇ ਬਿੱਛੂ ਖੁੱਡਾਂ ਵਿੱਚੋਂ ਨਿਕਲ ਕੇ ਸੁੱਕੀਆਂ ਥਾਵਾਂ ਅਤੇ ਘਰਾਂ ਵਿੱਚ ਵੜ ਜਾਂਦੇ ਹਨ।\n2. ਝਾੜੀਆਂ, ਮਲਬੇ ਜਾਂ ਪਾਣੀ ਵਿੱਚ ਬਿਨਾਂ ਡੰਡੇ ਦੀ ਮਦਦ ਤੋਂ ਪੈਰ ਨਾ ਰੱਖੋ।\n3. ਰਾਤ ਸਮੇਂ ਹਮੇਸ਼ਾ ਟਾਰਚ ਜਗਾ ਕੇ ਚੱਲੋ।\n4. ਜੇਕਰ ਸੱਪ ਲੜ ਜਾਵੇ ਤਾਂ ਜ਼ਖ਼ਮ ਨੂੰ ਕੱਟੋ ਜਾਂ ਚੂਸੋ ਨਾ। ਮਰੀਜ਼ ਨੂੰ ਬਿਨਾਂ ਹਿਲਾਏ ਤੁਰੰਤ 108/112 'ਤੇ ਫ਼ੋਨ ਕਰਕੇ ਹਸਪਤਾਲ ਪਹੁੰਚਾਓ।\n5. ਬੱਚਿਆਂ ਨੂੰ ਤੈਰਦੇ ਮਲਬੇ ਜਾਂ ਛੱਤਾਂ ਦੀਆਂ ਕੰਧਾਂ ਨੇੜੇ ਨਾ ਜਾਣ ਦਿਓ।"
+    },
+    "keywords": ["snake", "snakebite", "reptile", "scorpion", "saap", "saanp", "katna", "jahar", "ਸੱਪ", "ਸੱਪ ਲੜਨਾ", "ਜ਼ਹਿਰ", "ਬਿੱਛੂ"]
+  },
+  {
+    "id": "card-livestock-protection",
+    "category": "livestock",
+    "source": "Punjab Animal Husbandry Disaster Protocols",
+    "review_status": "verified",
+    "title": {
+      "en": "Livestock & Cattle Safety",
+      "hi": "पशुधन और मवेशियों की सुरक्षा",
+      "pa": "ਪਸ਼ੂਆਂ ਅਤੇ ਪਾਲਤੂ ਜਾਨਵਰਾਂ ਦੀ ਸੁਰੱਖਿਆ"
+    },
+    "summary": {
+      "en": "Untie cattle before water rises so they can swim to safety. Never leave livestock chained.",
+      "hi": "पानी बढ़ने से पहले पशुओं को खूंटे से खोल दें ताकि वे तैरकर बच सकें।",
+      "pa": "ਪਾਣੀ ਵਧਣ ਤੋਂ ਪਹਿਲਾਂ ਪਸ਼ੂਆਂ ਨੂੰ ਕਿੱਲੇ ਤੋਂ ਖੋਲ੍ਹ ਦਿਓ ਤਾਂ ਜੋ ਉਹ ਤੈਰ ਕੇ ਬਚ ਸਕਣ।"
+    },
+    "body": {
+      "en": "1. NEVER leave livestock tied to posts, mangers, or inside closed sheds when flood water approaches.\n2. Untie all cattle, buffaloes, and sheep so they have a chance to swim to higher ground.\n3. Move feed, silage, and dry fodder bags to elevated lofts or roof areas to prevent fungal rotting.\n4. Avoid letting animals drink standing flood water, which spreads hemorrhagic septicemia (HS) and foot-and-mouth disease.\n5. Contact the district veterinary officer or 1077 for emergency fodder and vaccination camps.",
+      "hi": "1. बाढ़ का पानी आने पर मवेशियों को कभी भी खूंटे से बंधा या बंद बाड़े में न छोड़ें।\n2. पशुओं को तुरंत खोल दें ताकि वे तैरकर ऊंचे स्थानों पर जा सकें।\n3. सूखे चारे और पशु आहार को छत या ऊंची मचान पर सुरक्षित रखें।\n4. मवेशियों को बाढ़ का गंदा पानी न पीने दें, इससे बीमारियां फैलती हैं।\n5. पशु चिकित्सा सहायता के लिए जिला नियंत्रण कक्ष 1077 पर संपर्क करें।",
+      "pa": "1. ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਆਉਣ ਦੀ ਸੂਰਤ ਵਿੱਚ ਪਸ਼ੂਆਂ ਨੂੰ ਕਦੇ ਵੀ ਕਿੱਲੇ ਨਾਲ ਬੰਨ੍ਹਿਆ ਜਾਂ ਬੰਦ ਵਾੜੇ ਵਿੱਚ ਨਾ ਛੱਡੋ।\n2. ਮੱਝਾਂ, ਗਾਵਾਂ ਅਤੇ ਬੱਕਰੀਆਂ ਨੂੰ ਤੁਰੰਤ ਖੋਲ੍ਹ ਦਿਓ ਤਾਂ ਜੋ ਉਹ ਤੈਰ ਕੇ ਉੱਚੀ ਥਾਂ 'ਤੇ ਜਾ ਸਕਣ।\n3. ਸੁੱਕੇ ਤੂੜੀ ਅਤੇ ਪੱਠਿਆਂ ਨੂੰ ਛੱਤਾਂ ਜਾਂ ਉੱਚੀਆਂ ਥਾਵਾਂ 'ਤੇ ਸੰਭਾਲੋ ਤਾਂ ਜੋ ਉੱਲੀ ਨਾ ਲੱਗੇ।\n4. ਪਸ਼ੂਆਂ ਨੂੰ ਹੜ੍ਹ ਦਾ ਖੜ੍ਹਾ ਗੰਦਾ ਪਾਣੀ ਨਾ ਪੀਣ ਦਿਓ, ਇਸ ਨਾਲ ਗਲਘੋਟੂ ਅਤੇ ਮੂੰਹ-ਖੁਰ ਦੀ ਬਿਮਾਰੀ ਫੈਲਦੀ ਹੈ।\n5. ਪਸ਼ੂ ਹਸਪਤਾਲ ਦੀ ਸਹਾਇਤਾ ਲਈ ਜ਼ਿਲ੍ਹਾ ਕੰਟਰੋਲ ਰੂਮ 1077 'ਤੇ ਸੰਪਰਕ ਕਰੋ।"
+    },
+    "keywords": ["cattle", "livestock", "cows", "buffaloes", "animals", "pashu", "gay", "bhains", "chara", "ਪਸ਼ੂ", "ਗਾਵਾਂ", "ਮੱਝਾਂ", "ਪੱਠੇ", "ਜਾਨਵਰ"]
+  }
+]

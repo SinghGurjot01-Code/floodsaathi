@@ -1,0 +1,28 @@
+{
+  "retrieval_benchmark": {
+    "total_queries": 100,
+    "top1_accuracy": 94.0,
+    "top3_accuracy": 100.0,
+    "by_language": {
+      "en": {
+        "total": 36,
+        "top1_accuracy": 91.7
+      },
+      "hi": {
+        "total": 32,
+        "top1_accuracy": 96.9
+      },
+      "pa": {
+        "total": 32,
+        "top1_accuracy": 93.8
+      }
+    }
+  },
+  "must_pass_evaluation": {
+    "total_must_pass": 40,
+    "failures_count": 0,
+    "failures": [],
+    "pass_rate_pct": 100.0
+  },
+  "gates_passed": true
+}
