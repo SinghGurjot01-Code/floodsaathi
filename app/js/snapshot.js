@@ -100,17 +100,20 @@ export async function createSnapshotFromRelay(relayData, userProfile, villageRec
     source_age_hours: 0 // fresh
   });
 
-  // Compute status
+  // Compute status with Phase 2 safety verification
   const rawStatus = computeRawStatus({
     gauges,
     alerts,
     rain_72h_mm,
     estimate,
-    district: userProfile.district
+    district: userProfile.district,
+    villageRecord: village || { id: user.village_id || "default", name: "Punjab" },
+    regionPack: { compatible: true },
+    sourceAgeHours: 0
   });
 
   const previousSnapshot = await getLatestSnapshot();
-  const previousStatus = previousSnapshot ? previousSnapshot.status : "Safe";
+  const previousStatus = previousSnapshot ? previousSnapshot.status : "UNKNOWN";
 
   const resolvedStatus = resolveOfflineStatus({
     previousStatus,

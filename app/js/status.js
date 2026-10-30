@@ -1,21 +1,30 @@
-// Status classification and offline rules (PRD Section 8.1 & 9.5)
+// Status classification and offline rules (PRD Section 8.1, 9.5 & Phase 2 Safety Update)
 // Pure ES module: NO DOM, NO network dependencies.
 
 export const STATUS_RANKS = {
-  Safe: 0,
-  Watch: 1,
-  Warning: 2,
-  Danger: 3
+  LOADING: -1,
+  DATA_UNAVAILABLE: 0,
+  UNKNOWN: 0,
+  Safe: 1,
+  Watch: 2,
+  Warning: 3,
+  Danger: 4
 };
 
 export const STATUS_COLORS = {
-  Safe: "#10b981",    // Emerald green
-  Watch: "#eab308",   // Amber yellow
-  Warning: "#f97316", // Bright orange
-  Danger: "#ef4444"   // Urgent red
+  LOADING: "#0284c7",          // Informative sky blue
+  DATA_UNAVAILABLE: "#64748b", // Slate gray
+  UNKNOWN: "#94a3b8",          // Neutral gray
+  Safe: "#10b981",             // Emerald green
+  Watch: "#eab308",            // Amber yellow
+  Warning: "#f97316",          // Bright orange
+  Danger: "#ef4444"            // Urgent red
 };
 
 export const STATUS_ICONS = {
+  LOADING: "refresh-cw",
+  DATA_UNAVAILABLE: "slash",
+  UNKNOWN: "help-circle",
   Safe: "shield-check",
   Watch: "eye",
   Warning: "alert-triangle",
@@ -23,10 +32,10 @@ export const STATUS_ICONS = {
 };
 
 /**
- * Compare two statuses and return the higher one.
- * @param {"Safe"|"Watch"|"Warning"|"Danger"} a 
- * @param {"Safe"|"Watch"|"Warning"|"Danger"} b 
- * @returns {"Safe"|"Watch"|"Warning"|"Danger"}
+ * Compare two statuses and return the higher one in terms of risk.
+ * @param {string} a 
+ * @param {string} b 
+ * @returns {string}
  */
 export function maxStatus(a, b) {
   const rankA = STATUS_RANKS[a] ?? 0;
@@ -37,30 +46,60 @@ export function maxStatus(a, b) {
 /**
  * Compute raw status based on current hydrologic and weather observations.
  * 
+ * Strict Safety Invariant (Phase 2):
+ * - Active threats (Danger, Warning, Watch) take immediate priority and are NEVER suppressed.
+ * - SAFE is returned ONLY if ALL of the following hold:
+ *   1. Dynamic inputs (gauges, rain, alerts) meet freshness threshold (< 24 hours).
+ *   2. Relevant gauge telemetry is present, non-empty, and valid.
+ *   3. Static inputs (village record, region pack) are present, valid and compatible.
+ *   4. The status rules ran to completion without error and no Watch/Warning/Danger triggered.
+ * - If no threats are triggered but telemetry is missing, stale (>24h), invalid, or loading:
+ *   Returns LOADING, DATA_UNAVAILABLE, or UNKNOWN. NEVER SAFE.
+ * 
  * @param {Object} params
  * @param {Array} [params.gauges] Relevant river gauges
  * @param {Array} [params.alerts] Active official alerts (SACHET)
  * @param {number|null} [params.rain_72h_mm] 72-hour rainfall in mm
  * @param {Object|null} [params.estimate] Output from computeOfflineEstimate
  * @param {string|null} [params.district] User's district (e.g. "Amritsar")
- * @returns {{ status: "Safe"|"Watch"|"Warning"|"Danger", reasons: string[], triggeringGauge: Object|null }}
+ * @param {Object|null} [params.villageRecord] Verified village record from region pack
+ * @param {Object|null} [params.regionPack] Loaded region pack metadata
+ * @param {number|null} [params.sourceAgeHours] Age of telemetry in hours
+ * @param {boolean} [params.isLoading=false] Whether data is currently loading
+ * @param {boolean} [params.fetchFailed=false] Whether data fetch failed
+ * @returns {{ status: string, reasons: string[], triggeringGauge: Object|null }}
  */
 export function computeRawStatus({
   gauges = [],
   alerts = [],
   rain_72h_mm = null,
   estimate = null,
-  district = null
+  district = null,
+  villageRecord = null,
+  regionPack = null,
+  sourceAgeHours = null,
+  isLoading = false,
+  fetchFailed = false
 }) {
-  let highestRank = STATUS_RANKS.Safe;
-  let status = "Safe";
+  // 1. Loading state
+  if (isLoading) {
+    return {
+      status: "LOADING",
+      reasons: ["Loading live flood and hydrologic telemetry..."],
+      triggeringGauge: null
+    };
+  }
+
+  // 2. Evaluate active hazards (Danger, Warning, Watch) FIRST so threats are NEVER masked
+  let highestRank = STATUS_RANKS.DATA_UNAVAILABLE;
+  let status = "DATA_UNAVAILABLE";
   const reasons = [];
   let triggeringGauge = null;
 
   const groundIsSafe = estimate?.projection?.ground_check === "likely_below_ground";
 
-  // 1. Check Danger conditions
-  for (const g of gauges) {
+  // Check Danger conditions
+  for (const g of (gauges || [])) {
     if (g.level_m !== null && g.danger_m !== null && g.level_m >= g.danger_m) {
       if (STATUS_RANKS.Danger > highestRank) {
         highestRank = STATUS_RANKS.Danger;
@@ -72,7 +111,7 @@ export function computeRawStatus({
   }
 
   // SACHET Extreme in user's district
-  for (const a of alerts) {
+  for (const a of (alerts || [])) {
     const sev = (a.severity || "").toLowerCase();
     const area = (a.area || "").toLowerCase();
     const inDistrict = !district || area.includes(district.toLowerCase());
@@ -101,8 +140,8 @@ export function computeRawStatus({
     return { status, reasons, triggeringGauge };
   }
 
-  // 2. Check Warning conditions
-  for (const g of gauges) {
+  // Check Warning conditions
+  for (const g of (gauges || [])) {
     if (g.level_m !== null && g.warning_m !== null && g.level_m >= g.warning_m) {
       if (STATUS_RANKS.Warning > highestRank) {
         highestRank = STATUS_RANKS.Warning;
@@ -114,7 +153,7 @@ export function computeRawStatus({
   }
 
   // SACHET Severe in district
-  for (const a of alerts) {
+  for (const a of (alerts || [])) {
     const sev = (a.severity || "").toLowerCase();
     const area = (a.area || "").toLowerCase();
     const inDistrict = !district || area.includes(district.toLowerCase());
@@ -143,9 +182,8 @@ export function computeRawStatus({
     return { status, reasons, triggeringGauge };
   }
 
-  // 3. Check Watch conditions
-  // Gauge within 0.5 m below warning mark AND trend > 0
-  for (const g of gauges) {
+  // Check Watch conditions
+  for (const g of (gauges || [])) {
     if (g.level_m !== null && g.warning_m !== null) {
       const distToWarning = g.warning_m - g.level_m;
       if (distToWarning > 0 && distToWarning <= 0.5 && (g.trend_m_per_h || 0) > 0) {
@@ -160,7 +198,7 @@ export function computeRawStatus({
   }
 
   // SACHET Moderate
-  for (const a of alerts) {
+  for (const a of (alerts || [])) {
     const sev = (a.severity || "").toLowerCase();
     const area = (a.area || "").toLowerCase();
     const inDistrict = !district || area.includes(district.toLowerCase());
@@ -174,7 +212,7 @@ export function computeRawStatus({
   }
 
   // Rain 72h >= 64.5 mm with rising gauge
-  const anyRisingGauge = gauges.some(g => (g.trend_m_per_h || 0) > 0);
+  const anyRisingGauge = (gauges || []).some(g => (g.trend_m_per_h || 0) > 0);
   if (rain_72h_mm !== null && rain_72h_mm >= 64.5 && anyRisingGauge) {
     if (STATUS_RANKS.Watch > highestRank) {
       highestRank = STATUS_RANKS.Watch;
@@ -187,7 +225,44 @@ export function computeRawStatus({
     return { status, reasons, triggeringGauge };
   }
 
-  // 4. Safe
+  // 3. No threats triggered. Verify ALL conditions to declare SAFE.
+  // A. Check for fetch failure or completely missing gauge telemetry
+  if (fetchFailed || !gauges || gauges.length === 0) {
+    return {
+      status: "DATA_UNAVAILABLE",
+      reasons: ["No river gauge telemetry available for this area."],
+      triggeringGauge: null
+    };
+  }
+
+  // B. Check for stale telemetry (> 24 hours old)
+  if (sourceAgeHours !== null && sourceAgeHours > 24) {
+    return {
+      status: "DATA_UNAVAILABLE",
+      reasons: ["Data is older than 24 hours. Contact emergency helplines."],
+      triggeringGauge: null
+    };
+  }
+
+  // C. Check static village record
+  if (!villageRecord) {
+    return {
+      status: "UNKNOWN",
+      reasons: ["Village location record missing or unverified."],
+      triggeringGauge: null
+    };
+  }
+
+  // D. Check static region pack
+  if (!regionPack || regionPack.compatible === false) {
+    return {
+      status: "UNKNOWN",
+      reasons: ["Regional hydrological pack missing or incompatible."],
+      triggeringGauge: null
+    };
+  }
+
+  // 4. SAFE: All verified, fresh, and normal
   if (groundIsSafe) {
     reasons.push("Water likely to stay below your ground level.");
   } else {
@@ -202,15 +277,15 @@ export function computeRawStatus({
  * "Offline status may rise or hold; it never silently lowers. It drops only after fresh data or the user's 'Water is receding' tap."
  * 
  * @param {Object} params
- * @param {string} params.previousStatus Previous status in snapshot ("Safe"|"Watch"|"Warning"|"Danger")
+ * @param {string} params.previousStatus Previous status in snapshot
  * @param {string} params.computedStatus Current newly recomputed status
  * @param {boolean} [params.isFreshData=false] Whether fresh live data was successfully received
  * @param {boolean} [params.userReportedReceding=false] Whether user tapped "Water is receding"
  * @returns {string} Enforced status
  */
 export function resolveOfflineStatus({
-  previousStatus = "Safe",
-  computedStatus = "Safe",
+  previousStatus = "UNKNOWN",
+  computedStatus = "UNKNOWN",
   isFreshData = false,
   userReportedReceding = false
 }) {
@@ -219,6 +294,14 @@ export function resolveOfflineStatus({
     return computedStatus;
   }
 
-  // Otherwise, offline status can only rise or hold, NEVER lower
-  return maxStatus(previousStatus, computedStatus);
+  // When offline without fresh data, if previous status was elevated (Warning/Danger/Watch),
+  // it must NEVER silently drop to Safe or DATA_UNAVAILABLE!
+  const prevRank = STATUS_RANKS[previousStatus] ?? 0;
+  const compRank = STATUS_RANKS[computedStatus] ?? 0;
+
+  if (prevRank > compRank) {
+    return previousStatus;
+  }
+
+  return computedStatus;
 }

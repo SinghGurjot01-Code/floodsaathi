@@ -11,6 +11,9 @@
     "settings": "Settings"
   },
   "status": {
+    "loading": "Loading Status...",
+    "unknown": "Unknown Status",
+    "data_unavailable": "Data Unavailable",
     "safe": "Likely Below Ground Level",
     "watch": "Watch",
     "warning": "Warning",

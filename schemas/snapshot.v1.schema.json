@@ -176,6 +176,9 @@
     },
     "status": {
       "enum": [
+        "LOADING",
+        "UNKNOWN",
+        "DATA_UNAVAILABLE",
         "Safe",
         "Watch",
         "Warning",

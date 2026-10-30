@@ -199,7 +199,10 @@ async function fetchLiveRelayData() {
 async function recomputeOfflineView(allowLower = false) {
   if (!currentSnapshot) {
     currentSnapshot = await getLatestSnapshot();
-    if (!currentSnapshot) return;
+    if (!currentSnapshot) {
+      renderEmptyOfflineState();
+      return;
+    }
   }
 
   const age = getSnapshotAge(currentSnapshot.saved_at);
@@ -223,7 +226,10 @@ async function recomputeOfflineView(allowLower = false) {
     alerts: currentSnapshot.alerts,
     rain_72h_mm: currentSnapshot.rain_72h_mm,
     estimate,
-    district: userProfile.district
+    district: userProfile.district,
+    villageRecord: currentSnapshot.village || { id: currentSnapshot.user?.village_id || "default", name: "Punjab" },
+    regionPack: { compatible: true },
+    sourceAgeHours: age.hours
   });
 
   const finalStatus = resolveOfflineStatus({
@@ -243,7 +249,7 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
   if (!snapshot) return;
 
   const age = getSnapshotAge(snapshot.saved_at);
-  const status = snapshot.status || "Safe";
+  const status = snapshot.status || "UNKNOWN";
   const statusCard = document.getElementById("status-card");
   const statusWord = document.getElementById("status-word");
   const statusReason = document.getElementById("status-reason");
@@ -252,7 +258,7 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
 
   // Status Styling
   statusCard.className = `status-card ${status.toLowerCase()}`;
-  statusWord.textContent = t(`status.${status.toLowerCase()}`);
+  statusWord.textContent = t(`status.${status.toLowerCase()}`) || status;
 
   // Badges
   statusAgeBadge.textContent = t("status.data_age", { age: age.display });
@@ -278,6 +284,29 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
 
   const estimateBox = document.getElementById("estimate-container");
 
+  // If status is DATA_UNAVAILABLE or UNKNOWN
+  if (status === "DATA_UNAVAILABLE") {
+    statusReason.textContent = t("status.numbers_hidden");
+    estimateBox.innerHTML = `
+      <div class="estimate-box" style="border-left-color: #64748b;">
+        <div class="estimate-headline">${t("status.data_unavailable")}</div>
+        <div class="estimate-sub">${t("helplines.always_available")}</div>
+      </div>
+    `;
+    return;
+  }
+
+  if (status === "UNKNOWN") {
+    statusReason.textContent = "Location or hydrological data incomplete. Confirm with local authorities.";
+    estimateBox.innerHTML = `
+      <div class="estimate-box" style="border-left-color: #94a3b8;">
+        <div class="estimate-headline">${t("status.unknown")}</div>
+        <div class="estimate-sub">${t("helplines.always_available")}</div>
+      </div>
+    `;
+    return;
+  }
+
   // Age > 24 hours: numbers hidden
   if (estimate.numbers_hidden) {
     statusReason.textContent = t("status.numbers_hidden");
@@ -298,6 +327,12 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
   } else if (status === "Danger") {
     statusReason.textContent = "Urgent: river levels or flood front indicate imminent danger.";
   } else if (status === "Warning") {
+    statusReason.textContent = "Warning: flood levels elevated. Prepare for evacuation.";
+  } else if (status === "Watch") {
+    statusReason.textContent = "River levels rising or heavy rainfall detected. Stay alert.";
+  } else {
+    statusReason.textContent = t("status.ground_safe");
+  }
     statusReason.textContent = "Warning: flood levels elevated. Prepare for evacuation.";
   } else if (status === "Watch") {
     statusReason.textContent = "River levels rising or heavy rainfall detected. Stay alert.";
@@ -367,7 +402,11 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
 }
 
 function renderEmptyOfflineState() {
+  const statusCard = document.getElementById("status-card");
+  const statusWord = document.getElementById("status-word");
   const statusReason = document.getElementById("status-reason");
+  if (statusCard) statusCard.className = "status-card data_unavailable";
+  if (statusWord) statusWord.textContent = t("status.data_unavailable");
   if (statusReason) {
     statusReason.textContent = "No offline snapshot found. Connect to internet to fetch live data.";
   }
