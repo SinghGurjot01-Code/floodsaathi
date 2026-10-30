@@ -211,6 +211,59 @@ test("Vector 8: Unified vertical datum HAND ground check", () => {
   assert.equal(resB.projection.ground_check, "potential_inundation");
 });
 
+test("Phase 4 Arrival: Assumed speed (<5 events) flags rough and widens bounds", () => {
+  const res = computeOfflineEstimate({
+    front: {
+      gauge_id: "G_HARIKE",
+      crossed_warning_at: "2026-08-30T06:00:00+05:30",
+      km_to_user: 50.0,
+      reach_km: 140.0
+    },
+    reach_speed_km_h: {
+      p25: 2.15,
+      median: 2.80,
+      p75: 3.50,
+      basis: "assumed",
+      n_events: 2,
+      is_rough: true
+    },
+    now: "2026-08-30T08:00:00+05:30",
+    source_age_hours: 2
+  });
+
+  assert.ok(res.arrival);
+  assert.equal(res.arrival.is_rough, true);
+  assert.equal(res.arrival.is_extrapolated, false);
+  assert.ok(res.arrival.summary_text.includes("Rough estimate"));
+  assert.ok(!res.arrival.summary_text.toLowerCase().includes("safe"), "Never use 'safe' in arrival estimate");
+});
+
+test("Phase 4 Arrival: Beyond downstream gauge flags extrapolated", () => {
+  const res = computeOfflineEstimate({
+    front: {
+      gauge_id: "G_RSD",
+      crossed_warning_at: "2026-08-30T00:00:00+05:30",
+      km_to_user: 190.0, // beyond reach of 165 km
+      reach_km: 165.0
+    },
+    reach_speed_km_h: {
+      p25: 2.75,
+      median: 2.82,
+      p75: 3.11,
+      basis: "history",
+      n_events: 6,
+      is_rough: false
+    },
+    now: "2026-08-30T08:00:00+05:30",
+    source_age_hours: 2
+  });
+
+  assert.ok(res.arrival);
+  assert.equal(res.arrival.is_extrapolated, true);
+  assert.equal(res.arrival.is_rough, true);
+  assert.ok(res.arrival.summary_text.includes("Rough estimate"));
+});
+
 test("Status rules: Extreme SACHET alert triggers Danger", () => {
   const raw = computeRawStatus({
     gauges: [{ id: "G1", level_m: 2.0, warning_m: 3.5, danger_m: 4.0, trend_m_per_h: 0 }],

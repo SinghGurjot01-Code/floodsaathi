@@ -1,30 +1,26 @@
 # relay/compute/front.py
 """Flood front detection and reach speed associations."""
+from typing import List, Dict, Any
+from relay.compute.reach_speeds import HISTORICAL_REACH_DISTRIBUTIONS, get_reach_speed
 
+# Formatted reach speeds for relay payloads
 DEFAULT_REACH_SPEEDS = [
     {
-        "from": "G_RSD",
-        "to": "G_HARIKE",
-        "km": 165.0,
-        "p25": 1.8,
-        "median": 2.8,
-        "p75": 4.2,
-        "n_events": 12,
-        "basis": "history"
-    },
-    {
-        "from": "G_KOLDAM",
-        "to": "G_HARIKE",
-        "km": 210.0,
-        "p25": 2.0,
-        "median": 3.2,
-        "p75": 4.8,
-        "n_events": 18,
-        "basis": "history"
+        "from": r["from"],
+        "to": r["to"],
+        "km": r["km"],
+        "p25": r["speed_p25"],
+        "median": r["speed_median"],
+        "p75": r["speed_p75"],
+        "n_events": r["n_events"],
+        "basis": r["basis"],
+        "is_rough": r["n_events"] < 5 or r["basis"] == "assumed",
+        "is_regulated": r.get("is_regulated", False)
     }
+    for r in HISTORICAL_REACH_DISTRIBUTIONS
 ]
 
-def detect_flood_fronts(gauges: list) -> list:
+def detect_flood_fronts(gauges: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """
     Check gauges for flood front initiation (crossing warning or danger marks).
     Returns list of active fronts.

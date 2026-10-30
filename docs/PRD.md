@@ -347,8 +347,9 @@ low  = hours_from_now(p75), likely = hours_from_now(median), high = hours_from_n
 - If `user.observations` contains "reached" newer than the snapshot: show "Reached (reported by you)" and reset to level-based status.
 - Screen text pattern (translated): "Water may reach your area in about {low} to {high}, most likely {likely}. Based on data from {age} ago."
 - Level projection for the nearest gauge: band between "level stays flat" and "trend continues" (trend × hours since `observed_at`, capped at 24 h), and when each would cross the danger mark (`(danger - level) / trend`, only if trend > 0).
-- Ground check: `rise = projected_level - bank_m`. If `bank_m` and `village.hand_m` exist and `rise < hand_m` for the "trend continues" case, show "Water likely to stay below your ground level" (never the word "safe"). Skip the check if `bank_m` is null.
+- Ground check (unified vertical datum): `water_head = (projected_level - bank_m) + bank_height_above_channel`. If `bank_m` and `village.hand_m` exist and `water_head < hand_m` for the "trend continues" case, show "Water likely to stay below your ground level" (never the word "safe"). Skip the check if `bank_m` is null.
 - Fallback distance: if `km_basis` is `straight_line_x1.3`, flag "rough".
+- Interpolation & Extrapolation: village distance $d_0$ is interpolated along river-km between upstream and downstream gauges. If $d_0 > \text{reach\_km}$, flag "extrapolated" and widen the estimated interval. If $n_{\text{events}} < 5$, flag "rough estimate" and widen uncertainty bounds.
 
 ### 9.4 Age bands (tune on backtest)
 `< 1 h` fresh · `1–6 h` "estimated" · `6–24 h` "rough estimate" · `> 24 h` numbers hidden: show last known facts, the age, and helplines.
@@ -420,8 +421,17 @@ Honest caveats: this is a daily-resolution model, so it cannot give hourly arriv
 6. Validate: compare cells flooded at the 2025 peak stage against Sentinel-1 flood masks you build (Copernicus Data Space or Google Earth Engine). Report village recall and pixel IoU in `eval/REPORT.md`.
 Caveat: Punjab is flat and a 30 m DEM's vertical error ($\pm 1\text{--}2\text{ m}$) is comparable to flood depths, so HAND is indicative. If recall < 80% or IoU < 0.6, label depth bands "advisory" in the app.
 
-### 10.4 Reach speeds
-For each consecutive gauge pair, from history (GUARDIAN or archive): find events where the upstream gauge crossed warning, find the downstream crossing, compute lag, convert to km/h with the river-km between gauges. Store median, p25, p75, `n_events`. If `n_events < 5`, set `basis: "assumed"` and widen the range, shown as "rough".
+### 10.4 Reach speeds & Empirical Wave Transit
+Wave transit speeds are derived purely from empirical gauge-to-gauge lag distributions recorded during real historical flood events, rather than theoretical wave celerity formulas ($c_k = \frac{5}{3}v$), which serve only as simplified conceptual approximations.
+- For each consecutive gauge pair from real history (GUARDIAN, India-WRIS, CWC archive):
+  * Identify distinct flood events where upstream gauge crossed warning level.
+  * Identify corresponding downstream warning crossing.
+  * Compute travel time difference ($\Delta t = t_{\text{downstream}} - t_{\text{upstream}}$ in hours).
+  * Compute reach river-network distance ($\Delta x$ in km).
+  * Store $n_{\text{events}}$, median, p25, p75 of the empirical lag distribution, and event dates. Speeds $v = \frac{\Delta x}{\Delta t}$ are derived as a convenience.
+- Insufficient historical evidence: If $n_{\text{events}} < 5$, mark `basis: "assumed"`, widen the uncertainty range ($\pm 35\text{--}50\%$), and show "rough estimate". Never give a narrow/precise arrival from insufficient evidence.
+- Reach interpolation: Village estimates are interpolated by along-river distance fraction only between calibrated gauge pairs. Beyond the downstream gauge, flag "extrapolated" and widen the uncertainty interval.
+- Hydrodynamic factors: On regulated reaches (e.g. downstream Ranjit Sagar Dam or Bhakra Dam) or breach-affected areas, note that gate operations, tributary inflows, and floodplain storage alter wave travel time; avoid false precision.
 
 ---
 

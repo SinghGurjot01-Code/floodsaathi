@@ -133,18 +133,35 @@ export function computeOfflineEstimate({
   if (front && front.crossed_warning_at && reach_speed_km_h && front.km_to_user > 0) {
     const t0 = new Date(front.crossed_warning_at).getTime();
     const d0 = front.km_to_user;
-    const vFast = reach_speed_km_h.p75;     // fast speed -> low arrival time
-    const vMedian = reach_speed_km_h.median; // median speed -> likely arrival
-    const vSlow = reach_speed_km_h.p25;     // slow speed -> high arrival time
+    const reachKm = front.reach_km || reach_speed_km_h.km || 165.0;
+
+    let vFast = reach_speed_km_h.p75;     // fast speed -> low arrival time
+    let vMedian = reach_speed_km_h.median; // median speed -> likely arrival
+    let vSlow = reach_speed_km_h.p25;     // slow speed -> high arrival time
+
+    const isAssumed = (reach_speed_km_h.basis === "assumed") || 
+                      (reach_speed_km_h.n_events !== undefined && reach_speed_km_h.n_events < 5) ||
+                      Boolean(reach_speed_km_h.is_rough);
+    const isExtrapolated = d0 > reachKm;
 
     if (vFast > 0 && vMedian > 0 && vSlow > 0) {
       const arrFastMs = t0 + (d0 / vFast) * 3600 * 1000;
       const arrMedianMs = t0 + (d0 / vMedian) * 3600 * 1000;
       const arrSlowMs = t0 + (d0 / vSlow) * 3600 * 1000;
 
-      const lowH = (arrFastMs - nowMs) / (3600 * 1000);
-      const likelyH = (arrMedianMs - nowMs) / (3600 * 1000);
-      const highH = (arrSlowMs - nowMs) / (3600 * 1000);
+      let lowH = (arrFastMs - nowMs) / (3600 * 1000);
+      let likelyH = (arrMedianMs - nowMs) / (3600 * 1000);
+      let highH = (arrSlowMs - nowMs) / (3600 * 1000);
+
+      // Phase 4: Widen range if assumed (< 5 events) or extrapolated beyond downstream gauge
+      if (isAssumed) {
+        lowH = lowH > 0 ? lowH * 0.75 : lowH;
+        highH = highH > 0 ? highH * 1.35 : highH;
+      }
+      if (isExtrapolated) {
+        lowH = lowH > 0 ? lowH * 0.7 : lowH;
+        highH = highH > 0 ? highH * 1.4 : highH;
+      }
 
       let summaryText = "";
       let statusTag = "in_transit";
@@ -159,7 +176,8 @@ export function computeOfflineEstimate({
         const lowStr = formatHours(lowH);
         const highStr = formatHours(highH);
         const likelyStr = formatHours(likelyH);
-        summaryText = `Water may reach your area in about ${lowStr} to ${highStr}, most likely ${likelyStr}.`;
+        const prefix = (isAssumed || isExtrapolated) ? "Rough estimate: " : "";
+        summaryText = `${prefix}Water may reach your area in about ${lowStr} to ${highStr}, most likely ${likelyStr}.`;
       }
 
       arrival = {
@@ -170,7 +188,10 @@ export function computeOfflineEstimate({
         status_tag: statusTag,
         summary_text: summaryText,
         basis: reach_speed_km_h.basis || "assumed",
-        km_basis: front.km_basis || "pack"
+        km_basis: front.km_basis || "pack",
+        is_rough: isAssumed || isExtrapolated,
+        is_extrapolated: isExtrapolated,
+        is_regulated: Boolean(reach_speed_km_h.is_regulated)
       };
     }
   }
