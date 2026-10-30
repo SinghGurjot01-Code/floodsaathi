@@ -1,0 +1,17 @@
+.env
+.env.local
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+.out/
+*.keystore
+*.jks
+*.pem
+*.key
+packs/**/*.pmtiles
+packs/**/*.bin
+packs/**/*.gguf
+packs/**/*.task
+android/**/build/
+.agent/

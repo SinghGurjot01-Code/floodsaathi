@@ -1,0 +1,289 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "floodsaathi.relay.v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "region",
+    "generated_at",
+    "sources",
+    "gauges",
+    "alerts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "floodsaathi.relay.v1"
+    },
+    "region": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "ok",
+          "age_min"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "fetched_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "age_min": {
+            "type": "number"
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "gauges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "river",
+          "lat",
+          "lon",
+          "level_m",
+          "warning_m",
+          "danger_m",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "river": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "level_m": {
+            "type": "number"
+          },
+          "warning_m": {
+            "type": "number"
+          },
+          "danger_m": {
+            "type": "number"
+          },
+          "bank_m": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trend_m_per_h": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "upstream_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "downstream_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "regulated": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "reach_speeds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "from",
+          "to",
+          "km",
+          "p25",
+          "median",
+          "p75",
+          "n_events",
+          "basis"
+        ],
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "km": {
+            "type": "number"
+          },
+          "p25": {
+            "type": "number"
+          },
+          "median": {
+            "type": "number"
+          },
+          "p75": {
+            "type": "number"
+          },
+          "n_events": {
+            "type": "integer"
+          },
+          "basis": {
+            "enum": [
+              "history",
+              "assumed"
+            ]
+          }
+        }
+      }
+    },
+    "rain_by_district": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "district",
+          "lat",
+          "lon",
+          "mm_72h"
+        ],
+        "properties": {
+          "district": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "mm_72h": {
+            "type": "number"
+          },
+          "hourly_mm": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "source",
+          "headline",
+          "issued_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "area": {
+            "type": "string"
+          },
+          "effective": {
+            "type": "string"
+          },
+          "expires": {
+            "type": "string"
+          },
+          "issued_at": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "model_forecasts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "gauge_id",
+          "model",
+          "issued_at",
+          "horizon_h"
+        ],
+        "properties": {
+          "gauge_id": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "horizon_h": {
+            "type": "number"
+          },
+          "level_m": {
+            "type": "number"
+          },
+          "p_exceed_warning_24h": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "resolution": {
+            "enum": [
+              "hourly",
+              "daily"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "floodsaathi.snapshot.v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "saved_at",
+    "user",
+    "gauges",
+    "status",
+    "source_age_min"
+  ],
+  "properties": {
+    "schema": {
+      "const": "floodsaathi.snapshot.v1"
+    },
+    "saved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "user": {
+      "type": "object",
+      "required": [
+        "lat",
+        "lon"
+      ],
+      "properties": {
+        "lat": {
+          "type": "number"
+        },
+        "lon": {
+          "type": "number"
+        },
+        "elevation_m": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "village_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "gauges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "river",
+          "lat",
+          "lon",
+          "level_m",
+          "warning_m",
+          "danger_m",
+          "observed_at"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "river": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "level_m": {
+            "type": "number"
+          },
+          "warning_m": {
+            "type": "number"
+          },
+          "danger_m": {
+            "type": "number"
+          },
+          "bank_m": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "trend_m_per_h": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "upstream_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "downstream_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "regulated": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "front": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "gauge_id": {
+          "type": "string"
+        },
+        "crossed_warning_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "km_to_user": {
+          "type": "number"
+        },
+        "km_basis": {
+          "enum": [
+            "pack",
+            "straight_line_x1.3"
+          ]
+        }
+      }
+    },
+    "reach_speed_km_h": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "p25": {
+          "type": "number"
+        },
+        "median": {
+          "type": "number"
+        },
+        "p75": {
+          "type": "number"
+        },
+        "basis": {
+          "enum": [
+            "history",
+            "assumed"
+          ]
+        }
+      }
+    },
+    "rain_72h_mm": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "alerts": {
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "Safe",
+        "Watch",
+        "Warning",
+        "Danger"
+      ]
+    },
+    "source_age_min": {
+      "type": "object"
+    },
+    "village": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "hand_m": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "bank_m": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "stage_depth": {
+          "type": "array"
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "type",
+          "at"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "reached",
+              "receding"
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

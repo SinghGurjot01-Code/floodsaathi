@@ -1,0 +1,17 @@
+requests
+pydantic
+jsonschema
+feedparser
+beautifulsoup4
+lxml
+boto3
+pytest
+numpy
+pandas
+scikit-learn
+lightgbm
+xarray
+rasterio
+pysheds
+osmnx
+networkx

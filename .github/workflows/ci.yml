@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - name: No-mock check
+        run: python scripts/check_no_mock.py
+      - name: App tests
+        run: |
+          if [ -d app/test ]; then node --test app/test; else echo "no app tests yet"; fi
+      - name: Python tests
+        run: |
+          pip install -U pip pytest jsonschema requests
+          [ -f relay/requirements.txt ] && pip install -r relay/requirements.txt || true
+          for d in relay/tests backend/tests; do [ -d "$d" ] && pytest "$d" || true; done

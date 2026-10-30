@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "floodsaathi.card.v1",
+  "type": "object",
+  "required": [
+    "id",
+    "hazard",
+    "lang",
+    "situation",
+    "steps",
+    "source",
+    "last_reviewed",
+    "review_status"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "hazard": {
+      "enum": [
+        "flood",
+        "cyclone",
+        "earthquake",
+        "heat",
+        "lightning",
+        "landslide",
+        "fire",
+        "refuse"
+      ]
+    },
+    "lang": {
+      "enum": [
+        "en",
+        "hi",
+        "pa"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "situation": {
+      "type": "string"
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "donts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "call_when": {
+      "type": "string"
+    },
+    "helplines": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "112",
+          "1078",
+          "1070",
+          "1077"
+        ]
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": [
+        "name",
+        "doc"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        }
+      }
+    },
+    "last_reviewed": {
+      "type": "string"
+    },
+    "review_status": {
+      "enum": [
+        "draft",
+        "reviewed"
+      ]
+    },
+    "reviewer": {
+      "type": "string"
+    }
+  }
+}
