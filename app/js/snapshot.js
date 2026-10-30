@@ -11,15 +11,15 @@ import { computeRawStatus, resolveOfflineStatus } from "./status.js";
  * @param {Object|null} villageRecord Pack record for village if available
  * @returns {Promise<Object>} Snapshot object (schema floodsaathi.snapshot.v1)
  */
-export async function createSnapshotFromRelay(relayData, userProfile, villageRecord = null) {
+export async function createSnapshotFromRelay(relayData, userProfile = {}, villageRecord = null) {
   const saved_at = new Date().toISOString();
   const observations = await getObservations();
 
   const user = {
-    lat: userProfile.lat ?? 31.634,
-    lon: userProfile.lon ?? 74.872,
-    elevation_m: userProfile.elevation_m ?? null,
-    village_id: userProfile.village_id ?? null
+    lat: userProfile?.lat ?? 31.634,
+    lon: userProfile?.lon ?? 74.872,
+    elevation_m: userProfile?.elevation_m ?? null,
+    village_id: userProfile?.village_id ?? null
   };
 
   const gauges = relayData.gauges || [];
@@ -106,7 +106,7 @@ export async function createSnapshotFromRelay(relayData, userProfile, villageRec
     alerts,
     rain_72h_mm,
     estimate,
-    district: userProfile.district,
+    district: userProfile?.district,
     villageRecord: village || { id: user.village_id || "default", name: "Punjab" },
     regionPack: { compatible: true },
     sourceAgeHours: 0

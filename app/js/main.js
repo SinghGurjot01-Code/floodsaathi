@@ -202,7 +202,7 @@ async function fetchLiveRelayData() {
     const res = await fetch("./data/latest/punjab.json");
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const relayData = await res.json();
-    const snapshot = await createSnapshotFromRelay(relayData);
+    const snapshot = await createSnapshotFromRelay(relayData, userProfile);
     currentSnapshot = snapshot;
     renderSnapshotData(snapshot);
   } catch (err) {
@@ -224,16 +224,42 @@ function renderDataUnavailable(reason) {
 function renderSnapshotData(snapshot) {
   if (!snapshot || !snapshot.gauges) return;
 
-  const raw = computeRawStatus(snapshot, userProfile.village_id);
-  const resolved = resolveOfflineStatus(raw.status, snapshot.saved_at);
-  const hero = document.getElementById("home-hero");
+  // Use resolved status from snapshot or recompute safely
+  let resolvedStatus = snapshot.status;
+  let statusReason = "Live flood telemetry monitored.";
 
-  if (hero) {
-    hero.className = `home-hero ${resolved.status.toLowerCase()}`;
+  if (!resolvedStatus || typeof resolvedStatus !== "string") {
+    const raw = computeRawStatus({
+      gauges: snapshot.gauges || [],
+      alerts: snapshot.alerts || [],
+      rain_72h_mm: snapshot.rain_72h_mm,
+      district: userProfile.district,
+      villageRecord: snapshot.village || { id: userProfile.village_id, name: userProfile.village_name },
+      regionPack: { compatible: true },
+      sourceAgeHours: snapshot.saved_at ? (Date.now() - new Date(snapshot.saved_at).getTime()) / 3600000 : 0
+    });
+    resolvedStatus = resolveOfflineStatus({
+      previousStatus: "UNKNOWN",
+      computedStatus: raw.status,
+      isFreshData: false
+    });
+    statusReason = raw.reasons?.[0] || raw.reason || statusReason;
   }
 
-  document.getElementById("status-word").textContent = resolved.status.toUpperCase();
-  document.getElementById("status-reason").textContent = raw.reason || "Live flood telemetry monitored.";
+  const hero = document.getElementById("home-hero");
+  if (hero) {
+    hero.className = `home-hero ${resolvedStatus.toLowerCase()}`;
+  }
+
+  const statusWord = document.getElementById("status-word");
+  if (statusWord) {
+    statusWord.textContent = resolvedStatus.toUpperCase();
+  }
+
+  const statusReasonEl = document.getElementById("status-reason");
+  if (statusReasonEl) {
+    statusReasonEl.textContent = statusReason;
+  }
 
   const age = getSnapshotAge(snapshot.saved_at);
   document.getElementById("status-age-badge").textContent = `Data: ${age.display}`;

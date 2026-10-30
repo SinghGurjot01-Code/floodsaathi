@@ -3,10 +3,16 @@
   "tagline": "Offline-First Flood Early-Warning",
   "nav": {
     "status": "My Status",
+    "home": "Home",
     "map": "Water Map",
     "alerts": "Alerts",
     "evac": "Evacuate",
     "ask": "Ask Saathi",
+    "saathi": "Saathi",
+    "shelters": "Shelters",
+    "guide": "Guide",
+    "preferences": "Preferences",
+    "more": "More",
     "sos": "SOS",
     "settings": "Settings"
   },
