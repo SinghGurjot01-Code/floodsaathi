@@ -1,12 +1,12 @@
 {
   "retrieval_benchmark": {
     "total_queries": 100,
-    "top1_accuracy": 94.0,
-    "top3_accuracy": 100.0,
+    "top1_accuracy": 90.0,
+    "top3_accuracy": 97.0,
     "by_language": {
       "en": {
         "total": 36,
-        "top1_accuracy": 91.7
+        "top1_accuracy": 86.1
       },
       "hi": {
         "total": 32,
@@ -14,7 +14,7 @@
       },
       "pa": {
         "total": 32,
-        "top1_accuracy": 93.8
+        "top1_accuracy": 87.5
       }
     }
   },

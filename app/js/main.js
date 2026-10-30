@@ -790,7 +790,7 @@ function setupPreferencesView() {
 
   // Google Translate API Key setup (R3)
   const saveKeyBtn = document.getElementById("btn-save-translate-key");
-  const keyInput = document.getElementById("pref-google-translate-key");
+  const keyInput = document.getElementById("input-translate-api-key") || document.getElementById("pref-google-translate-key");
   const keyStatus = document.getElementById("translate-key-status");
 
   saveKeyBtn?.addEventListener("click", async () => {
@@ -811,7 +811,7 @@ function setupPreferencesView() {
 
 function renderPreferencesView() {
   // Sync Google Translate key status
-  const keyInput = document.getElementById("pref-google-translate-key");
+  const keyInput = document.getElementById("input-translate-api-key") || document.getElementById("pref-google-translate-key");
   const keyStatus = document.getElementById("translate-key-status");
   if (keyInput && keyStatus) {
     getSetting("google_translate_api_key").then((savedKey) => {

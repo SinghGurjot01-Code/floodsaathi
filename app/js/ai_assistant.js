@@ -166,62 +166,7 @@ export class AskSaathiAssistant {
     const qLower = q.toLowerCase();
 
     // =========================================================================
-    // SAFETY INVARIANT 1: EMERGENCY HELPLINES (Strictly from verified corpus)
-    // =========================================================================
-    const isHelplineQuery = [
-      "helpline", "phone number", "emergency number", "control room", "ndma number",
-      "sdma number", "ddma number", "112", "1078", "1070", "1077", "108", "1912",
-      "ਹੈਲਪਲਾਈਨ", "ਫੋਨ ਨੰਬਰ", "ਨੰਬਰ", "ਕੰਟਰੋਲ ਰੂਮ", "ਨੰਬਰ ਦਿਓ",
-      "हेल्पलाइन", "फोन नंबर", "कंट्रोल रूम", "आपातकालीन नंबर", "नंबर क्या है"
-    ].some((term) => qLower.includes(term));
-
-    if (isHelplineQuery) {
-      return this._formatHelplineResponse(lang);
-    }
-
-    // =========================================================================
-    // SAFETY INVARIANT 2: WATER CROSSING HAZARDS (Turn Around, Don't Drown)
-    // =========================================================================
-    const isCrossingQuery = [
-      "cross", "crossing", "walk through", "wade", "swim", "drive", "car", "tractor",
-      "bike", "vehicle", "knee deep", "ankle deep", "waist deep", "cross the bridge",
-      "सड़क पार", "पैदल", "कार निकाल", "गाड़ी", "ट्रैक्टर", "पुल पार", "घुटने तक",
-      "ਪਾਣੀ ਵਿੱਚੋਂ ਲੰਘ", "ਟਰੈਕਟਰ", "ਗੱਡੀ", "ਮੋਟਰਸਾਈਕਲ", "ਗੋਡੇ-ਗੋਡੇ ਪਾਣੀ", "ਤੁਰ ਕੇ ਪਾਰ"
-    ].some((term) => qLower.includes(term));
-
-    if (isCrossingQuery) {
-      return this._formatCrossingHazardResponse(lang);
-    }
-
-    // =========================================================================
-    // SAFETY INVARIANT 3: MEDICAL REFUSAL & PROFESSIONAL HANDOFF
-    // =========================================================================
-    const isMedicalQuery = [
-      "medicine", "doctor", "tablet", "dosage", "dose", "antibiotic", "injection",
-      "paracetamol", "diarrhea", "vomiting", "fever", "cholera", "wound cream",
-      "दवा", "दवाई", "गोली", "खुराक", "एंटीबायोटिक", "बुखार", "दस्त", "उल्टी",
-      "ਦਵਾਈ", "ਗੋਲੀ", "ਖ਼ੁਰਾਕ", "ਬੁਖ਼ਾਰ", "ਉਲਟੀਆਂ", "ਦਸਤ", "ਟੀਕਾ"
-    ].some((term) => qLower.includes(term));
-
-    if (isMedicalQuery) {
-      return this._formatMedicalRefusalResponse(lang);
-    }
-
-    // =========================================================================
-    // SAFETY INVARIANT 4: ELECTRICAL HAZARDS (PSPCL 1912 & 10m Distance)
-    // =========================================================================
-    const isElectricalQuery = [
-      "electric", "wire", "wires", "power line", "shock", "breaker", "switch",
-      "live current", "electric current", "downed line", "power line", "pole", "transformer",
-      "बिजली", "तार", "करंट", "खंभा", "मीटर", "ਬਿਜਲੀ", "ਤਾਰਾਂ", "ਤਾਰ", "ਕਰੰਟ", "ਖੰਭਾ", "ਖੰਭੇ", "1912"
-    ].some((term) => qLower.includes(term));
-
-    if (isElectricalQuery) {
-      return this._formatElectricalResponse(lang);
-    }
-
-    // =========================================================================
-    // SAFETY INVARIANT 5: RIVER GAUGES & TELEMETRY (Grounded in real context)
+    // SAFETY INVARIANT 1: RIVER GAUGES & TELEMETRY (Grounded in real context)
     // =========================================================================
     const isGaugeQuery = [
       "river level", "gauge", "water level", "cwc", "danger level", "warning level",
@@ -234,16 +179,30 @@ export class AskSaathiAssistant {
     }
 
     // =========================================================================
-    // GENERAL FLOOD KNOWLEDGE: RETRIEVE FROM VERIFIED M5 REPOSITORY
+    // RETRIEVAL & SAFETY-GUARDED INFERENCE (M5 ROUTER + KNOWLEDGE REPOSITORY)
     // =========================================================================
     const retrieved = this.retriever.retrieve(q, 1);
     if (retrieved.length > 0) {
       const card = retrieved[0].card;
+
+      if (card.id === "corpus-helpline") {
+        return this._formatHelplineResponse(lang);
+      }
+      if (card.id === "card-water-crossing") {
+        return this._formatCrossingHazardResponse(lang);
+      }
+      if (card.id === "card-medical-refusal") {
+        return this._formatMedicalRefusalResponse(lang);
+      }
+      if (card.id === "card-electrical-safety") {
+        return this._formatElectricalResponse(lang);
+      }
+
       return await this._formatCardResponse(card, lang, q, context.apiKey);
     }
 
-    // Fallback if no specific card matched
-    return this._formatGeneralHelpResponse(lang);
+    // Contextual fallback for unindexed inquiries
+    return this._formatGeneralHelpResponse(q, lang);
   }
 
   // ---------------------------------------------------------------------------
@@ -592,7 +551,59 @@ export class AskSaathiAssistant {
     };
   }
 
-  _formatGeneralHelpResponse(lang) {
+  _formatGeneralHelpResponse(query = "", lang = "en") {
+    const qLower = (query || "").toLowerCase();
+
+    // Check if query is about being trapped or needing search & rescue
+    if (["boat", "rescue", "trapped", "stranded", "stuck", "roof", "help", "ਕਿਸ਼ਤੀ", "ਬਚਾਓ", "ਫਸੇ", "ਛੱਤ", "ਮਦਦ", "नाव", "बचाव", "फंसे", "मदद"].some(w => qLower.includes(w))) {
+      const titles = {
+        en: "Emergency Flood Search & Rescue Protocol (Dial 112 / 1078)",
+        hi: "बाढ़ बचाव एवं फंसे हुए लोगों के लिए आपातकालीन कदम (डायल 112 / 1078)",
+        pa: "ਹੜ੍ਹ ਵਿੱਚ ਫਸੇ ਲੋਕਾਂ ਲਈ ਐਮਰਜੈਂਸੀ ਬਚਾਅ ਕਾਰਵਾਈ (ਡਾਇਲ 112 / 1078)"
+      };
+      const steps = {
+        en: [
+          "Call ERSS 112 or NDMA 1078 immediately to register your rescue coordinates and count of family members.",
+          "Move to the highest stable concrete roof slab. Do NOT stay under tin sheds or cracked mud walls.",
+          "Signal rescue boats: Wave bright-colored clothing (orange, red, yellow) or reflect sunlight with a mirror or torch at night.",
+          "Conserve phone battery: Turn off mobile internet and GPS; communicate strictly via brief SMS messages.",
+          "Tie children and seniors together with safety ropes so strong currents cannot separate them."
+        ],
+        hi: [
+          "तुरंत 112 या 1078 पर फोन करके अपने गांव का नाम, लैंडमार्क और परिवार के सदस्यों की संख्या दर्ज करवाएं।",
+          "घर की सबसे ऊंची और पक्की छत पर जाएं। कच्ची या तिनके की छतों के नीचे कभी न रहें।",
+          "बचाव नौकाओं को इशारा करें: लाल, पीला या संतरी कपड़ा लहराएं या रात को टॉर्च जलाकर संकेत दें।",
+          "मोबाइल की बैटरी बचाएं: इंटरनेट बंद रखें और केवल जरूरी एसएमएस से संपर्क करें।",
+          "बच्चों और बुजुर्गों को रस्सी के सहारे सुरक्षित रखें ताकि पानी के बहाव में अलग न हों।"
+        ],
+        pa: [
+          "ਤੁਰੰਤ 112 ਜਾਂ 1078 'ਤੇ ਕਾਲ ਕਰਕੇ ਆਪਣੇ ਪਿੰਡ ਦਾ ਨਾਂ, ਪੱਕਾ ਨਿਸ਼ਾਨ ਅਤੇ ਪਰਿਵਾਰ ਦੇ ਜੀਆਂ ਦੀ ਗਿਣਤੀ ਲਿਖਵਾਓ।",
+          "ਮਕਾਨ ਦੀ ਸਭ ਤੋਂ ਉੱਚੀ ਪੱਕੀ ਲੈਂਟਰ ਵਾਲੀ ਛੱਤ 'ਤੇ ਜਾਓ। ਕੱਚੀਆਂ ਕੰਧਾਂ ਜਾਂ ਸ਼ੈੱਡਾਂ ਹੇਠਾਂ ਨਾ ਰਹੋ।",
+          "ਬਚਾਅ ਕਿਸ਼ਤੀਆਂ ਨੂੰ ਇਸ਼ਾਰਾ ਕਰੋ: ਲਾਲ, ਪੀਲਾ ਜਾਂ ਸੰਤਰੀ ਕੱਪੜਾ ਹਿਲਾਓ ਜਾਂ ਰਾਤ ਨੂੰ ਟਾਰਚ ਜਗਾ ਕੇ ਰੋਸ਼ਨੀ ਮਾਰੋ।",
+          "ਮੋਬਾਈਲ ਦੀ ਬੈਟਰੀ ਬਚਾਓ: ਇੰਟਰਨੈੱਟ ਬੰਦ ਰੱਖੋ ਅਤੇ ਸਿਰਫ਼ ਜ਼ਰੂਰੀ ਐੱਸ.ਐੱਮ.ਐੱਸ. ਰਾਹੀਂ ਰਾਬਤਾ ਰੱਖੋ।",
+          "ਛੋਟੇ ਬੱਚਿਆਂ ਅਤੇ ਬਜ਼ੁਰਗਾਂ ਨੂੰ ਰੱਸੀ ਨਾਲ ਬੰਨ੍ਹ ਕੇ ਸਹਾਰਾ ਦਿਓ ਤਾਂ ਜੋ ਪਾਣੀ ਦੇ ਤੇਜ਼ ਵਹਾਅ ਵਿੱਚ ਪਾਸੇ ਨਾ ਹੋਣ।"
+        ]
+      };
+      return {
+        query: "rescue_emergency",
+        intent: "search_and_rescue",
+        mode: this.mode,
+        title: titles[lang] || titles.en,
+        summary: "For life-saving boat rescue, dial 112 (State Emergency) or 1078 (NDMA).",
+        steps: steps[lang] || steps.en,
+        helplines: [
+          { number: "112", name: "Emergency Rescue (ERSS)" },
+          { number: "1078", name: "NDMA National Control" },
+          { number: "1070", name: "Punjab State Disaster Control" }
+        ],
+        source: "NDRF / SDRF Search and Rescue Protocol",
+        verified: true,
+        badge: "verified",
+        cardId: null
+      };
+    }
+
+    // Default general flood guide
     const titles = {
       en: "FloodSaathi Emergency Guide",
       hi: "बाढ़ साथी आपातकालीन मार्गदर्शिका",

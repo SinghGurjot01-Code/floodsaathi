@@ -1,7 +1,7 @@
 {
   "schema": "floodsaathi.exported_model.v1",
   "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
-  "lora_adapter_dir": "C:\\Users\\Gurjotpal Singh\\Desktop\\FloodSaathi\\relay\\models\\saathi_lora",
+  "lora_adapter_dir": "C:\\Users\\Gurjotpal Singh\\AppData\\Local\\Temp\\pytest-of-Gurjotpal Singh\\pytest-187\\test_export_spec_generation0\\lora_test",
   "quantization": "int4",
   "exported_formats": [
     "onnx",
@@ -9,9 +9,14 @@
     "litert"
   ],
   "target_platforms": {
-    "pwa_webgpu": "onnx/model_int4",
+    "pwa_webgpu": "onnx/model_int4.onnx",
     "android_litert": "litert/task_spec.json",
-    "native_gguf": "gguf/model_spec.json"
+    "native_gguf": "gguf/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+  },
+  "artifacts": {
+    "onnx_int4": "onnx/model_int4.onnx",
+    "gguf_q4_k_m": "gguf/qwen2.5-0.5b-instruct-q4_k_m.gguf",
+    "litert_task": "litert/task_spec.json"
   },
   "hardware_profile": {
     "min_ram_mb": 2500,

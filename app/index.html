@@ -634,14 +634,14 @@
             <!-- Google Cloud Translation API Configuration (R3) -->
             <div style="margin-top: 14px; padding: 14px; background: #f8fafc; border: 1px solid var(--line); border-radius: 14px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <label for="pref-google-translate-key" style="font-size: 13.5px; font-weight: 700; color: var(--navy);">Google Translate API Key (Online Fallback)</label>
+                <label for="input-translate-api-key" style="font-size: 13.5px; font-weight: 700; color: var(--navy);">Google Translate API Key (Online Fallback)</label>
                 <span class="plugin-badge" id="translate-key-status" style="font-size:11px;">Offline Core</span>
               </div>
               <p style="font-size: 12px; color: var(--mut); margin-bottom: 8px; line-height: 1.4;">
                 Optional: Used when online to dynamically translate English safety guidance into natural Punjabi and Hindi. When offline or unset, FloodSaathi strictly uses the verified offline disaster cards.
               </p>
               <div style="display: flex; gap: 8px;">
-                <input type="password" id="pref-google-translate-key" placeholder="AIzaSy..." style="flex:1; height:38px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); font-family: monospace; font-size: 13px;">
+                <input type="password" id="input-translate-api-key" data-legacy-id="pref-google-translate-key" placeholder="AIzaSy..." style="flex:1; height:38px; padding: 0 10px; border-radius: 8px; border: 1px solid var(--line); font-family: monospace; font-size: 13px;">
                 <button class="btn-resync-gps" id="btn-save-translate-key" style="min-height:38px; padding:0 14px; font-weight:700;">Save</button>
               </div>
             </div>

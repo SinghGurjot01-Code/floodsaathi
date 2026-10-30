@@ -1,7 +1,7 @@
 {
   "model_id": "Qwen/Qwen2.5-0.5B-Instruct",
   "dataset": "C:\\Users\\Gurjotpal Singh\\Desktop\\FloodSaathi\\corpus\\flood_safety_dataset.jsonl",
-  "record_count": 46,
+  "record_count": 64,
   "lora_r": 16,
   "lora_alpha": 32,
   "epochs": 3,

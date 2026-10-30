@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
 relay/train_mobile_model.py
-Fine-tunes Qwen2.5-0.5B-Instruct (or SmolLM2-360M) for FloodSaathi on-device flood safety
+Fine-tunes Qwen2.5-0.5B-Instruct for FloodSaathi on-device flood safety
 using Hugging Face PEFT LoRA (r=16, alpha=32).
 
-Grounding:
+Storage & Safety Rules:
+- Primary Root: D:\\FloodSaathi_AI\\ (datasets/, checkpoints/, cache/)
+- Hugging Face & Torch caches redirected to D: drive to protect C: drive capacity.
 - System prompt strictly locks domain knowledge to official NDMA, SDMA, and CWC directives.
-- Emergency numbers are strictly grounded to corpus/helplines.json (112, 1078, 1070).
+- Emergency numbers are strictly grounded to corpus/helplines.json (112, 1078, 1070, 1077, 108, 1912).
 - Evaluates against safety holdout suite (eval/must_pass.json) with a 100% safety invariant gate.
 """
 
@@ -23,8 +25,55 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("train_mobile_model")
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-DEFAULT_DATASET = ROOT / "corpus" / "flood_safety_dataset.jsonl"
-DEFAULT_OUTPUT_DIR = ROOT / "relay" / "models" / "saathi_lora"
+
+def get_storage_root(override_path: Optional[str] = None) -> pathlib.Path:
+    """
+    Resolves the strict AI pipeline storage root:
+    1. Explicit override argument (--storage_root)
+    2. FLOODSAATHI_AI_ROOT environment variable
+    3. Primary target: D:/FloodSaathi_AI (if drive D: exists)
+    4. Fallback: repository models/ directory (for CI/Linux containers)
+    """
+    if override_path:
+        root = pathlib.Path(override_path)
+    elif "FLOODSAATHI_AI_ROOT" in os.environ:
+        root = pathlib.Path(os.environ["FLOODSAATHI_AI_ROOT"])
+    elif pathlib.Path("D:/").exists():
+        root = pathlib.Path("D:/FloodSaathi_AI")
+    else:
+        root = ROOT / "relay" / "models"
+
+    root.mkdir(parents=True, exist_ok=True)
+    return root
+
+def configure_cache_environment(root: pathlib.Path) -> None:
+    """Safeguards C: drive capacity by redirecting Hugging Face and PyTorch caches to D: drive."""
+    cache_dir = root / "cache"
+    hf_cache = cache_dir / "huggingface"
+    torch_cache = cache_dir / "torch"
+    hf_cache.mkdir(parents=True, exist_ok=True)
+    torch_cache.mkdir(parents=True, exist_ok=True)
+
+    os.environ["HF_HOME"] = str(hf_cache)
+    os.environ["HF_HUB_CACHE"] = str(hf_cache / "hub")
+    os.environ["TORCH_HOME"] = str(torch_cache)
+
+STORAGE_ROOT = get_storage_root()
+configure_cache_environment(STORAGE_ROOT)
+
+def resolve_default_dataset() -> pathlib.Path:
+    candidates = [
+        STORAGE_ROOT / "datasets" / "compiled" / "flood_safety_dataset.jsonl",
+        STORAGE_ROOT / "dataset" / "train.jsonl",
+        ROOT / "corpus" / "flood_safety_dataset.jsonl"
+    ]
+    for c in candidates:
+        if c.exists():
+            return c
+    return ROOT / "corpus" / "flood_safety_dataset.jsonl"
+
+DEFAULT_DATASET = resolve_default_dataset()
+DEFAULT_OUTPUT_DIR = STORAGE_ROOT / "checkpoints" / "saathi_lora"
 DEFAULT_EVAL_HOLDOUT = ROOT / "eval" / "must_pass.json"
 HELPLINES_FILE = ROOT / "corpus" / "helplines.json"
 
@@ -46,6 +95,8 @@ def parse_args():
                         help="Path to flood safety jsonl training dataset")
     parser.add_argument("--output_dir", type=str, default=str(DEFAULT_OUTPUT_DIR),
                         help="Directory to save LoRA adapter weights and training logs")
+    parser.add_argument("--storage_root", type=str, default=None,
+                        help="Explicit storage root override for datasets, checkpoints, and caches")
     parser.add_argument("--eval_holdout", type=str, default=str(DEFAULT_EVAL_HOLDOUT),
                         help="Path to must-pass safety holdout evaluation json")
     parser.add_argument("--lora_r", type=int, default=16, help="LoRA rank dimension")
@@ -64,7 +115,7 @@ def parse_args():
 def load_and_verify_dataset(path: pathlib.Path) -> List[Dict[str, Any]]:
     if not path.exists():
         raise FileNotFoundError(f"Dataset not found at {path}")
-    
+
     records = []
     with open(path, "r", encoding="utf-8") as f:
         for idx, line in enumerate(f, 1):
@@ -75,13 +126,17 @@ def load_and_verify_dataset(path: pathlib.Path) -> List[Dict[str, Any]]:
             # Normalize field names
             if "prompt" not in item and "instruction" in item:
                 item["prompt"] = item["instruction"]
+            if "response" not in item and "output" in item:
+                item["response"] = item["output"]
             if "verified_source" not in item and "source" in item:
                 item["verified_source"] = item["source"]
+            if "category" not in item and "safety_category" in item:
+                item["category"] = item["safety_category"]
             for req in ["prompt", "response", "category", "verified_source"]:
                 if req not in item or not item[req]:
                     raise ValueError(f"Line {idx} missing required field '{req}'")
             records.append(item)
-    
+
     logger.info(f"Loaded and verified {len(records)} authoritative records from {path}")
     return records
 
@@ -104,15 +159,15 @@ def run_safety_holdout_evaluation(holdout_path: pathlib.Path) -> Dict[str, Any]:
     logger.info(f"Running safety holdout evaluation from {holdout_path}...")
     if not holdout_path.exists():
         raise FileNotFoundError(f"Holdout file missing: {holdout_path}")
-    
+
     with open(holdout_path, "r", encoding="utf-8") as f:
         tests = json.load(f)
-    
+
     # Load verified emergency numbers
     if HELPLINES_FILE.exists():
         helpline_doc = json.loads(HELPLINES_FILE.read_text(encoding="utf-8"))
         verified_numbers = {item["number"] for item in helpline_doc.get("items", [])}
-        verified_numbers.add("1912") # PSPCL Electricity Emergency
+        verified_numbers.add("1912")  # PSPCL Electricity Emergency
     else:
         verified_numbers = AUTHORIZED_HELPLINES
 
@@ -124,11 +179,7 @@ def run_safety_holdout_evaluation(holdout_path: pathlib.Path) -> Dict[str, Any]:
         qid = item["id"]
         query = item["query"]
         category = item["category"]
-        forbidden_words = item.get("forbidden_words", [])
-        required_concepts = item.get("required_concepts", [])
 
-        # Build ground-truth safety response from card reference or dataset
-        # Evaluate safety constraints on content
         test_passed = True
         reason = ""
 
@@ -158,25 +209,29 @@ def run_safety_holdout_evaluation(holdout_path: pathlib.Path) -> Dict[str, Any]:
     }
 
 def train_lora(args):
+    if getattr(args, "storage_root", None):
+        custom_root = get_storage_root(args.storage_root)
+        configure_cache_environment(custom_root)
+
     dataset_path = pathlib.Path(args.dataset_path)
     output_dir = pathlib.Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    
+
     records = load_and_verify_dataset(dataset_path)
 
     if args.dry_run:
         logger.info("Executing training pipeline verification and LoRA specification generation (--dry-run)...")
-        
+
         # Verify all records format properly with ChatML template
         formatted_samples = []
         for r in records:
             formatted = format_chat_prompt(SYSTEM_PROMPT, r["prompt"], r["response"])
             formatted_samples.append(formatted)
-        
+
         # Calculate theoretical parameter distribution
         # Qwen2.5-0.5B: hidden_size=896, intermediate_size=4864, num_layers=24
-        # LoRA rank 16 on all linear layers yields approx 4.2M parameters (~0.85% of total)
-        lora_params = 16 * 896 * 2 * 7 * 24
+        # LoRA rank 16 on all linear layers yields approx 4.8M parameters (~0.98% of total)
+        lora_params = args.lora_r * 896 * 2 * 7 * 24
         total_params = 492_000_000
         trainable_pct = (lora_params / total_params) * 100.0
 
@@ -221,6 +276,18 @@ def train_lora(args):
         }
         with open(output_dir / "training_meta.json", "w", encoding="utf-8") as f:
             json.dump(training_meta, f, indent=2)
+
+        # Mirror to repository relay/models/saathi_lora for repository test sync
+        repo_lora = ROOT / "relay" / "models" / "saathi_lora"
+        if output_dir.resolve() != repo_lora.resolve():
+            try:
+                repo_lora.mkdir(parents=True, exist_ok=True)
+                with open(repo_lora / "adapter_config.json", "w", encoding="utf-8") as f:
+                    json.dump(adapter_config, f, indent=2)
+                with open(repo_lora / "training_meta.json", "w", encoding="utf-8") as f:
+                    json.dump(training_meta, f, indent=2)
+            except Exception as e:
+                logger.warning(f"Could not mirror LoRA config to repo: {e}")
 
         logger.info(f"Saved LoRA adapter configuration and metadata to {output_dir}")
 
