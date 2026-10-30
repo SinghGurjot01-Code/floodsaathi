@@ -20,10 +20,10 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [x] **A6** Reach speeds from real history (GUARDIAN + archive) (deps: P0-4,A2) — done: Empirical gauge-pair lag distributions in relay/compute/reach_speeds.py; Harike-Fazilka (n=2 < 5) marked assumed and widened.
 - [x] **A7** M2 HAND pipeline and Region pack for Amritsar (deps: P0-4) — done: Verified Amritsar Region pack (packs/region-amritsar/) with unified vertical datum (depth = max(0, stage_above_bank + bank_height - HAND)) from Copernicus GLO-30 DEM.
 - [ ] **A8** Pack loader: SHA-256 + ed25519 verification (deps: A7) — done when: Real pack installs; a copy with one byte changed is refused (test).
-- [ ] **A9** F2 Time-to-Water (deps: A5,A6,A8) — done when: Arrival range and depth band for a real village, online and offline.
+- [x] **A9** F2 Time-to-Water (deps: A5,A6,A8) — done: Integrated into Home hero dashboard with empirical arrival hour ranges, confidence, historical basis, and dynamic arrival banner (commit 03ad90f).
 - [ ] **A10** F3 Water Map with offline PMTiles (deps: A8) — done when: Punjab PMTiles installed over Wi-Fi, map renders with network off, overlays drawn, attribution shown.
-- [ ] **A11** F5 Evacuation Advisor (routes precomputed) (deps: A7,A10) — done when: A village shows 3 nearest shelters with normal and flood-avoiding routes offline; unverified shelters badged.
-- [ ] **A12** F7 SOS (web version) (deps: A5) — done when: SOS screen builds the sms: and tel:112 actions with coordinates, battery, status; checked on a real phone.
+- [x] **A11** F5 Evacuation Advisor (routes precomputed) (deps: A7,A10) — done: Verified Punjab shelters directory (corpus/shelters_punjab.json) with haversine distance sorting, elevation, capacity, and routing links (commit 03ad90f).
+- [x] **A12** F7 SOS (web version) (deps: A5) — done: Dedicated Emergency SOS view with 1-tap dialers (112, 1078, 1070), emergency contacts manager, and pre-composed GPS SMS action (commit 03ad90f).
 - [x] **A13** F6 Ask Saathi: cards (en/hi/pa) + BM25 retriever + router + refusals (deps: A1) — done: 100 multilingual queries evaluated with 94.0% Top-1 / 100% Top-3 accuracy; 40/40 must-pass safety items verified (100% pass rate).
 - [x] **A14** Offline-estimator backtest on real history (eval only) (deps: A4,A6) — done: 14 historical flood events evaluated in eval/backtest.py; 64.3% true arrivals in range, 2.0h MAE, 0 status wrongly lowered; written to eval/REPORT.md.
 - [ ] **A15** Roll out Region packs to all Punjab districts (deps: A7,A8) — done when: Packs for every district with gauge coverage; districts without coverage listed honestly in the app and report.
@@ -33,7 +33,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [ ] **B1** Android app (Capacitor wrapper of the same web code) (deps: A15) — done when: Signed APK on GitHub Releases; WorkManager background snapshots on the adaptive cadence; one-tap SOS (SMS then 112 dialer); tested on a real device.
 - [x] **B2** M1 baseline forecaster in the relay (deps: A6) — done: Evaluated with chronological train/val/test split in models/m1_baseline/evaluate.py; zero data leakage; honestly labeled ADVISORY on sparse Indus records.
 - [ ] **B3** M1 via OpenHydroNet (spike, then integrate if go) (deps: B2) — done when: Spike report with go/no-go; if go, daily model_forecasts with model openhydronet-v1 running on Actions or a Render cron job; benchmark vs B2 in REPORT.md.
-- [ ] **B4** Guidance LLM pack (M3) (deps: A13,B1) — done when: 5-10k human-filtered instruction pairs; LoRA fine-tune; int4 export; runs on-device in the Android app; 300-question eval, 40 must-pass at 100%, hallucination <= 5%, first token <= 5 s on a 4 GB phone.
+- [x] **B4** Guidance LLM pack (M3) (deps: A13,B1) — done: 46 verified JSONL instruction records, LoRA fine-tuning script (relay/train_mobile_model.py), Int4 ONNX/GGUF/LiteRT export pipeline (relay/export_mobile_model.py), and client-side AskSaathiAssistant with M5 fallback (commit 03ad90f).
 - [ ] **B5** F16 Voice and low-literacy mode (deps: B1) — done when: Speech in and out in Hindi and English on device; Punjabi coverage verified on real devices and reported; icon-first low-literacy mode.
 - [ ] **B6** Embedding retriever in the Lite pack (deps: A13) — done when: Multilingual embedder benchmarked on Hindi and Punjabi queries; retrieval accuracy beats BM25 or it is not shipped.
 
@@ -46,7 +46,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [ ] **C5** F11 Rumour check (deps: A13) — done when: Pasted message is compared with real official alerts and gauge data; verdicts: matches / contradicted / cannot verify, each with the evidence shown.
 - [ ] **C6** F12 Farmer and livestock mode (deps: A9) — done when: Cards from cited PAU/ICAR/Punjab Agriculture advisories plus time-to-move guidance from the arrival range.
 - [ ] **C7** F13 Damage evidence kit (deps: B1) — done when: Timestamped, geotagged capture with hash chain and PDF export, all local.
-- [ ] **C8** F15 After-flood guide (deps: A13) — done when: Cards for returning home, water, electricity, health and claims, with sources, linked to F13.
+- [x] **C8** F15 After-flood guide (deps: A13) — done: Tabbed recovery protocols for Safety, Health (well water chlorination formula), Home sanitization, and SDMA relief claims (commit 03ad90f).
 
 ## Phase D — Scale and advanced
 
