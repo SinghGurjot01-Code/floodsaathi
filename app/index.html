@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="description" content="Offline-first flood early-warning system for India. Estimated arrival ranges, shelter routing, and emergency SOS.">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+  <title>FloodSaathi</title>
+  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/status.css">
+</head>
+<body>
+
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="brand">
+      <img src="./icons/icon.svg" alt="FloodSaathi Logo" class="brand-icon" width="36" height="36">
+      <span class="brand-name" data-i18n="app_name">FloodSaathi</span>
+    </div>
+    <div class="header-actions">
+      <!-- Language Switcher: EN / हिं / ਪੰ -->
+      <div class="lang-selector" role="group" aria-label="Language selector">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="hi">हिं</button>
+        <button class="lang-btn" data-lang="pa">ਪੰ</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Persistent Emergency Helplines Bar -->
+  <nav class="helpline-bar" id="helpline-bar" aria-label="Emergency Helplines">
+    <!-- Populated by JS -->
+  </nav>
+
+  <!-- Offline Notice Banner -->
+  <div class="offline-banner hidden" id="offline-banner" role="status" aria-live="polite">
+    <!-- Offline message with data age -->
+  </div>
+
+  <!-- Main View Container -->
+  <main>
+    <!-- View 1: My Status (F1 & F2 & F8) -->
+    <section class="view-section active" id="view-status">
+      <!-- Status Card -->
+      <div class="status-card safe" id="status-card">
+        <div class="status-icon-wrapper" id="status-icon-container">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <div class="status-word" id="status-word">Safe</div>
+        <div class="status-reason" id="status-reason">Loading flood safety conditions...</div>
+        
+        <div class="status-meta">
+          <span class="badge badge-age" id="status-age-badge">Data from just now</span>
+          <span class="badge badge-age" id="status-offline-badge" style="display:none;" data-i18n="status.estimated_badge">Estimated</span>
+        </div>
+      </div>
+
+      <!-- Time-to-Water Estimate Box -->
+      <div id="estimate-container"></div>
+
+      <!-- River Gauge Summary -->
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-6"/><path d="M12 2v10"/></svg>
+          <span data-i18n="estimator.nearest_gauge">River Gauge Details</span>
+        </div>
+        <div class="gauge-grid" id="gauge-grid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- User Action Reporting Buttons -->
+      <div class="user-actions-group">
+        <button class="user-action-btn" id="btn-water-reached">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <span data-i18n="actions.water_reached">Water reached my street</span>
+        </button>
+        <button class="user-action-btn" id="btn-water-receding">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          <span data-i18n="actions.water_receding">Water is receding</span>
+        </button>
+      </div>
+
+      <button class="btn btn-outline" id="btn-refresh-data" data-i18n="actions.refresh">Refresh Live Data</button>
+    </section>
+
+    <!-- View 2: Official Alerts (F4) -->
+    <section class="view-section" id="view-alerts">
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span data-i18n="alerts.title">Official Alerts (NDMA SACHET)</span>
+        </div>
+        <div id="alerts-container">
+          <p data-i18n="common.loading">Loading alerts...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- View 3: Emergency SOS (F7) -->
+    <section class="view-section" id="view-sos">
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span data-i18n="sos.title">Emergency SOS</span>
+        </div>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 16px;" data-i18n="sos.disclaimer">
+          Web SOS creates SMS and phone calls. Review and send via your device dialer or messaging app.
+        </p>
+
+        <div class="sos-container">
+          <a href="tel:112" class="sos-action-btn call-112" data-i18n="sos.call_112">
+            Call 112 Immediately
+          </a>
+          <button class="sos-action-btn send-sms" id="sos-btn-sms" data-i18n="sos.send_sms">
+            Send SMS to My Contacts
+          </button>
+        </div>
+
+        <div style="margin-top: 24px;">
+          <h3 style="font-size: 1rem; margin-bottom: 8px;" data-i18n="sos.contacts_heading">Emergency Contacts</h3>
+          <div id="sos-contacts-list"></div>
+
+          <form id="sos-add-contact-form" style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+            <input type="text" id="contact-name" class="btn-outline" style="text-align: left; padding: 10px;" placeholder="Contact Name" data-i18n-placeholder="sos.name_placeholder" required>
+            <input type="tel" id="contact-phone" class="btn-outline" style="text-align: left; padding: 10px;" placeholder="Phone Number (e.g. 9876543210)" data-i18n-placeholder="sos.phone_placeholder" required>
+            <button type="submit" class="btn btn-primary" data-i18n="sos.add_contact">Add Contact</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- View 4: Settings -->
+    <section class="view-section" id="view-settings">
+      <div class="card">
+        <div class="card-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span data-i18n="settings.title">Settings</span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="font-size: 0.9rem; color: var(--text-secondary);" data-i18n="settings.storage">Offline Storage Used</label>
+          <div id="storage-used-display" style="font-size: 1.1rem; font-weight: 700; margin-top: 4px;">Calculating...</div>
+        </div>
+
+        <button class="btn btn-outline" id="btn-export-json" data-i18n="settings.export_json">Export Debug JSON</button>
+
+        <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-subtle);">
+          <h4 data-i18n="settings.about">About FloodSaathi</h4>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px;" data-i18n="settings.about_text">
+            FloodSaathi is an offline-first early warning system built with real hydrological observations.
+          </p>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 8px;">
+            Version 1.0.0 (Punjab Pilot CTBF-AI-12)
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Tab Navigation -->
+  <nav class="tab-bar" aria-label="Main Navigation">
+    <button class="tab-btn active" data-tab="status">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <span data-i18n="nav.status">My Status</span>
+    </button>
+    <button class="tab-btn" data-tab="alerts">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span data-i18n="nav.alerts">Alerts</span>
+    </button>
+    <button class="tab-btn" data-tab="sos">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span data-i18n="nav.sos">SOS</span>
+    </button>
+    <button class="tab-btn" data-tab="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="nav.settings">Settings</span>
+    </button>
+  </nav>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

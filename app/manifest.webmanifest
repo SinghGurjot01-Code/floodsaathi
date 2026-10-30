@@ -1,0 +1,21 @@
+{
+  "name": "FloodSaathi - Offline Flood Warning",
+  "short_name": "FloodSaathi",
+  "description": "Offline-first flood early-warning app for India providing estimated arrival ranges, shelter routing, and emergency SOS.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#0284c7",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["weather", "utilities", "safety"],
+  "lang": "en"
+}

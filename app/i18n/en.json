@@ -1,0 +1,103 @@
+{
+  "app_name": "FloodSaathi",
+  "tagline": "Offline-First Flood Early-Warning",
+  "nav": {
+    "status": "My Status",
+    "map": "Water Map",
+    "alerts": "Alerts",
+    "evac": "Evacuate",
+    "ask": "Ask Saathi",
+    "sos": "SOS",
+    "settings": "Settings"
+  },
+  "status": {
+    "safe": "Likely Below Ground Level",
+    "watch": "Watch",
+    "warning": "Warning",
+    "danger": "Danger",
+    "title": "Current Status",
+    "data_age": "Data from {age} ago",
+    "offline_notice": "Offline — running on saved snapshot ({age} ago)",
+    "offline_badge": "Offline",
+    "estimated_badge": "Estimated",
+    "rough_estimate": "Rough estimate",
+    "numbers_hidden": "Numbers hidden: data is older than 24 hours. Contact emergency helplines below.",
+    "ground_safe": "Water likely to stay below your ground level",
+    "receding_reported": "Water is receding (reported by you)",
+    "reached_reported": "Water reached your location (reported by you)"
+  },
+  "estimator": {
+    "arrival_range": "Water may reach your area in about {low} to {high}, most likely {likely}.",
+    "may_already_reach": "May already be reaching your area.",
+    "likely_already_reach": "Water is likely already reaching your area.",
+    "depth_band": "Projected depth: {band}",
+    "depth_none": "None",
+    "depth_lt_05": "< 0.5 m",
+    "depth_05_15": "0.5 – 1.5 m",
+    "depth_gt_15": "> 1.5 m",
+    "nearest_gauge": "Nearest gauge: {name} ({river})",
+    "current_level": "Current level: {level} m",
+    "warning_mark": "Warning mark: {level} m",
+    "danger_mark": "Danger mark: {level} m",
+    "trend": "Trend: {trend} m/h",
+    "projected_crossing": "Projected danger mark crossing in {hours} hours",
+    "stays_flat": "If level stays flat: will not cross danger mark"
+  },
+  "actions": {
+    "water_reached": "Water reached my street",
+    "water_receding": "Water is receding",
+    "refresh": "Refresh Live Data",
+    "refreshing": "Fetching latest data...",
+    "change_location": "Change Village / Location"
+  },
+  "helplines": {
+    "title": "Emergency Helplines",
+    "call_112": "Call 112 (National Emergency)",
+    "call_1078": "Call 1078 (NDMA Disaster)",
+    "call_1070": "Call 1070 (Punjab State SEOC)",
+    "call_1077": "Call 1077 (District Control)",
+    "always_available": "Toll-free emergency numbers work even with low cellular balance."
+  },
+  "alerts": {
+    "title": "Official Alerts (NDMA SACHET)",
+    "no_alerts": "No active official flood alerts for this area.",
+    "source_badge": "Official NDMA SACHET",
+    "severity": "Severity: {sev}",
+    "effective": "Effective: {time}",
+    "area": "Affected area: {area}",
+    "verbatim_note": "Official alert text is presented verbatim from NDMA SACHET."
+  },
+  "sos": {
+    "title": "Emergency SOS",
+    "disclaimer": "Web SOS creates SMS and phone calls. Review and send via your device's dialer or messaging app.",
+    "send_sms": "Send SMS to My Contacts",
+    "call_112": "Call 112 Immediately",
+    "contacts_heading": "Emergency Contacts (stored on device)",
+    "add_contact": "Add Contact",
+    "name_placeholder": "Contact Name",
+    "phone_placeholder": "Phone Number (e.g. 9876543210)",
+    "save": "Save",
+    "no_contacts": "No contacts added yet. Add trusted family or neighbours.",
+    "share_link": "Share Emergency Status"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "village": "Selected Village / Location",
+    "storage": "Offline Storage Used",
+    "export_json": "Export Debug JSON",
+    "about": "About FloodSaathi",
+    "about_text": "FloodSaathi is an offline-first flood early-warning app for India built exclusively with real hydrological observations and official advisories. Complies with NDMA guidelines.",
+    "clear_storage": "Clear Local Storage",
+    "version": "Version"
+  },
+  "common": {
+    "loading": "Loading...",
+    "km": "km",
+    "hours": "hours",
+    "minutes": "min",
+    "meters": "m",
+    "unknown": "Unavailable",
+    "unverified": "Unverified — confirm with district office"
+  }
+}

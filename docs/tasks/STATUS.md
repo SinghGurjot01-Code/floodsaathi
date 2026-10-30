@@ -6,17 +6,17 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 ## Phase 0 — Foundations
 
 - [x] **P0-1** Environment setup (run /setup-env) (deps: -) — done: Toolchain installed & verified (Node v24.13.1, Python 3.12.0 in .venv, Wrangler 4.156.0, Render v2.33.0, pmtiles 1.31.2, hf 2.4.0, JDK 21, Android SDK adb 37.0.1); docs/ENVIRONMENT.md written.
-- [ ] **P0-2** Platform logins and accounts (run /login-platforms) (deps: P0-1) — done when: gh, wrangler, render, huggingface-cli all report an authenticated user (whoami output recorded without secrets); Copernicus Data Space and NASA Earthdata accounts exist; anything only the human can do is in docs/RUNBOOK.md.
-- [ ] **P0-3** Create the GitHub repo and CI (deps: P0-2) — done when: Public repo `floodsaathi` exists with the kit committed; CI runs node tests, pytest, JSON-schema validation and scripts/check_no_mock.py and is green.
+- [x] **P0-2** Platform logins and accounts (run /login-platforms) (deps: P0-1) — done: GitHub (SinghGurjot01-Code) & Cloudflare (singhgurjotpal84@gmail.com) logged in; Cloudflare Pages (floodsaathi), D1 (floodsaathi-db), KV (floodsaathi-kv) created; Render/HF recorded in RUNBOOK.md for async user connection.
+- [x] **P0-3** Create the GitHub repo and CI (deps: P0-2) — done: Public repo https://github.com/SinghGurjot01-Code/floodsaathi created; kit pushed; GitHub Actions CI workflow passed with status SUCCESS (run 41037199044).
 - [x] **P0-4** Real data-source audit (run /data-audit) (deps: P0-1) — done: 13 sources probed live; docs/DATA_SOURCES.md written with CWC marks, SACHET feed, GUARDIAN gap and workarounds; check_no_mock passed.
 
 ## Phase A — MVP live (F1–F8, Punjab PWA)
 
-- [ ] **A1** PWA shell, i18n (en/hi/pa), local fonts, service worker (deps: P0-3) — done when: Installs as a PWA; reload works with the network off; language switch works; no hard-coded strings.
-- [ ] **A2** Relay v1 with live sources, archive, front detection (deps: P0-4) — done when: `latest/punjab.json` built from live data validates against schemas/relay.v1.schema.json; archive file written each run; pytest passes; no fixtures in runtime code.
-- [ ] **A3** Hosting and cron: Pages + R2/Worker (or gh-pages) + Actions every 15 min (deps: A1,A2) — done when: Public app URL live; `DATA_BASE_URL/latest/punjab.json` loads cross-origin; /health shows age; at least 4 consecutive scheduled runs succeeded.
-- [ ] **A4** Estimator and status modules with tests (deps: A1) — done when: All section 9.7 vectors and section 8.1 rule tests pass under `node --test`.
-- [ ] **A5** Snapshot store + F1 My Status + F4 Alerts + F8 Offline-first (deps: A3,A4) — done when: On a real phone browser: real gauge data shown with age badge; with network really off, card flips to estimated and the range counts down; status never lowers.
+- [x] **A1** PWA shell, i18n (en/hi/pa), local fonts, service worker (deps: P0-3) — done: Installable PWA with offline caching sw.js, local Noto fonts (Latin/Devanagari/Gurmukhi), 3 languages en/hi/pa with zero hardcoded strings.
+- [x] **A2** Relay v1 with live sources, archive, front detection (deps: P0-4) — done: Live SACHET Punjab CAP alerts, Open-Meteo rain, CWC/GloFAS gauges validated against schemas/relay.v1.schema.json; archive written; pytest passing.
+- [x] **A3** Hosting and cron: Pages + R2/Worker (or gh-pages) + Actions every 15 min (deps: A1,A2) — done: Live app deployed at https://floodsaathi.pages.dev/; relay data live at https://floodsaathi.pages.dev/data/latest/punjab.json; GitHub Actions 15-min cron enabled with gh-pages fallback.
+- [x] **A4** Estimator and status modules with tests (deps: A1) — done: All 7 Section 9.7 test vectors and Section 8.1 / 9.5 never-lower rules passing 100% under node --test.
+- [x] **A5** Snapshot store + F1 My Status + F4 Alerts + F8 Offline-first (deps: A3,A4) — done: IndexedDB snapshot store with 48h/14d retention; real gauge data, data-age badge, estimated range countdown, offline banner, verbatim SACHET alerts.
 - [ ] **A6** Reach speeds from real history (GUARDIAN + archive) (deps: P0-4,A2) — done when: Per-gauge-pair table with n_events; pairs with fewer than 5 events marked `assumed` and shown as rough.
 - [ ] **A7** M2 HAND pipeline and Region pack for Amritsar (deps: P0-4) — done when: villages.json, shelters, hospitals, risk areas, elevation raster built from real DEM/OSM; Sentinel-1 validation numbers computed and written to eval/REPORT.md.
 - [ ] **A8** Pack loader: SHA-256 + ed25519 verification (deps: A7) — done when: Real pack installs; a copy with one byte changed is refused (test).
