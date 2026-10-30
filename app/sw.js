@@ -1,7 +1,7 @@
 // Service Worker for FloodSaathi
 // Provides offline capability for PWA shell and cached data snapshots.
 
-const CACHE_NAME = "floodsaathi-v1.1.0";
+const CACHE_NAME = "floodsaathi-v1.1.1";
 
 const PRECACHE_URLS = [
   "./",

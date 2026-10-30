@@ -333,12 +333,6 @@ function renderStatusView(snapshot, precomputedEstimate = null) {
   } else {
     statusReason.textContent = t("status.ground_safe");
   }
-    statusReason.textContent = "Warning: flood levels elevated. Prepare for evacuation.";
-  } else if (status === "Watch") {
-    statusReason.textContent = "River levels rising or heavy rainfall detected. Stay alert.";
-  } else {
-    statusReason.textContent = t("status.ground_safe");
-  }
 
   // Render Time-to-Water box
   if (estimate.arrival) {
