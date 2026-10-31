@@ -873,6 +873,18 @@ async function loadKnowledgeCards() {
       cardRetriever = new CardRetriever(allCards);
       aiAssistant = new AskSaathiAssistant({ cards: allCards });
       await aiAssistant.init();
+      // Check if local neural server is active
+      try {
+        const ping = await fetch("/api/health", { method: "GET" }).catch(() => null);
+        if (ping && ping.ok) {
+          const saathiModeBadge = document.getElementById("saathi-mode-badge");
+          if (saathiModeBadge) {
+            saathiModeBadge.className = "plugin-badge active";
+            saathiModeBadge.textContent = "Live Neural AI";
+          }
+        }
+      } catch {}
+
       const folderStatus = await getFloodSaathiFolderStatus();
       const slmDownloaded = (await getSetting("slm_model_downloaded", false)) || Boolean(folderStatus.modelReady);
       const slmEnabled = (await getSetting("slm_model_enabled", false)) || Boolean(folderStatus.modelReady);
@@ -880,7 +892,7 @@ async function loadKnowledgeCards() {
         await aiAssistant.loadModelFromFolder();
         aiAssistant.setMode("webgpu_slm");
         const saathiModeBadge = document.getElementById("saathi-mode-badge");
-        if (saathiModeBadge) {
+        if (saathiModeBadge && !saathiModeBadge.textContent.includes("Live")) {
           saathiModeBadge.className = "plugin-badge active";
           saathiModeBadge.textContent = "Connected: FloodSaathi/models";
         }
@@ -1110,6 +1122,7 @@ async function submitChatQuery(query) {
         gauges: currentSnapshot?.gauges,
         alerts: currentSnapshot?.alerts,
         apiKey,
+        useNeural: true,
         slmDownloaded: slmDownloaded || slmEnabled
       });
     } else if (cardRetriever) {

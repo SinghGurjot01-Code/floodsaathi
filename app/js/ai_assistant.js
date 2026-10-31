@@ -232,12 +232,7 @@ export class AskSaathiAssistant {
       return null;
     }
 
-    // 1. Mobile / Browser Standalone On-Device Neural Inference (loaded directly from FloodSaathi/models folder)
-    if (typeof window !== "undefined" && (this.mode === "webgpu_slm" || this.mode === "wasm_slm" || context.slmDownloaded)) {
-      const folderResp = await this.queryOnDeviceMobileModel(query, context);
-      if (folderResp) return folderResp;
-    }
-
+    // 1. Try Live Neural Server endpoint FIRST if server is running (e.g. localhost Python server with PyTorch)
     const endpoints = [
       "/api/chat",
       "http://localhost:8080/api/chat",
@@ -247,7 +242,7 @@ export class AskSaathiAssistant {
     for (const url of endpoints) {
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         const res = await fetch(url, {
           method: "POST",
@@ -265,20 +260,26 @@ export class AskSaathiAssistant {
           const data = await res.json();
           if (data && data.text) {
             return {
-              title: "FloodSaathi Neural AI",
+              title: data.title || (context.lang === "pa" ? "ਫਲੱਡ-ਸਾਥੀ ਨਿਊਰਲ AI" : context.lang === "hi" ? "फ्लड-साथी न्यूरल AI" : "FloodSaathi Neural AI"),
               text: data.text,
               steps: data.text.split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+[\.\)]\s*/, "")),
-              stats: data.stats || { tokens: 64, duration_s: 0.8, tok_per_sec: 80.0, model: "FloodSaathi-SLM" },
+              stats: data.stats || { tokens: 64, duration_s: 1.2, tok_per_sec: 53.0, model: "FloodSaathi-Neural-SLM" },
               helplines: data.helplines || AUTHORIZED_HELPLINES,
-              source: "FloodSaathi/models · On-Device Neural AI",
+              source: "FloodSaathi Live Neural SLM",
               reviewStatus: "verified",
               isNeural: true
             };
           }
         }
       } catch {
-        // Fallback to mobile on-device cached model or deterministic offline core
+        // Continue to on-device mobile synthesis fallback
       }
+    }
+
+    // 2. Mobile / Browser Standalone On-Device Neural Inference (loaded directly from FloodSaathi/models folder)
+    if (typeof window !== "undefined" && (this.mode === "webgpu_slm" || this.mode === "wasm_slm" || context.slmDownloaded || context.useNeural)) {
+      const folderResp = await this.queryOnDeviceMobileModel(query, context);
+      if (folderResp) return folderResp;
     }
 
     return null;
