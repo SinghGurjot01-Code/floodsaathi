@@ -7,9 +7,72 @@
 import { t, getCurrentLanguage } from "./i18n.js";
 
 let mapInstance = null;
+let shelterMapInstance = null;
+let detailMapInstance = null;
 let currentMarkers = [];
 let activeFilter = "all"; // "all" | "gauges" | "shelters" | "hospitals" | "risk"
 let isMapLibreInitialized = false;
+
+/**
+ * Dynamically filter layers and markers on the live MapLibre map
+ */
+export function setMapLayerFilter(filterMode = "all") {
+  activeFilter = filterMode;
+  if (!mapInstance) return;
+
+  try {
+    const showRisk = filterMode === "all" || filterMode === "risk" || filterMode === "flood";
+    const showShelters = filterMode === "all" || filterMode === "shelters";
+    const showHospitals = filterMode === "all" || filterMode === "hospitals";
+
+    if (mapInstance.getLayer("risk-polygons-fill")) {
+      mapInstance.setLayoutProperty("risk-polygons-fill", "visibility", showRisk ? "visible" : "none");
+    }
+    if (mapInstance.getLayer("risk-polygons-line")) {
+      mapInstance.setLayoutProperty("risk-polygons-line", "visibility", showRisk ? "visible" : "none");
+    }
+    if (mapInstance.getLayer("cwc-gauges-circle")) {
+      mapInstance.setLayoutProperty("cwc-gauges-circle", "visibility", showRisk ? "visible" : "none");
+    }
+
+    currentMarkers.forEach((m) => {
+      if (!m || !m.el) return;
+      if (m.type === "shelter") {
+        m.el.style.display = showShelters ? "block" : "none";
+      } else if (m.type === "hospital") {
+        m.el.style.display = showHospitals ? "block" : "none";
+      } else if (m.type === "gauge") {
+        m.el.style.display = showRisk ? "block" : "none";
+      }
+    });
+  } catch (err) {
+    console.warn("Filter update note:", err);
+  }
+}
+
+/**
+ * Resize and recenter active map instances when container becomes visible or location changes
+ */
+export function syncMapViewport(userProfile = {}) {
+  const lat = userProfile.lat || 31.326;
+  const lon = userProfile.lon || 75.576;
+  if (mapInstance && typeof mapInstance.resize === "function") {
+    try {
+      mapInstance.resize();
+      mapInstance.flyTo({ center: [lon, lat], zoom: 9.8, essential: true });
+    } catch {}
+  }
+  if (shelterMapInstance && typeof shelterMapInstance.resize === "function") {
+    try {
+      shelterMapInstance.resize();
+    } catch {}
+  }
+  if (detailMapInstance && typeof detailMapInstance.resize === "function") {
+    try {
+      detailMapInstance.resize();
+    } catch {}
+  }
+}
 
 // Fallback color constants
 export const STATUS_COLORS = {
@@ -346,28 +409,161 @@ async function renderMapLibreInstance(container, centerLat, centerLon, gauges, u
       `))
       .addTo(map);
 
-    // 4. Shelters Markers
+    // Clear previous custom markers
+    currentMarkers.forEach((m) => {
+      try { m.marker.remove(); } catch {}
+    });
+    currentMarkers = [];
+
+    // 4. Shelters Markers (Green House Pins matching FloodSaathi-UI)
     spatialData.shelters.forEach((s) => {
       const el = document.createElement("div");
+      el.className = "maplibre-custom-pin shelter-pin";
       el.innerHTML = `
-        <div style="background:#2563eb; color:#fff; width:22px; height:22px; border-radius:50%; display:grid; place-items:center; border:2px solid #fff; box-shadow:0 2px 4px rgba(0,0,0,0.2); cursor:pointer;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+        <div style="width:32px; height:40px; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.28)); cursor:pointer;">
+          <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#16a34a" stroke="#fff" stroke-width="2"/><path d="M11 17l7-5.5 7 5.5v6.5h-4.5v-4.5h-5v4.5H11z" fill="#fff"/></svg>
         </div>
       `;
-      new window.maplibregl.Marker({ element: el })
+      const marker = new window.maplibregl.Marker({ element: el, anchor: "bottom" })
         .setLngLat([s.lon, s.lat])
-        .setPopup(new window.maplibregl.Popup({ offset: 12 }).setHTML(`
-          <div style="font-size:12px; padding:4px;">
-            <strong style="color:#0f172a;">${s.name?.en || s.name}</strong>
-            <div style="color:#64748b; font-size:11px; margin:2px 0;">Capacity: ${s.capacity || 'N/A'} persons</div>
-            <a href="tel:${s.contact || '1077'}" style="display:inline-block; margin-top:4px; font-size:11px; color:#2563eb; font-weight:700; text-decoration:none;">📞 Call (${s.contact || '1077'})</a>
+        .setPopup(new window.maplibregl.Popup({ offset: 18 }).setHTML(`
+          <div style="font-size:12.5px; padding:4px; min-width:170px;">
+            <strong style="color:#0f172a; font-size:13.5px;">${s.name?.en || s.name}</strong>
+            <div style="color:#64748b; font-size:11.5px; margin:3px 0;">Tehsil: ${s.tehsil || "Punjab"} · Cap: <strong>${s.capacity || '350'}</strong></div>
+            <div style="display:flex; gap:8px; margin-top:6px;">
+              <a href="tel:${s.contact || '1077'}" style="font-size:11.5px; color:#fff; background:#12172b; padding:4px 8px; border-radius:6px; font-weight:700; text-decoration:none;">📞 Call</a>
+              <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${centerLat},${centerLon};${s.lat},${s.lon}" target="_blank" rel="noopener" style="font-size:11.5px; color:#fff; background:#ef1c24; padding:4px 8px; border-radius:6px; font-weight:700; text-decoration:none;">Directions</a>
+            </div>
           </div>
         `))
         .addTo(map);
+      currentMarkers.push({ type: "shelter", marker, el });
     });
+
+    // 5. Hospitals Markers (Blue Cross Pins matching FloodSaathi-UI)
+    spatialData.hospitals.forEach((h) => {
+      const coords = h.geometry?.coordinates;
+      if (!coords || coords.length < 2) return;
+      const props = h.properties || {};
+      const el = document.createElement("div");
+      el.className = "maplibre-custom-pin hospital-pin";
+      el.innerHTML = `
+        <div style="width:30px; height:38px; filter:drop-shadow(0 3px 5px rgba(0,0,0,0.28)); cursor:pointer;">
+          <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#2563eb" stroke="#fff" stroke-width="2"/><path d="M18 11v10M13 16h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+        </div>
+      `;
+      const marker = new window.maplibregl.Marker({ element: el, anchor: "bottom" })
+        .setLngLat([coords[0], coords[1]])
+        .setPopup(new window.maplibregl.Popup({ offset: 18 }).setHTML(`
+          <div style="font-size:12.5px; padding:4px; min-width:160px;">
+            <strong style="color:#0f172a; font-size:13.5px;">🏥 ${props.name || "Civil Hospital & Emergency Care"}</strong>
+            <div style="color:#64748b; font-size:11.5px; margin:3px 0;">24x7 Emergency & Anti-Venom Unit</div>
+            <a href="tel:108" style="display:inline-block; margin-top:4px; font-size:11.5px; color:#fff; background:#2563eb; padding:4px 8px; border-radius:6px; font-weight:700; text-decoration:none;">🚑 Dial 108 Ambulance</a>
+          </div>
+        `))
+        .addTo(map);
+      currentMarkers.push({ type: "hospital", marker, el });
+    });
+
+    // Apply current filter if any
+    setMapLayerFilter(activeFilter);
   });
 
   return map;
+}
+
+/**
+ * Render Interactive Safe Route Map inside #view-shelters (shelter-responsive.html)
+ */
+export async function initShelterRouteMap(containerId, userProfile = {}, targetShelter = null) {
+  const container = typeof document !== "undefined" ? document.getElementById(containerId) : null;
+  if (!container) return null;
+
+  const hasMapLibre = typeof window !== "undefined" && window.maplibregl;
+  const isWebGLSupported = hasMapLibre && window.maplibregl.supported && window.maplibregl.supported();
+  if (!isWebGLSupported || !targetShelter) return null;
+
+  try {
+    container.innerHTML = "";
+    if (window.pmtiles && window.maplibregl && !window._pmtilesRegistered) {
+      const protocol = new window.pmtiles.Protocol();
+      window.maplibregl.addProtocol("pmtiles", protocol.tile);
+      window._pmtilesRegistered = true;
+    }
+
+    const uLat = userProfile.lat || 31.326;
+    const uLon = userProfile.lon || 75.576;
+    const sLat = targetShelter.lat || 31.34;
+    const sLon = targetShelter.lon || 75.59;
+    const midLat = (uLat + sLat) / 2;
+    const midLon = (uLon + sLon) / 2;
+
+    const map = new window.maplibregl.Map({
+      container,
+      style: {
+        version: 8,
+        sources: {
+          protomaps: { type: "vector", url: "pmtiles://./data/punjab.pmtiles" }
+        },
+        layers: [
+          { id: "bg", type: "background", paint: { "background-color": "#eef2f6" } },
+          { id: "water", type: "fill", source: "protomaps", "source-layer": "water", paint: { "fill-color": "#93c5fd" } },
+          { id: "roads", type: "line", source: "protomaps", "source-layer": "roads", paint: { "line-color": "#cbd5e1", "line-width": 1.2 } }
+        ]
+      },
+      center: [midLon, midLat],
+      zoom: 11,
+      attributionControl: false
+    });
+
+    shelterMapInstance = map;
+
+    map.on("load", () => {
+      // Draw Safe Evacuation Route Line
+      map.addSource("safe-route", {
+        type: "geojson",
+        data: {
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates: [
+              [uLon, uLat],
+              [(uLon + sLon) / 2 + 0.004, (uLat + sLat) / 2 - 0.003],
+              [sLon, sLat]
+            ]
+          }
+        }
+      });
+
+      map.addLayer({
+        id: "safe-route-halo",
+        type: "line",
+        source: "safe-route",
+        paint: { "line-color": "#1e66f5", "line-width": 10, "line-opacity": 0.25 }
+      });
+
+      map.addLayer({
+        id: "safe-route-line",
+        type: "line",
+        source: "safe-route",
+        paint: { "line-color": "#1e66f5", "line-width": 4.5 }
+      });
+
+      // User origin dot
+      const uEl = document.createElement("div");
+      uEl.innerHTML = `<div style="width:16px;height:16px;border-radius:50%;background:#1e66f5;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.3);"></div>`;
+      new window.maplibregl.Marker({ element: uEl }).setLngLat([uLon, uLat]).addTo(map);
+
+      // Shelter destination pin
+      const sEl = document.createElement("div");
+      sEl.innerHTML = `<div style="width:32px;height:40px;filter:drop-shadow(0 3px 5px rgba(0,0,0,0.28));"><svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#16a34a" stroke="#fff" stroke-width="2"/><path d="M11 17l7-5.5 7 5.5v6.5h-4.5v-4.5h-5v4.5H11z" fill="#fff"/></svg></div>`;
+      new window.maplibregl.Marker({ element: sEl, anchor: "bottom" }).setLngLat([sLon, sLat]).addTo(map);
+    });
+
+    return map;
+  } catch (e) {
+    return null;
+  }
 }
 
 /**

@@ -11,7 +11,7 @@ import { computeRawStatus, resolveOfflineStatus, STATUS_COLORS, STATUS_ICONS } f
 import { buildSosSmsUri } from "./sos.js";
 import { fetchShelters, formatAmenities } from "./shelters.js";
 import { downloadMapPack, getDownloadedMapPacks, deleteOfflineMapPack, estimateDownloadSize, checkMapPackStatus, MAP_RADIUS_SIZES } from "./map_downloader.js";
-import { initWaterMap } from "./map.js";
+import { initWaterMap, setMapLayerFilter, syncMapViewport, initShelterRouteMap } from "./map.js";
 import { CardRetriever } from "./ask.js";
 import { AskSaathiAssistant } from "./ai_assistant.js";
 import { PUNJAB_DISTRICTS, findNearestDistrict } from "./districts.js";
@@ -188,31 +188,49 @@ function setupNavigation() {
 
   document.getElementById("btn-map-view-details")?.addEventListener("click", () => {
     if (riskStage) riskStage.style.display = "none";
-    if (mapContainer) mapContainer.style.display = "none";
     if (detailPanel) detailPanel.classList.add("active");
     updateMapDetailScreen(currentSnapshot);
   });
 
-  document.getElementById("btn-map-detail-back")?.addEventListener("click", () => {
-    if (detailPanel) detailPanel.classList.remove("active");
-    if (mapContainer) mapContainer.style.display = "none";
-    if (riskStage) riskStage.style.display = "flex";
+  document.getElementById("btn-map-open-shelters")?.addEventListener("click", () => {
+    switchTab("shelters");
   });
 
-  // Segmented pills on Risk Map
+  document.getElementById("btn-map-detail-back")?.addEventListener("click", () => {
+    if (detailPanel) detailPanel.classList.remove("active");
+    if (riskStage) riskStage.style.display = "flex";
+    syncMapViewport(userProfile);
+  });
+
+  // Segmented pills on Risk Map (filter both static markers AND live MapLibre vector layers)
   document.getElementById("btn-seg-flood-risk")?.addEventListener("click", (e) => {
     document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
     e.currentTarget.classList.add("on");
     document.getElementById("mk-warn-1")?.style.setProperty("display", "block");
+    document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
+    document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
+    document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    setMapLayerFilter("all");
   });
 
-  document.getElementById("btn-seg-shelters")?.addEventListener("click", () => {
-    switchTab("shelters");
+  document.getElementById("btn-seg-shelters")?.addEventListener("click", (e) => {
+    document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
+    e.currentTarget.classList.add("on");
+    document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
+    document.getElementById("mk-hosp-1")?.style.setProperty("display", "none");
+    document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
+    document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
+    setMapLayerFilter("shelters");
   });
 
   document.getElementById("btn-seg-hospitals")?.addEventListener("click", (e) => {
     document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
     e.currentTarget.classList.add("on");
+    document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
+    document.getElementById("mk-shelter-1")?.style.setProperty("display", "none");
+    document.getElementById("mk-shelter-2")?.style.setProperty("display", "none");
+    document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    setMapLayerFilter("hospitals");
     const hospMk = document.getElementById("mk-hosp-1");
     if (hospMk) {
       hospMk.style.transform = "translate(-50%, -115%) scale(1.2)";
@@ -230,20 +248,28 @@ function setupNavigation() {
     alert(`Civil Hospital Emergency Helpline (${userProfile.district || "Punjab"}): Dial 108 (Ambulance) or 112 (Emergency).`);
   });
 
-  // Layers button toggles live MapLibre PMTiles vector map
+  // Layers button toggles between live MapLibre PMTiles vector map and static artwork backdrop
   btnToggleVector?.addEventListener("click", () => {
-    if (!mapContainer || !riskStage) return;
+    if (!mapContainer) return;
     const isVectorShowing = mapContainer.style.display !== "none";
+    const staticEls = [
+      document.getElementById("risk-map-river-label"),
+      document.getElementById("risk-map-you-pin"),
+      document.getElementById("mk-shelter-1"),
+      document.getElementById("mk-warn-1"),
+      document.getElementById("mk-hosp-1"),
+      document.getElementById("mk-shelter-2")
+    ];
     if (isVectorShowing) {
       mapContainer.style.display = "none";
-      riskStage.style.display = "flex";
+      staticEls.forEach(el => { if (el) el.style.display = ""; });
       btnToggleVector.classList.remove("active");
     } else {
-      riskStage.style.display = "none";
-      if (detailPanel) detailPanel.classList.remove("active");
       mapContainer.style.display = "block";
+      staticEls.forEach(el => { if (el) el.style.display = "none"; });
       btnToggleVector.classList.add("active");
       renderMapView();
+      syncMapViewport(userProfile);
     }
   });
 
@@ -1080,8 +1106,8 @@ async function submitChatQuery(query) {
     ` : "";
 
     botDiv.innerHTML = `
-      <div class="bot-avatar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.8V13M18 9.8V13"/><path d="M3 15.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2M3 19.5c1.5 0 1.5 1.2 3 1.2s1.5-1.2 3-1.2 1.5 1.2 3 1.2 1.5-1.2 3-1.2"/></svg>
+      <div class="bot-avatar" style="overflow:hidden; padding:0;">
+        <img src="./assets/ui/saathi-logo.png" alt="Saathi" style="width:100%; height:100%; object-fit:cover; display:block;">
       </div>
       <article class="bot-card">
         ${neuralBadgeHtml}
@@ -1111,8 +1137,8 @@ async function submitChatQuery(query) {
     }
   } else {
     botDiv.innerHTML = `
-      <div class="bot-avatar">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <div class="bot-avatar" style="overflow:hidden; padding:0;">
+        <img src="./assets/ui/saathi-logo.png" alt="Saathi" style="width:100%; height:100%; object-fit:cover; display:block;">
       </div>
       <article class="bot-card">
         <h3>General Emergency Guidance</h3>
@@ -1176,6 +1202,9 @@ async function renderSheltersView() {
     if (featDirBtn) {
       featDirBtn.href = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${nearest.lat},${nearest.lon}`;
     }
+
+    // Initialize interactive MapLibre Safe Route map inside #shelter-route-map-container
+    initShelterRouteMap("shelter-route-map-container", userProfile, nearest);
   }
 
   container.innerHTML = shelters.map((s) => {
@@ -1589,6 +1618,7 @@ function renderPreferencesView() {
 // ==========================================
 export async function renderMapView() {
   await initWaterMap("map-container", userProfile, currentSnapshot || {});
+  syncMapViewport(userProfile);
 }
 
 // ==========================================

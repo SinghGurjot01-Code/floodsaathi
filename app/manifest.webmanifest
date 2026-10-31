@@ -6,9 +6,15 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0f172a",
-  "theme_color": "#0284c7",
+  "background_color": "#ffffff",
+  "theme_color": "#ef1c24",
   "icons": [
+    {
+      "src": "./assets/ui/saathi-logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
     {
       "src": "./icons/icon.svg",
       "sizes": "any",
