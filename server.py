@@ -91,16 +91,23 @@ def get_or_load_model():
 
         device = "cuda" if torch.cuda.is_available() else "cpu"
         dtype = torch.float16 if device == "cuda" else torch.float32
-        print(f"[Server] Loading real neural model {MODEL_ID} into memory on {device} ({dtype})...")
+        if device == "cuda":
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+            gpu_name = torch.cuda.get_device_name(0)
+            vram_gb = round(torch.cuda.get_device_properties(0).total_memory / 1e9, 1)
+            print(f"[Server] 🚀 Activating NVIDIA GPU Acceleration: {gpu_name} ({vram_gb} GB VRAM) in {dtype}")
+        else:
+            print(f"[Server] Loading real neural model {MODEL_ID} into memory on {device} ({dtype})...")
         t0 = time.time()
         tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-        model = AutoModelForCausalLM.from_pretrained(
-            MODEL_ID,
-            dtype=dtype,
-            low_cpu_mem_usage=True
-        )
+        load_kwargs = {"dtype": dtype}
         if device == "cuda":
-            model = model.to("cuda")
+            load_kwargs["device_map"] = "cuda"
+        else:
+            load_kwargs["low_cpu_mem_usage"] = True
+
+        model = AutoModelForCausalLM.from_pretrained(MODEL_ID, **load_kwargs)
 
         # Check for fine-tuned LoRA weights
         if (LORA_CHECKPOINT_DIR / "adapter_model.safetensors").exists() or (LORA_CHECKPOINT_DIR / "adapter_model.bin").exists():
@@ -293,7 +300,7 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
             gen_kwargs = dict(
                 **inputs,
                 streamer=streamer,
-                max_new_tokens=280,
+                max_new_tokens=140,
                 temperature=0.6,
                 top_p=0.9,
                 do_sample=True,
@@ -453,6 +460,10 @@ def run_server(port=8080):
     print(f" - POST /api/model/load   : Pre-load neural model into RAM")
     print(f" - POST /api/chat         : Real FloodSaathi Neural SLM Inference")
     print("=" * 68)
+
+    # Warm up neural model in background thread so it is instantly ready on RTX 3050 GPU
+    threading.Thread(target=get_or_load_model, daemon=True).start()
+
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
