@@ -1,0 +1,399 @@
+/* FloodSaathi Base Styles & Layout Shell */
+
+/* 1. Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  background-color: var(--page);
+  color: var(--navy);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  overflow-x: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Language specific font stacks applied via html[lang] */
+html[lang="pa"] body {
+  font-family: var(--font-pa);
+}
+html[lang="hi"] body {
+  font-family: var(--font-hi);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus Visible */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[role="tab"]:focus-visible,
+[role="switch"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  outline: 3px solid var(--navy);
+  outline-offset: 2px;
+}
+
+input, button, textarea, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul, ol {
+  list-style: none;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* 2. Responsive Phone Frame Shell */
+#app-frame {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: none;
+}
+
+/* Phone framing on desktop and wide screens */
+@media (min-width: 480px) and (min-height: 700px) {
+  #app-frame {
+    height: min(92dvh, 880px);
+    border-radius: 38px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    margin: auto;
+  }
+}
+
+/* Main Viewport Container */
+#view {
+  flex: 1 1 auto;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 3. Offline Banner */
+#offline-banner {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-offline);
+  background: #2b3347;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  padding: calc(6px + env(safe-area-inset-top, 0px)) 16px 6px;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-normal) var(--ease-smooth);
+}
+#offline-banner.visible {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+#offline-banner svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* 4. Bottom Navigation */
+#bottom-nav {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: var(--z-nav);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding: 6px max(6px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(6px, env(safe-area-inset-left, 0px));
+  transition: transform var(--duration-normal) var(--ease-smooth);
+}
+
+#bottom-nav.hidden {
+  display: none;
+}
+
+.nav-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 2px;
+  border-radius: var(--radius-sm);
+  color: #3e465a;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  min-height: 52px;
+  min-width: 44px;
+  transition: color var(--duration-fast);
+}
+
+.nav-tab svg {
+  width: 24px;
+  height: 24px;
+  transition: transform var(--duration-fast);
+}
+
+.nav-tab:active svg {
+  transform: scale(0.92);
+}
+
+.nav-tab[aria-current="page"] {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.nav-tab[aria-current="page"] svg {
+  stroke-width: 2.2;
+}
+
+/* 5. Floating SOS Button */
+#sos-fab {
+  position: absolute;
+  z-index: var(--z-fab);
+  right: calc(16px + env(safe-area-inset-right, 0px));
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  background: var(--red-radial);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 2px var(--red), 0 0 0 6px rgba(239, 28, 36, 0.2), var(--shadow-fab);
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-spring), opacity var(--duration-fast);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#sos-fab:hover {
+  transform: scale(1.05);
+}
+
+#sos-fab:active {
+  transform: scale(0.95);
+}
+
+#sos-fab.hidden {
+  display: none;
+}
+
+/* 6. Toasts */
+#toast-container {
+  position: absolute;
+  top: calc(16px + env(safe-area-inset-top, 0px));
+  left: 16px;
+  right: 16px;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.fs-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--navy);
+  color: #ffffff;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: var(--shadow-lg);
+  animation: toastIn 240ms var(--ease-smooth);
+  transition: transform var(--duration-normal), opacity var(--duration-normal);
+}
+
+.fs-toast.toast-error {
+  background: #b91c1c;
+}
+
+.fs-toast.toast-success {
+  background: #15803d;
+}
+
+.fs-toast.toast-warning {
+  background: #c2410c;
+}
+
+.toast-msg {
+  flex: 1;
+}
+
+.toast-action {
+  font-weight: 700;
+  color: #ffffff;
+  text-decoration: underline;
+  padding: 4px 6px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 7. Modal & Bottom Sheet Container */
+#modal-container {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: none;
+}
+
+#modal-container.active {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.fs-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 23, 43, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeIn 200ms ease;
+}
+
+.fs-dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-height: 85dvh;
+  background: var(--surface);
+  border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
+  box-shadow: var(--shadow-sheet);
+  padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 240ms var(--ease-smooth);
+  overflow-y: auto;
+}
+
+.fs-dialog-grab {
+  width: 44px;
+  height: 5px;
+  border-radius: 4px;
+  background: #d4d7e0;
+  margin: 0 auto 16px;
+  flex-shrink: 0;
+}
+
+.fs-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.fs-dialog-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.fs-dialog-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--card-grey);
+  display: grid;
+  place-items: center;
+  color: var(--navy);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 8. Skeletons & Shimmer */
+.skeleton {
+  background: linear-gradient(90deg, #eceef3 25%, #f6f7fa 50%, #eceef3 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

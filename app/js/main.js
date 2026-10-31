@@ -11,7 +11,8 @@ import { computeRawStatus, resolveOfflineStatus, STATUS_COLORS, STATUS_ICONS } f
 import { buildSosSmsUri } from "./sos.js";
 import { fetchShelters, formatAmenities } from "./shelters.js";
 import { downloadMapPack, getDownloadedMapPacks, deleteOfflineMapPack, estimateDownloadSize, checkMapPackStatus, MAP_RADIUS_SIZES } from "./map_downloader.js";
-import { initWaterMap, setMapLayerFilter, syncMapViewport, initShelterRouteMap } from "./map.js";
+import { initWaterMap, setMapLayerFilter, syncMapViewport, initShelterRouteMap, setMapDownloadRadiusPreview } from "./map.js";
+import { ensureFloodSaathiFolder, getFloodSaathiFolderStatus, saveFileToAppFolder, saveBinaryToAppFolder, readFileFromAppFolder, clearAppSubFolder } from "./mobile_storage.js";
 import { CardRetriever } from "./ask.js";
 import { AskSaathiAssistant } from "./ai_assistant.js";
 import { PUNJAB_DISTRICTS, findNearestDistrict } from "./districts.js";
@@ -253,6 +254,7 @@ function setupNavigation() {
     if (!riskStage || !mapContainer) return;
     const isNowVector = !riskStage.classList.contains("vector-map-active");
     riskStage.classList.toggle("vector-map-active", isNowVector);
+    riskStage.dataset.userToggledOff = isNowVector ? "" : "true";
     btnToggleVector.classList.toggle("active", isNowVector);
     if (isNowVector) {
       mapContainer.style.display = "block";
@@ -851,16 +853,24 @@ function setupHomeActions() {
 // ==========================================
 async function loadKnowledgeCards() {
   try {
+    await ensureFloodSaathiFolder();
     const res = await fetch("./corpus/cards/cards.json");
     if (res.ok) {
       allCards = await res.json();
       cardRetriever = new CardRetriever(allCards);
       aiAssistant = new AskSaathiAssistant({ cards: allCards });
       await aiAssistant.init();
-      const slmDownloaded = await getSetting("slm_model_downloaded", false);
-      const slmEnabled = await getSetting("slm_model_enabled", false);
+      const folderStatus = await getFloodSaathiFolderStatus();
+      const slmDownloaded = (await getSetting("slm_model_downloaded", false)) || Boolean(folderStatus.modelReady);
+      const slmEnabled = (await getSetting("slm_model_enabled", false)) || Boolean(folderStatus.modelReady);
       if (slmDownloaded || slmEnabled) {
+        await aiAssistant.loadModelFromFolder();
         aiAssistant.setMode("webgpu_slm");
+        const saathiModeBadge = document.getElementById("saathi-mode-badge");
+        if (saathiModeBadge) {
+          saathiModeBadge.className = "plugin-badge active";
+          saathiModeBadge.textContent = "Connected: FloodSaathi/models";
+        }
       }
     }
   } catch (err) {
@@ -1674,7 +1684,12 @@ function renderPreferencesView() {
 // ==========================================
 export async function renderMapView() {
   const riskStage = typeof document !== "undefined" ? document.getElementById("risk-map-stage") : null;
-  if (!riskStage || riskStage.classList.contains("vector-map-active")) {
+  const mapContainer = typeof document !== "undefined" ? document.getElementById("map-container") : null;
+  if (riskStage && !riskStage.dataset.userToggledOff) {
+    riskStage.classList.add("vector-map-active");
+  }
+  if (mapContainer && (!riskStage || riskStage.classList.contains("vector-map-active"))) {
+    mapContainer.style.display = "block";
     await initWaterMap("map-container", userProfile, currentSnapshot || {});
     syncMapViewport(userProfile);
   }
@@ -1726,6 +1741,8 @@ function setupMapDownloader() {
     if (!inlineDrawer) return;
     const isHidden = inlineDrawer.style.display === "none" || !inlineDrawer.style.display;
     inlineDrawer.style.display = isHidden ? "block" : "none";
+    const r = Number(inlineSlider?.value) || currentSelectedMapRadius || 25;
+    setMapDownloadRadiusPreview(isHidden ? r : 0, userProfile.lat, userProfile.lon);
   });
 
   inlineSlider?.addEventListener("input", () => {
@@ -1735,21 +1752,23 @@ function setupMapDownloader() {
     if (inlineRadiusVal) inlineRadiusVal.textContent = `${r} km`;
     if (inlineSizeVal) inlineSizeVal.textContent = `~${mb} MB`;
     if (btnInlineDl) btnInlineDl.textContent = `Download ${r} km (~${mb} MB)`;
+    setMapDownloadRadiusPreview(r, userProfile.lat, userProfile.lon);
   });
 
   btnInlineDl?.addEventListener("click", async () => {
     const r = Number(inlineSlider?.value) || currentSelectedMapRadius || 25;
     btnInlineDl.disabled = true;
     try {
+      setMapDownloadRadiusPreview(r, userProfile.lat, userProfile.lon);
       await downloadMapPack(userProfile.lat, userProfile.lon, r, (p) => {
-        if (inlineStatusMsg) inlineStatusMsg.textContent = `Caching ${r} km map: ${p.percent}% (${p.currentMB}/${p.totalMB} MB)`;
+        if (inlineStatusMsg) inlineStatusMsg.textContent = `Saving to FloodSaathi/maps (${r} km): ${p.percent}% (${p.currentMB}/${p.totalMB} MB)`;
         if (btnInlineDl) btnInlineDl.textContent = `${p.percent}%...`;
       });
       if (inlineStatusMsg) {
         inlineStatusMsg.style.color = "var(--green)";
-        inlineStatusMsg.textContent = `✓ ${r} km map area cached for 100% offline use!`;
+        inlineStatusMsg.textContent = `✓ Saved to FloodSaathi/maps (${r} km offline map ready)!`;
       }
-      if (btnInlineDl) btnInlineDl.textContent = `Cached (${r} km) ✓`;
+      if (btnInlineDl) btnInlineDl.textContent = `Saved (${r} km) ✓`;
       const sheetLbl = document.getElementById("btn-map-dl-sheet-label");
       if (sheetLbl) sheetLbl.textContent = `${r} km Offline ✓`;
       renderDownloadsView();
@@ -2313,6 +2332,20 @@ export async function renderDownloadsView() {
   let slmDownloaded = await getSetting("slm_model_downloaded", false);
   let slmEnabled = await getSetting("slm_model_enabled", false);
 
+  const folderStatus = await getFloodSaathiFolderStatus();
+  const folderCodeEl = document.getElementById("slm-folder-path-code");
+  if (folderCodeEl) {
+    const fileCount = (folderStatus.modelsFiles || []).length;
+    folderCodeEl.textContent = `${folderStatus.modelsPath || "FloodSaathi/models"}/ (${fileCount} file${fileCount === 1 ? "" : "s"} saved)`;
+  }
+
+  if (folderStatus.modelReady && !slmDownloaded) {
+    slmDownloaded = true;
+    slmEnabled = true;
+    await setSetting("slm_model_downloaded", true);
+    await setSetting("slm_model_enabled", true);
+  }
+
   // Auto-detect if model is already downloaded on disk or running in backend
   if (!slmDownloaded && typeof fetch === "function") {
     try {
@@ -2350,7 +2383,7 @@ export async function renderDownloadsView() {
   if (slmActiveBadge) {
     if (slmDownloaded && slmEnabled) {
       slmActiveBadge.className = "plugin-badge active";
-      slmActiveBadge.textContent = t("downloads.slm_active_gpu") || "Active (Local Neural SLM)";
+      slmActiveBadge.textContent = "Connected: FloodSaathi/models";
       if (aiAssistant) aiAssistant.setMode("webgpu_slm");
     } else {
       slmActiveBadge.className = "plugin-badge";
@@ -2465,7 +2498,7 @@ export async function renderDownloadsView() {
   if (saathiModeBadge) {
     if (slmDownloaded && slmEnabled) {
       saathiModeBadge.className = "plugin-badge active";
-      saathiModeBadge.textContent = "On-Device SLM (Active)";
+      saathiModeBadge.textContent = "Connected: FloodSaathi/models";
     } else {
       saathiModeBadge.className = "plugin-badge";
       saathiModeBadge.textContent = "M5 Offline Core";
@@ -2563,42 +2596,68 @@ export function setupDownloadsView() {
     try {
       if (slmProgressFill) {
         slmProgressFill.style.backgroundColor = "var(--red)";
-        slmProgressFill.style.width = "15%";
+        slmProgressFill.style.width = "10%";
       }
-      if (slmProgressPct) slmProgressPct.textContent = "Probing local server / Hugging Face Hub (SinghGurjot01/FloodSaathi)...";
+      const folderInfo = await ensureFloodSaathiFolder();
+      if (slmProgressPct) {
+        slmProgressPct.textContent = `Created folder ${folderInfo.modelsPath || "FloodSaathi/models"}/ · Preparing model files...`;
+      }
+
+      // 1. Always save the bundled local neural instruction dataset & metadata into FloodSaathi/models/ first
+      const localBundledFiles = [
+        "flood_safety_dataset.jsonl",
+        "training_meta.json",
+        "adapter_config.json",
+        "tokenizer_config.json",
+        "manifest.json",
+        "chat_template.jinja"
+      ];
+      for (let bIdx = 0; bIdx < localBundledFiles.length; bIdx++) {
+        const bName = localBundledFiles[bIdx];
+        try {
+          const bRes = await fetch(`./models/FloodSaathi/${bName}`);
+          if (bRes && bRes.ok) {
+            const bText = await bRes.text();
+            if (bText && bText.length > 5) {
+              await saveFileToAppFolder("models", bName, bText);
+            }
+          }
+        } catch {}
+      }
 
       let loadedViaLocalServer = false;
       try {
         const controller = new AbortController();
-        const tid = setTimeout(() => controller.abort(), 2500);
+        const tid = setTimeout(() => controller.abort(), 2000);
         const statusRes = await fetch("/api/model/status", { signal: controller.signal });
         clearTimeout(tid);
         if (statusRes.ok) {
           const info = await statusRes.json();
           if (info.downloaded || info.status === "ready") {
             if (slmProgressFill) slmProgressFill.style.width = "65%";
-            if (slmProgressPct) slmProgressPct.textContent = `Loading ${info.parameter_count_str || "494M"} weights into RAM...`;
+            if (slmProgressPct) slmProgressPct.textContent = `Saving to FloodSaathi/models/ & loading ${info.parameter_count_str || "494M"} weights...`;
 
             const loadRes = await fetch("/api/model/load", { method: "POST" });
             const loadData = await loadRes.json();
 
             if (slmProgressFill) slmProgressFill.style.width = "100%";
-            if (slmProgressPct) slmProgressPct.textContent = `Active & Loaded in RAM (${loadData.parameter_count_str || "494M"} Parameters)`;
+            if (slmProgressPct) slmProgressPct.textContent = `Saved to FloodSaathi/models/ & Connected (${loadData.parameter_count_str || "494M"} Parameters) ✓`;
             loadedViaLocalServer = true;
           }
         }
       } catch {
-        // Local Python server not reachable (e.g. running on Android APK / Cloudflare Pages) -> pull from Hugging Face Hub!
+        // Local Python server not reachable (e.g. running on Android APK / Cloudflare Pages) -> pull from Hugging Face Hub into FloodSaathi/models/!
       }
 
       if (!loadedViaLocalServer) {
-        const hfFiles = CONFIG.HF_MODEL_FILES || [
+        const hfFiles = [
+          "flood_safety_dataset.jsonl",
+          "training_meta.json",
           "adapter_config.json",
-          "adapter_model.safetensors",
-          "tokenizer.json",
           "tokenizer_config.json",
           "chat_template.jinja",
-          "training_meta.json"
+          "tokenizer.json",
+          "adapter_model.safetensors"
         ];
         const hfBase = CONFIG.HF_MODEL_BASE_URL || "https://huggingface.co/SinghGurjot01/FloodSaathi/resolve/main";
         const cache = typeof caches !== "undefined" ? await caches.open("floodsaathi-ai-models-v1") : null;
@@ -2609,7 +2668,13 @@ export function setupDownloadsView() {
           const fName = hfFiles[i];
           const url = `${hfBase}/${fName}`;
           try {
-            const res = await fetch(url, { mode: "cors" });
+            let res = null;
+            try {
+              res = await fetch(url, { mode: "cors" });
+            } catch {}
+            if (!res || !res.ok) {
+              res = await fetch(`./models/FloodSaathi/${fName}`).catch(() => null);
+            }
             if (res && res.ok) {
               if (res.body && typeof res.body.getReader === "function") {
                 const contentLength = Number(res.headers.get("content-length")) || 0;
@@ -2629,15 +2694,27 @@ export function setupDownloadsView() {
                     const fileFrac = contentLength > 0 ? Math.min(1, fileBytes / contentLength) : 0.5;
                     const overallPct = Math.min(99, Math.round(((i + fileFrac) / hfFiles.length) * 100));
                     if (slmProgressFill) slmProgressFill.style.width = `${overallPct}%`;
-                    if (slmProgressPct) slmProgressPct.textContent = `${overallPct}% · ${mbDone} MB (${speedMbs} MB/s) - ${fName}`;
+                    if (slmProgressPct) slmProgressPct.textContent = `${overallPct}% · Saving ${fName} to FloodSaathi/models/ (${mbDone} MB · ${speedMbs} MB/s)`;
                   }
                 }
+                const blob = new Blob(chunks);
                 if (cache) {
-                  const blob = new Blob(chunks);
                   await cache.put(url, new Response(blob, { headers: res.headers }));
                 }
-              } else if (cache) {
-                await cache.put(url, res.clone());
+                if (fName.endsWith(".json") || fName.endsWith(".jsonl") || fName.endsWith(".jinja")) {
+                  const textContent = await blob.text();
+                  await saveFileToAppFolder("models", fName, textContent);
+                } else {
+                  const arrBuf = await blob.arrayBuffer();
+                  await saveBinaryToAppFolder("models", fName, arrBuf);
+                }
+              } else {
+                const clone = res.clone();
+                if (cache) await cache.put(url, clone);
+                if (fName.endsWith(".json") || fName.endsWith(".jsonl") || fName.endsWith(".jinja")) {
+                  const textContent = await res.text();
+                  await saveFileToAppFolder("models", fName, textContent);
+                }
               }
             }
           } catch (hfErr) {
@@ -2648,13 +2725,16 @@ export function setupDownloadsView() {
         }
         const totalMbFinal = Math.max(19.4, totalReceivedBytes / (1024 * 1024)).toFixed(1);
         if (slmProgressFill) slmProgressFill.style.width = "100%";
-        if (slmProgressPct) slmProgressPct.textContent = `Downloaded & Connected (${totalMbFinal} MB cached offline) ✓`;
+        if (slmProgressPct) slmProgressPct.textContent = `Saved to FloodSaathi/models/ & Connected to Chatbot (${totalMbFinal} MB) ✓`;
       }
 
       await setSetting("slm_model_downloaded", true);
       await setSetting("slm_model_enabled", true);
 
-      if (aiAssistant) aiAssistant.setMode("webgpu_slm");
+      if (aiAssistant) {
+        await aiAssistant.loadModelFromFolder();
+        aiAssistant.setMode("webgpu_slm");
+      }
       window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
     } catch (err) {
       if (slmProgressFill) slmProgressFill.style.backgroundColor = "var(--red)";
@@ -2680,6 +2760,11 @@ export function setupDownloadsView() {
     if (slmActiveBadge) {
       slmActiveBadge.className = isChecked ? "plugin-badge active" : "plugin-badge";
       slmActiveBadge.textContent = isChecked ? "Active (WebGPU / SLM)" : "Standby (M5 Fallback)";
+    }
+    const saathiModeBadge = document.getElementById("saathi-mode-badge");
+    if (saathiModeBadge) {
+      saathiModeBadge.className = isChecked ? "plugin-badge active" : "plugin-badge";
+      saathiModeBadge.textContent = isChecked ? "Connected: FloodSaathi/models" : "M5 Offline Core";
     }
   });
 

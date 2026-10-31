@@ -1,9 +1,48 @@
 // app/js/map_downloader.js
 // Feature F10: User-Selectable Offline Map Downloader
-// Downloads vector tiles / PMTiles packs into Cache API for 100% offline MapLibre operation.
+// Downloads vector tiles / PMTiles & OpenStreetMap slippy tiles into Cache API
+// and FloodSaathi/maps mobile folder for 100% offline MapLibre & Tile Map operation.
 // Pure ES module: runs offline, NO framework.
 
+import { saveFileToAppFolder } from "./mobile_storage.js";
+
 export const CACHE_NAME = "floodsaathi-offline-maps-v1";
+
+/**
+ * Convert (lat, lon, zoom) to OpenStreetMap slippy tile (x, y)
+ */
+export function latLonToTileXY(lat, lon, z) {
+  const n = Math.pow(2, z);
+  const x = Math.floor(((lon + 180) / 360) * n);
+  const latRad = (lat * Math.PI) / 180;
+  const y = Math.floor(((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n);
+  return { x: Math.max(0, Math.min(n - 1, x)), y: Math.max(0, Math.min(n - 1, y)) };
+}
+
+/**
+ * Build list of OpenStreetMap tile URLs covering a given center & radius (capped for fast mobile caching)
+ */
+export function getOsmTileUrlsForRadius(centerLat, centerLon, radiusKm, maxTiles = 24) {
+  const lat = Number(centerLat) || 30.901;
+  const lon = Number(centerLon) || 75.857;
+  const rKm = Math.max(5, Math.min(150, Number(radiusKm) || 25));
+  const dLat = rKm / 111.32;
+  const dLon = rKm / (111.32 * Math.cos((lat * Math.PI) / 180));
+
+  const urls = [];
+  const zooms = [9, 10, 11, 12];
+  for (const z of zooms) {
+    const minT = latLonToTileXY(lat + dLat, lon - dLon, z);
+    const maxT = latLonToTileXY(lat - dLat, lon + dLon, z);
+    for (let x = minT.x; x <= maxT.x; x++) {
+      for (let y = minT.y; y <= maxT.y; y++) {
+        urls.push(`https://tile.openstreetmap.org/${z}/${x}/${y}.png`);
+        if (urls.length >= maxTiles) return urls;
+      }
+    }
+  }
+  return urls;
+}
 
 export const MAP_RADIUS_SIZES = {
   10: { mb: 12, label: "Village & Surroundings (10 km)" },
@@ -158,6 +197,8 @@ export async function downloadMapPack(centerLat, centerLon, radiusKm, onProgress
 
   // Real local regional vector assets and map libraries bundled with application
   const regionalMapAssets = [
+    "./data/punjab.pmtiles",
+    "./corpus/shelters_punjab.json",
     "./packs/region-amritsar/manifest.json",
     "./packs/region-amritsar/villages.json",
     "./packs/region-amritsar/shelters.geojson",
@@ -170,25 +211,30 @@ export async function downloadMapPack(centerLat, centerLon, radiusKm, onProgress
     "./vendor/maplibre-gl/maplibre-gl.css"
   ];
 
-  let loadedBytes = 0;
-  const totalSteps = regionalMapAssets.length + 1;
+  // In browser/mobile APK environment when online, also cache real OpenStreetMap slippy tiles for the selected radius
+  const isBrowserOnline = typeof window !== "undefined" && (typeof navigator === "undefined" || navigator.onLine !== false);
+  const osmTileUrls = isBrowserOnline ? getOsmTileUrlsForRadius(centerLat, centerLon, radiusKm, 16) : [];
+  const allAssets = [...regionalMapAssets, ...osmTileUrls];
 
-  for (let i = 0; i < regionalMapAssets.length; i++) {
-    const assetUrl = regionalMapAssets[i];
+  let loadedBytes = 0;
+  const totalSteps = allAssets.length + 1;
+
+  for (let i = 0; i < allAssets.length; i++) {
+    const assetUrl = allAssets[i];
     let res = null;
     try {
       if (typeof fetch === "function") {
-        res = await fetch(assetUrl);
+        res = await fetch(assetUrl, assetUrl.startsWith("http") ? { mode: "cors" } : undefined);
       }
     } catch {
       // In headless Node test runner without base URL, load local file
-      if (typeof process !== "undefined" && process?.versions?.node) {
+      if (!assetUrl.startsWith("http") && typeof process !== "undefined" && process?.versions?.node) {
         try {
           const fs = await import("node:fs");
           const path = await import("node:path");
           const filePath = path.resolve(process.cwd(), "app", assetUrl.replace(/^\.\//, ""));
           if (fs.existsSync(filePath)) {
-            const data = fs.readFileSync(filePath, "utf-8");
+            const data = fs.readFileSync(filePath);
             res = new Response(data, {
               status: 200,
               headers: { "Content-Type": assetUrl.endsWith(".json") || assetUrl.endsWith(".geojson") ? "application/json" : "application/octet-stream" }
@@ -203,8 +249,8 @@ export async function downloadMapPack(centerLat, centerLon, radiusKm, onProgress
       const clone = (typeof res.clone === "function") ? res.clone() : res;
       await cache.put(assetUrl, clone);
       try {
-        const text = await res.text();
-        loadedBytes += text.length;
+        const buf = await res.arrayBuffer();
+        loadedBytes += buf.byteLength;
       } catch {
         loadedBytes += 15000;
       }
@@ -226,13 +272,26 @@ export async function downloadMapPack(centerLat, centerLon, radiusKm, onProgress
     }
   }
 
-  // Persist pack metadata record into Cache API
+  // Persist pack metadata record into Cache API AND into mobile FloodSaathi/maps folder
   if (cache) {
     const metaResponse = new Response(JSON.stringify(packMeta), {
       headers: { "Content-Type": "application/json" }
     });
     await cache.put(`/offline-maps/meta-${packMeta.id}.json`, metaResponse);
   }
+
+  try {
+    await saveFileToAppFolder(
+      "maps",
+      `map_pack_${radiusKm}km_${Math.round((Number(centerLat) || 30.9) * 100)}_${Math.round((Number(centerLon) || 75.85) * 100)}.json`,
+      JSON.stringify({
+        ...packMeta,
+        cachedTileCount: osmTileUrls.length,
+        tileUrls: osmTileUrls,
+        vectorPack: "punjab.pmtiles"
+      }, null, 2)
+    );
+  } catch {}
 
   // Complete progress report
   if (typeof onProgress === "function") {

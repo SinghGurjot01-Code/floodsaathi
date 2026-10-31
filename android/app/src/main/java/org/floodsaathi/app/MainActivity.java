@@ -23,6 +23,10 @@ public class MainActivity extends BridgeActivity {
             settings.setDatabaseEnabled(true);
             settings.setGeolocationEnabled(true);
             settings.setMediaPlaybackRequiresUserGesture(false);
+            this.bridge.getWebView().addJavascriptInterface(
+                new FloodSaathiNativeBridge(this),
+                "FloodSaathiNative"
+            );
         }
     }
 

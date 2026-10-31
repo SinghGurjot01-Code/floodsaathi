@@ -1,7 +1,7 @@
 // Service Worker for FloodSaathi
 // Provides offline capability for PWA shell and cached data snapshots.
 
-const CACHE_NAME = "floodsaathi-v1.9.0";
+const CACHE_NAME = "floodsaathi-v2.0.0";
 
 const PRECACHE_URLS = [
   "./",
@@ -26,6 +26,12 @@ const PRECACHE_URLS = [
   "./js/shelters.js",
   "./js/map_downloader.js",
   "./js/map.js",
+  "./js/mobile_storage.js",
+  "./models/FloodSaathi/flood_safety_dataset.jsonl",
+  "./models/FloodSaathi/training_meta.json",
+  "./models/FloodSaathi/adapter_config.json",
+  "./models/FloodSaathi/tokenizer_config.json",
+  "./models/FloodSaathi/manifest.json",
   "./data/punjab.pmtiles",
   "./corpus/cards/cards.json",
   "./corpus/helplines.json",
@@ -83,6 +89,24 @@ self.addEventListener("fetch", (event) => {
     return;
   }
   const url = new URL(event.request.url);
+
+  // Cache-first for OpenStreetMap slippy map tiles (stored in floodsaathi-offline-maps-v1)
+  if (url.hostname.includes("tile.openstreetmap.org")) {
+    event.respondWith(
+      caches.open("floodsaathi-offline-maps-v1").then((cache) => {
+        return cache.match(event.request.url).then((cachedTile) => {
+          if (cachedTile) return cachedTile;
+          return fetch(event.request).then((netRes) => {
+            if (netRes && (netRes.status === 200 || netRes.type === "opaque")) {
+              cache.put(event.request.url, netRes.clone()).catch(() => {});
+            }
+            return netRes;
+          }).catch(() => cachedTile);
+        });
+      })
+    );
+    return;
+  }
 
   // Network-first for dynamic live relay data (punjab.json)
   if (url.pathname.includes("/latest/") || (url.pathname.endsWith(".json") && url.pathname.includes("/data/"))) {
