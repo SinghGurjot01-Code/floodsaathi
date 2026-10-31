@@ -87,91 +87,114 @@
 
 /* Time-to-Water Card */
 .estimate-box {
-  background-color: var(--bg-surface-elevated);
-  border-radius: var(--radius-md);
-  padding: 16px;
-  margin: 12px 0;
-  border-left: 4px solid var(--brand-accent);
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 16px 18px;
+  margin: 14px 0;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-left: 5px solid #2563eb;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
 }
 
 .estimate-headline {
   font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 800;
+  color: var(--navy);
   margin-bottom: 6px;
+  letter-spacing: -0.01em;
 }
 
 .estimate-sub {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
+  font-size: 0.92rem;
+  color: #4a5268;
+  line-height: 1.45;
 }
 
 /* Gauge Data Grid */
 .gauge-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
-  margin-top: 12px;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .gauge-stat {
-  background: var(--bg-surface-elevated);
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  background: #f8fafc;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
 .gauge-stat-label {
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: #64748b;
   text-transform: uppercase;
-  margin-bottom: 2px;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
 }
 
 .gauge-stat-value {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--navy);
 }
 
 /* User Action Buttons (Water reached / receding) */
 .user-actions-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin: 16px 0;
+  gap: 12px;
+  margin: 18px 0;
 }
 
 .user-action-btn {
-  min-height: var(--touch-target);
-  padding: 10px;
-  border-radius: var(--radius-sm);
-  font-size: 0.9rem;
-  font-weight: 600;
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-surface);
-  color: var(--text-primary);
+  min-height: var(--touch-target, 48px);
+  padding: 12px 14px;
+  border-radius: 16px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  border: 1px solid rgba(203, 213, 225, 0.8);
+  background: #ffffff;
+  color: var(--navy);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.user-action-btn:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
 }
 
 .user-action-btn:active {
-  background: var(--bg-surface-elevated);
+  background: #f1f5f9;
 }
 
 /* Official Alerts List */
 .alert-item {
-  border-left: 4px solid #ef4444;
-  background-color: var(--bg-surface);
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: 16px;
-  margin-bottom: 12px;
-  border-top: 1px solid var(--border-subtle);
-  border-right: 1px solid var(--border-subtle);
-  border-bottom: 1px solid var(--border-subtle);
+  border-left: 5px solid #ef4444;
+  background-color: #ffffff;
+  border-radius: 4px 16px 16px 4px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  border-right: 1px solid rgba(226, 232, 240, 0.9);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
+}
+
+.alert-item:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.07);
 }
 
 .alert-item.severe {
@@ -190,21 +213,23 @@
 }
 
 .alert-headline {
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--navy);
+  letter-spacing: -0.01em;
 }
 
 .alert-body {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  margin-bottom: 8px;
-  line-height: 1.4;
+  font-size: 0.92rem;
+  color: #334155;
+  margin-bottom: 10px;
+  line-height: 1.5;
 }
 
 .alert-meta {
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: #64748b;
+  font-weight: 500;
 }
 
 /* SOS Screen */
@@ -215,25 +240,34 @@
 }
 
 .sos-action-btn {
-  min-height: 56px;
+  min-height: 58px;
   font-size: 1.15rem;
-  font-weight: 700;
-  border-radius: var(--radius-md);
+  font-weight: 800;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
   text-decoration: none;
   cursor: pointer;
   border: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sos-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
 }
 
 .sos-action-btn.call-112 {
-  background-color: #dc2626;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
   color: #ffffff;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
 }
 
 .sos-action-btn.send-sms {
-  background-color: #2563eb;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
   color: #ffffff;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
 }
