@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FloodSaathi</string>
+    <string name="title_activity_main">FloodSaathi</string>
+    <string name="package_name">org.floodsaathi.app</string>
+    <string name="custom_url_scheme">org.floodsaathi.app</string>
+</resources>

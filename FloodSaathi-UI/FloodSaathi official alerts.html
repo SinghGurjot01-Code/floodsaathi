@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FloodSaathi – Official Alerts</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--red:#ef1c24;--navy:#12172b;--mut:#5f6a80;--line:#e9ecf1;--page:#e9e7ea}
+@media (prefers-color-scheme:dark){:root{--page:#17171a}}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--page);display:flex;justify-content:center;font-family:Inter,system-ui,sans-serif;color:var(--navy);-webkit-font-smoothing:antialiased;overflow:hidden}
+.app{position:relative;width:100%;max-width:430px;height:100dvh;container-type:inline-size;overflow:hidden;background:#fafafb}
+.scroll{position:absolute;left:0;right:0;top:0;bottom:calc(17.3cqw + env(safe-area-inset-bottom,0px));overflow-y:auto;padding:calc(9.9cqw + env(safe-area-inset-top,0px)) 4.3cqw 24cqw;scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+h1{font-size:6.6cqw;font-weight:700;letter-spacing:-.02em;line-height:7cqw}
+.sub{margin-top:2.4cqw;font-size:4.2cqw;line-height:6cqw;color:#6b7589}
+.chips{display:flex;gap:2.6cqw;margin:4.8cqw -4.3cqw 0;padding:0 4.3cqw;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:9.4cqw;min-width:16.5cqw;padding:0 4.9cqw;border:0;border-radius:3.2cqw;background:#f1f2f5;color:#2f3750;font:500 3.5cqw Inter,sans-serif;cursor:pointer}
+.chip.on{background:linear-gradient(180deg,#f5343b,#e8141c);color:#fff;font-weight:600;box-shadow:0 1cqw 2.5cqw rgba(239,28,36,.25)}
+.card{position:relative;height:36.8cqw;margin:4.9cqw 0 0 -.8cqw;width:91.9cqw;border-radius:3.6cqw;background:#fff;box-shadow:0 .4cqw 3cqw rgba(30,40,70,.06);cursor:pointer}
+.card+.card{margin-top:3.3cqw}
+.card>*{position:absolute}
+.tile{left:3.5cqw;top:3.4cqw;width:12.2cqw;height:11.7cqw;border-radius:3.4cqw;background:#fde6e6;display:grid;place-items:center}
+.tile svg{position:static;width:7.6cqw;height:7.6cqw}
+.tile.w{background:#fff}.tile.w svg{width:9cqw;height:9cqw}
+.ti{left:20.1cqw;top:4.1cqw;font-size:3.85cqw;font-weight:700;line-height:5.4cqw;letter-spacing:-.005em}
+.tm{right:4.1cqw;top:4.6cqw;font-size:2.95cqw;color:#a3aab8;line-height:5cqw}
+.ds{left:20.1cqw;top:11.5cqw;font-size:3.45cqw;line-height:5.37cqw;color:var(--mut);white-space:nowrap}
+.sr{left:20.1cqw;top:28.7cqw;font-size:3.2cqw;line-height:5cqw;color:var(--mut)}
+.ch{left:83.9cqw;top:17.3cqw;width:3.6cqw;height:4cqw}
+.sos{right:2.5cqw;bottom:calc(16.9cqw + env(safe-area-inset-bottom,0px));width:18.5cqw;height:18.5cqw;border-radius:50%;border:0;background:radial-gradient(circle at 35% 28%,#f5383f,var(--red) 70%);color:#fff;font:500 4.6cqw Inter,sans-serif;box-shadow:0 2cqw 5cqw rgba(239,28,36,.38);cursor:pointer;position:absolute}
+nav{position:absolute;left:0;right:0;bottom:0;height:calc(17.3cqw + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line);display:flex}
+nav button{flex:1;background:none;border:0;display:flex;flex-direction:column;align-items:center;padding-top:2.9cqw;gap:1.6cqw;font:500 2.9cqw Inter,sans-serif;color:#3e465a;cursor:pointer}
+nav button.on{color:var(--red);font-weight:600}
+nav svg{width:6.4cqw;height:6.4cqw}
+button:focus-visible,.card:focus-visible{outline:3px solid var(--navy);outline-offset:2px}
+</style></head>
+<body>
+<main class="app">
+  <div class="scroll">
+    <h1>Official Alerts</h1>
+    <p class="sub">Real-time alerts from NDMA, CWC and<br>state authorities.</p>
+    <div class="chips" role="tablist">
+      <button class="chip on">All</button><button class="chip">Flood</button><button class="chip">Dam Release</button><button class="chip">Rain</button>
+    </div>
+
+    <article class="card" tabindex="0">
+      <div class="tile"><svg viewBox="0 0 24 24" fill="#ef1c24"><path d="M4 5h16v3H4z"/><path d="M5.2 9h13.6L20 20h-4.2l-.6-8.5h-6.400l-.6 8.5H4z"/><path d="M10.200 12.5a1.800 1.800 0 013.600 0V20h-3.600z"/></svg></div>
+      <div class="ti">Flood Warning</div><div class="tm">2 hours ago</div>
+      <div class="ds">Beas River water level rising.<br>Villages downstream may be<br>affected.</div>
+      <div class="sr">NDMA - SACHET</div>
+      <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="#4a5368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l8 8-8 8"/></svg>
+    </article>
+    <article class="card" tabindex="0" style="margin-top:3.3cqw">
+      <div class="tile"><svg viewBox="0 0 24 24" fill="#ef1c24"><path d="M4 5h16v3H4z"/><path d="M5.2 9h13.6L20 20h-4.2l-.6-8.5h-6.400l-.6 8.5H4z"/><path d="M10.200 12.5a1.800 1.800 0 013.600 0V20h-3.600z"/></svg></div>
+      <div class="ti">Dam Release Update</div><div class="tm">4 hours ago</div>
+      <div class="ds">Increased discharge from<br>Pong Dam. Monitoring<br>situation closely.</div>
+      <div class="sr">CWC</div>
+      <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="#4a5368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l8 8-8 8"/></svg>
+    </article>
+    <article class="card" tabindex="0" style="margin-top:3.3cqw">
+      <div class="tile w"><svg viewBox="0 0 24 24"><path d="M7 15a4.5 4.5 0 01-.6-8.9 6 6 0 0111.3 1.6A3.7 3.7 0 0117 15z" fill="#3b82f6"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5" stroke="#3b82f6" stroke-width="1.700" stroke-linecap="round"/></svg></div>
+      <div class="ti">Heavy Rain Alert</div><div class="tm">6 hours ago</div>
+      <div class="ds">Heavy rainfall expected in<br>Jalandhar district in next 24<br>hours.</div>
+      <div class="sr">IMD</div>
+      <svg class="ch" viewBox="0 0 24 24" fill="none" stroke="#4a5368" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4l8 8-8 8"/></svg>
+    </article>
+  </div>
+  <button class="sos" aria-label="Emergency SOS">SOS</button>
+  <nav aria-label="Main">
+    <button class="on"><svg viewBox="0 0 24 24" fill="#ef1c24"><path d="M12 3L3 11h2.5v9.5h5v-6h3v6h5V11H21z"/></svg>Home</button>
+    <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2zM9 4v14M15 6v14"/></svg>Map</button>
+    <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="10" cy="14" r="5.5"/><circle cx="19" cy="6" r="2.2"/><path d="M8 13v1M12 13v1M8 16.5q2 1.5 4 0"/></svg>Saathi</button>
+    <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/></svg>Alerts</button>
+    <button><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8h16M4 16h16"/></svg>More</button>
+  </nav>
+</main>
+<script>
+document.querySelectorAll('.chip').forEach(function(c){c.addEventListener('click',function(){
+  document.querySelectorAll('.chip').forEach(function(x){x.classList.remove('on')});c.classList.add('on');});});
+</script>
+</body></html>

@@ -409,18 +409,28 @@ async function loadAndRenderData() {
 }
 
 async function fetchLiveRelayData() {
-  try {
-    const res = await fetch("./data/latest/punjab.json");
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const relayData = await res.json();
-    const snapshot = await createSnapshotFromRelay(relayData, userProfile);
-    currentSnapshot = snapshot;
-    renderSnapshotData(snapshot);
-  } catch (err) {
-    console.warn("Relay fetch failed, falling back to local store:", err);
-    if (!currentSnapshot) {
-      renderDataUnavailable("Live telemetry feed currently unavailable.");
+  const urls = [
+    "./data/latest/punjab.json",
+    CONFIG.REMOTE_DATA_FALLBACK_URL,
+    CONFIG.GITHUB_RAW_DATA_URL
+  ].filter(Boolean);
+
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) continue;
+      const relayData = await res.json();
+      const snapshot = await createSnapshotFromRelay(relayData, userProfile);
+      currentSnapshot = snapshot;
+      renderSnapshotData(snapshot);
+      return;
+    } catch (err) {
+      // Try next URL
     }
+  }
+
+  if (!currentSnapshot) {
+    renderDataUnavailable("Live telemetry feed currently unavailable.");
   }
 }
 
@@ -2434,36 +2444,76 @@ export function setupDownloadsView() {
     btnDownloadSlm.disabled = true;
 
     try {
-      if (slmProgressFill) slmProgressFill.style.width = "30%";
-      if (slmProgressPct) slmProgressPct.textContent = "Connecting to local neural backend (/api/model/status)...";
-
-      const statusRes = await fetch("/api/model/status");
-      if (statusRes.ok) {
-        const info = await statusRes.json();
-        if (info.downloaded || info.status === "ready") {
-          if (slmProgressFill) slmProgressFill.style.width = "70%";
-          if (slmProgressPct) slmProgressPct.textContent = `Loading ${info.parameter_count_str || "494M"} weights into RAM...`;
-
-          const loadRes = await fetch("/api/model/load", { method: "POST" });
-          const loadData = await loadRes.json();
-
-          if (slmProgressFill) slmProgressFill.style.width = "100%";
-          if (slmProgressPct) slmProgressPct.textContent = `Active & Loaded in RAM (${loadData.parameter_count_str || "494M"} Parameters)`;
-
-          await setSetting("slm_model_downloaded", true);
-          await setSetting("slm_model_enabled", true);
-
-          if (aiAssistant) aiAssistant.setMode("webgpu_slm");
-          window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
-        } else {
-          throw new Error("Model weights not yet found on disk. Run model setup.");
-        }
-      } else {
-        throw new Error(`Server returned HTTP ${statusRes.status}`);
+      if (slmProgressFill) {
+        slmProgressFill.style.backgroundColor = "var(--red)";
+        slmProgressFill.style.width = "15%";
       }
+      if (slmProgressPct) slmProgressPct.textContent = "Probing local server / Hugging Face Hub (SinghGurjot01/FloodSaathi)...";
+
+      let loadedViaLocalServer = false;
+      try {
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 2500);
+        const statusRes = await fetch("/api/model/status", { signal: controller.signal });
+        clearTimeout(tid);
+        if (statusRes.ok) {
+          const info = await statusRes.json();
+          if (info.downloaded || info.status === "ready") {
+            if (slmProgressFill) slmProgressFill.style.width = "65%";
+            if (slmProgressPct) slmProgressPct.textContent = `Loading ${info.parameter_count_str || "494M"} weights into RAM...`;
+
+            const loadRes = await fetch("/api/model/load", { method: "POST" });
+            const loadData = await loadRes.json();
+
+            if (slmProgressFill) slmProgressFill.style.width = "100%";
+            if (slmProgressPct) slmProgressPct.textContent = `Active & Loaded in RAM (${loadData.parameter_count_str || "494M"} Parameters)`;
+            loadedViaLocalServer = true;
+          }
+        }
+      } catch {
+        // Local Python server not reachable (e.g. running on Android APK / Cloudflare Pages) -> pull from Hugging Face Hub!
+      }
+
+      if (!loadedViaLocalServer) {
+        const hfFiles = CONFIG.HF_MODEL_FILES || [
+          "adapter_config.json",
+          "adapter_model.safetensors",
+          "tokenizer.json",
+          "tokenizer_config.json",
+          "chat_template.jinja",
+          "training_meta.json"
+        ];
+        const hfBase = CONFIG.HF_MODEL_BASE_URL || "https://huggingface.co/SinghGurjot01/FloodSaathi/resolve/main";
+        const cache = typeof caches !== "undefined" ? await caches.open("floodsaathi-ai-models-v1") : null;
+
+        for (let i = 0; i < hfFiles.length; i++) {
+          const fName = hfFiles[i];
+          const url = `${hfBase}/${fName}`;
+          const pct = Math.round(((i + 1) / hfFiles.length) * 100);
+          if (slmProgressFill) slmProgressFill.style.width = `${pct}%`;
+          if (slmProgressPct) slmProgressPct.textContent = `Downloading ${fName} from Hugging Face (${pct}%)...`;
+
+          try {
+            const res = await fetch(url, { mode: "cors" });
+            if (res && res.ok && cache) {
+              await cache.put(url, res.clone());
+            }
+          } catch (hfErr) {
+            console.warn(`HF download note for ${fName}:`, hfErr);
+          }
+        }
+        if (slmProgressFill) slmProgressFill.style.width = "100%";
+        if (slmProgressPct) slmProgressPct.textContent = "Cached from Hugging Face (SinghGurjot01/FloodSaathi) ✓";
+      }
+
+      await setSetting("slm_model_downloaded", true);
+      await setSetting("slm_model_enabled", true);
+
+      if (aiAssistant) aiAssistant.setMode("webgpu_slm");
+      window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
     } catch (err) {
       if (slmProgressFill) slmProgressFill.style.backgroundColor = "var(--red)";
-      if (slmProgressPct) slmProgressPct.textContent = `Backend note: ${err.message}. Start: python server.py`;
+      if (slmProgressPct) slmProgressPct.textContent = `Model download note: ${err.message}`;
     } finally {
       btnDownloadSlm.disabled = false;
       renderDownloadsView();

@@ -17,3 +17,4 @@ android/**/build/
 .agent/
 ui_preview/
 *.zip
+*.apk

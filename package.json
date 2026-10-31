@@ -1,0 +1,19 @@
+{
+  "name": "floodsaathi",
+  "version": "1.2.0",
+  "description": "FloodSaathi — Offline-First Flood Early-Warning App for Punjab",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test app/test/*.test.mjs",
+    "test:e2e": "node --test tests/e2e/*.mjs",
+    "cap:sync": "npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/core": "^6.2.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

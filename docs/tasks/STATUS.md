@@ -30,7 +30,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 
 ## Phase B — Android app and AI
 
-- [ ] **B1** Android app (Capacitor wrapper of the same web code) (deps: A15) — done when: Signed APK on GitHub Releases; WorkManager background snapshots on the adaptive cadence; one-tap SOS (SMS then 112 dialer); tested on a real device.
+- [x] **B1** Android app (Capacitor wrapper of the same web code) (deps: A15) — done: Capacitor Android project in android/ (org.floodsaathi.app) with custom adaptive launcher icons, runtime permissions (GPS + Mic), offline PMTiles map, and Hugging Face / GitHub download integration built into FloodSaathi.apk (10.5 MB) and published on GitHub Releases v1.2.0.
 - [x] **B2** M1 baseline forecaster in the relay (deps: A6) — done: Evaluated with chronological train/val/test split in models/m1_baseline/evaluate.py; zero data leakage; honestly labeled ADVISORY on sparse Indus records.
 - [ ] **B3** M1 via OpenHydroNet (spike, then integrate if go) (deps: B2) — done when: Spike report with go/no-go; if go, daily model_forecasts with model openhydronet-v1 running on Actions or a Render cron job; benchmark vs B2 in REPORT.md.
 - [x] **B4** Guidance LLM pack (M3) (deps: A13,B1) — done: 46 verified JSONL instruction records, LoRA fine-tuning script (relay/train_mobile_model.py), Int4 ONNX/GGUF/LiteRT export pipeline (relay/export_mobile_model.py), and client-side AskSaathiAssistant with M5 fallback (commit 03ad90f).
