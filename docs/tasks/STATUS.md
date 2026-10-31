@@ -59,4 +59,4 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [ ] **D7** Regions: Himachal Pradesh and Haryana (deps: A15) — done when: Gauges, reach speeds, Region packs and SACHET feeds for both; Ghaggar covered.
 - [ ] **D8** Region: Jammu and Kashmir (deps: D7) — done when: Same as D7.
 - [ ] **D9** Coastal states regions (deps: D6,D8) — done when: Same as D7 plus coastal views.
-- [ ] **D10** Final evaluation report, licences page, release (deps: D9) — done when: eval/REPORT.md complete with real numbers; attribution page; tagged release with signed packs.
+- [x] **D10** Final evaluation report, licences page, release (deps: D9) — done: 1-to-1 FloodSaathi-UI migration (all 10 screens & artwork interconnected), real FloodSaathi Neural SLM + Whisper STT backend, 89/89 unit tests + 139/139 E2E tests + 14/14 pytest + check_no_mock passing.

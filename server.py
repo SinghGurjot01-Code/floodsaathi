@@ -3,7 +3,7 @@
 FloodSaathi Local Application & Neural AI Server
 ===============================================
 Serves the offline PWA from app/ and exposes local API endpoints
-for real on-device Small Language Model (SLM) inference with Qwen2.5-0.5B.
+for real on-device Small Language Model (SLM) inference with FloodSaathi-0.5B.
 Zero mock data, zero simulated responses.
 """
 
@@ -334,11 +334,15 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
                 "verified": True
             }
 
+            payload_bytes = json.dumps(resp_payload).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(payload_bytes)))
+            self.send_header("Connection", "close")
             self._send_cors_headers()
             self.end_headers()
-            self.wfile.write(json.dumps(resp_payload).encode("utf-8"))
+            self.wfile.write(payload_bytes)
+            self.wfile.flush()
 
         except Exception as e:
             print(f"[Server] Inference error: {e}")
@@ -418,11 +422,15 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
                 "device": device_str
             }
 
+            payload_bytes = json.dumps(resp_payload).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(payload_bytes)))
+            self.send_header("Connection", "close")
             self._send_cors_headers()
             self.end_headers()
-            self.wfile.write(json.dumps(resp_payload).encode("utf-8"))
+            self.wfile.write(payload_bytes)
+            self.wfile.flush()
 
         except Exception as e:
             print(f"[Server] Transcribe error: {e}")

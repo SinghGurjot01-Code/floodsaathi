@@ -117,3 +117,24 @@ Corrected chronological splits:
   2. *Medical Dosages*: 100% of medical queries received refusals to provide medication dosages, with automatic redirection to ambulance 108 and emergency 112.
   3. *Helpline Integrity*: 100% of phone numbers referenced come strictly from `corpus/helplines.json` (112, 1078, 1070, 1077, 108, 1912). Zero unauthorized numbers generated.
   4. *Official Alerts*: Official NDMA SACHET alerts are preserved verbatim and given top priority over computed estimates.
+
+---
+
+## 7. Phase 7: 1-to-1 FloodSaathi-UI Migration & Full End-to-End Verification
+
+- **UI Screens Migrated 1-to-1 (`ui_preview/FloodSaathi-UI/` -> `app/`)**:
+  1. `home.html` -> `#view-home` (misty hills hero `./assets/ui/home-hills.jpg`, live status, time-to-water banner, 2x2 hairline telemetry sheet, official alert summary, water reached/receding actions, TTS Listen + GPS Re-sync).
+  2. `app-shell.html` -> `#first-run-modal` (onboarding splash with `./assets/ui/onboarding-bg.jpg`, `./assets/ui/saathi-logo.png`, 3-language pill selector, GPS & manual district picker, auto-pack download).
+  3. `risk-map.html` -> `#risk-map-stage` in `#view-map` (segmented pills `Flood Risk | Shelters | Hospitals`, Layers toggle for live MapLibre PMTiles vector map `#map-container`, interactive markers, bottom risk card with `View details`).
+  4. `map-screen.html` -> `#map-detail-panel` in `#view-map` (route overlay SVG, `Estimated time-to-water`, `Likely depth`, interactive `Now · 12h · 24h · 48h · 72h` timeline slider).
+  5. `shelter-responsive.html` -> `#view-shelters` (top `Safe Route` map pane `./assets/ui/shelter-map-bg.jpg`, featured nearest shelter sheet with `./assets/ui/shelter-thumb.jpg`, capacity & amenities list, `Get Directions`, plus full verified Punjab shelters list).
+  6. `ask-saathi-chat.html` -> `#view-saathi` (FloodSaathi logo header, real local FloodSaathi Neural SLM + offline M5 fallback, Whisper STT + Web Speech API voice input, TTS readout, numbered survival steps).
+  7. `official-alerts.html` -> `#view-alerts` (`All | Flood | Dam Release | Rain` filter chips, verbatim NDMA SACHET / Punjab SDMA alert cards with custom tiles and TTS readout).
+  8. `emergency.html` -> `#view-sos` (concentric pulsing SOS button, `Call 112`, `Send SMS`, `Family Check-in` card with `I'm Safe` GPS SMS action, and emergency contacts manager).
+  9. `after-flood-guide.html` -> `#view-after-flood` (`Safety | Health | Home | Claims` tabs, illustrated red-tile cards with NDMA/SDMA recovery steps and TTS readout).
+  10. `alert-preferences.html` -> `#view-preferences` (custom icon rows and switches for Flood Warnings, Dam Release, Heavy Rain, Critical Siren, interactive 5–50 km radius slider, Quiet Hours, Google Translate fallback key, and offline map packs manager).
+- **Automated Test Verification**:
+  - Unit Tests (`node --test app/test/*.test.mjs`): **89 / 89 PASSED**
+  - Opaque-Box E2E Tests (`node --test tests/e2e/*.mjs`): **139 / 139 PASSED**
+  - Python Relay & Model Tests (`pytest relay/tests`): **14 / 14 PASSED**
+  - Zero-Mock Audit (`python scripts/check_no_mock.py`): **OK (0 mock data)**

@@ -38,7 +38,14 @@ const PRECACHE_URLS = [
   "./vendor/maplibre-gl/maplibre-gl.css",
   "./vendor/pmtiles/pmtiles.js",
   "./vendor/tweetnacl/nacl.min.js",
-  "./vendor/minisearch/minisearch.min.js"
+  "./vendor/minisearch/minisearch.min.js",
+  "./assets/ui/home-hills.jpg",
+  "./assets/ui/onboarding-bg.jpg",
+  "./assets/ui/saathi-logo.png",
+  "./assets/ui/risk-map-bg.jpg",
+  "./assets/ui/map-screen-bg.jpg",
+  "./assets/ui/shelter-map-bg.jpg",
+  "./assets/ui/shelter-thumb.jpg"
 ];
 
 self.addEventListener("install", (event) => {

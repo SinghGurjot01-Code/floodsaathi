@@ -1973,7 +1973,703 @@ body {
   animation: pulse-speaker 1.5s infinite;
 }
 
-/* Location picker district buttons */
+/* =========================================================
+   FLOODSAATHI-UI 1-TO-1 PROTOTYPE SCREEN STYLES
+   ========================================================= */
+
+/* 1. Home Hero Hills & Hairline Sheet (home.html) */
+.home-hero .hills {
+  position: absolute;
+  left: -4%;
+  right: -4%;
+  bottom: -24px;
+  height: 195px;
+  background: url("../assets/ui/home-hills.jpg") center bottom / cover no-repeat;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 30%, #000 58%);
+  mask-image: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.45) 30%, #000 58%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.home-hero > *:not(.hills) {
+  position: relative;
+  z-index: 2;
+}
+
+.metrics-sheet .vl {
+  width: 1px;
+  background: var(--line);
+  margin: 4px 0;
+}
+
+.metrics-sheet .hl {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 0;
+}
+
+/* 2. Risk Map Stage & Time-to-Water Detail Map (risk-map.html & map-screen.html) */
+.map-mode-switcher {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.risk-map-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 540px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: #cfd6dc;
+}
+
+.risk-map-stage .map-bg {
+  position: absolute;
+  inset: 0;
+  background: url("../assets/ui/risk-map-bg.jpg") center 46% / cover no-repeat;
+  z-index: 1;
+}
+
+.risk-map-stage .river-lbl {
+  position: absolute;
+  left: 33%;
+  top: 25.5%;
+  transform: rotate(-16deg);
+  color: #163b69;
+  font-weight: 700;
+  font-size: 15px;
+  text-shadow: 0 1px 2px rgba(255,255,255,0.75);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.risk-map-stage .you-pin {
+  position: absolute;
+  left: 35.5%;
+  top: 41.5%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(37, 99, 235, 0.22);
+  display: grid;
+  place-items: center;
+  z-index: 4;
+  cursor: pointer;
+}
+
+.risk-map-stage .you-pin::after {
+  content: "";
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #1d5bd6;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.risk-map-stage .mk {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  width: 34px;
+  height: 42px;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.28));
+  z-index: 4;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.risk-map-stage .mk:hover {
+  transform: translate(-50%, -105%) scale(1.08);
+}
+
+.risk-map-stage .mk svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.risk-map-top {
+  position: relative;
+  z-index: 5;
+  padding: 14px 16px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.risk-seg {
+  flex: 1;
+  display: flex;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(8px);
+  border-radius: 22px;
+  padding: 3px;
+  box-shadow: 0 3px 12px rgba(20,25,40,0.12);
+  border: 1px solid rgba(255,255,255,0.9);
+}
+
+.risk-seg button {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  border-radius: 18px;
+  font: 600 13.5px Inter, sans-serif;
+  color: #3a4054;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.risk-seg button.on {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(235, 30, 38, 0.35);
+}
+
+.risk-lay-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 3px 12px rgba(20,25,40,0.14);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  color: var(--navy);
+}
+
+.risk-lay-btn.active {
+  background: var(--navy);
+  color: #fff;
+}
+
+.risk-bottom-card {
+  position: relative;
+  z-index: 5;
+  margin: auto 14px 14px;
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(10px);
+  border-radius: 22px;
+  padding: 16px 18px 14px;
+  box-shadow: 0 10px 28px rgba(18,24,40,0.16);
+}
+
+.risk-bottom-card .row1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.risk-bottom-card .loc {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.risk-bottom-card .risk {
+  margin: 4px 0 0 23px;
+  font-size: 14.5px;
+  color: #545b6e;
+  font-weight: 500;
+}
+
+.risk-bottom-card .risk b {
+  color: var(--green);
+  font-weight: 700;
+}
+
+.risk-bottom-card .risk b.warn {
+  color: #ea580c;
+}
+
+.risk-bottom-card .risk b.danger {
+  color: var(--red);
+}
+
+.btn-map-details {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 19px;
+  border: 0;
+  background: var(--red);
+  color: #fff;
+  font: 600 13.5px Inter, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 3px 10px rgba(235, 30, 38, 0.3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.risk-legend {
+  margin-top: 12px;
+  padding-top: 11px;
+  border-top: 1px solid #eceef2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #464d60;
+  font-weight: 500;
+  flex-wrap: wrap;
+}
+
+.risk-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.risk-sw {
+  width: 18px;
+  height: 11px;
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.risk-sw.hi { background: #ef3b2d; }
+.risk-sw.md { background: #f59e0b; }
+.risk-sw.lo { background: #facc15; }
+
+/* Time-to-Water Detail Panel (map-screen.html) */
+.map-detail-panel {
+  display: none;
+  flex-direction: column;
+  flex: 1 1 auto;
+  background: #ffffff;
+}
+
+.map-detail-panel.active {
+  display: flex;
+}
+
+.map-detail-hero {
+  position: relative;
+  height: 295px;
+  background: #cfd8e3 url("../assets/ui/map-screen-bg.jpg") center/cover no-repeat;
+  overflow: hidden;
+  flex: none;
+}
+
+.map-detail-back {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.95);
+  border: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  z-index: 4;
+}
+
+.map-detail-sheet {
+  position: relative;
+  margin-top: -18px;
+  background: #fff;
+  border-radius: 22px 22px 0 0;
+  padding: 20px 20px 24px;
+  box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.08);
+  flex: 1 1 auto;
+}
+
+.map-detail-stats {
+  display: grid;
+  grid-template-columns: 1.08fr 1fr;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+
+.map-detail-stat + .map-detail-stat {
+  border-left: 1px solid var(--line);
+  padding-left: 18px;
+}
+
+.map-detail-stat .label {
+  font-size: 13.5px;
+  color: var(--mut);
+  font-weight: 500;
+}
+
+.map-detail-stat .val {
+  margin-top: 4px;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+}
+
+.map-detail-stat .sub {
+  margin-top: 2px;
+  font-size: 13.5px;
+  color: #3c4257;
+  font-weight: 500;
+}
+
+.map-timeline-wrap {
+  padding: 16px 2px 8px;
+}
+
+.map-timeline-track {
+  position: relative;
+  height: 6px;
+  background: #e5e7ef;
+  border-radius: 99px;
+}
+
+.map-timeline-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 37%;
+  background: linear-gradient(90deg, #ff5a3c, var(--red));
+  border-radius: 99px;
+  transition: width 0.25s ease;
+}
+
+.map-timeline-knob {
+  position: absolute;
+  left: 37%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--red);
+  border: 4px solid #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(232,20,28,0.45);
+  transition: left 0.25s ease;
+}
+
+.map-timeline-ticks {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #7c8296;
+  font-weight: 600;
+}
+
+.map-timeline-ticks span {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+.map-timeline-ticks span.active {
+  color: var(--navy);
+  font-weight: 700;
+  background: #f1f5f9;
+}
+
+.map-detail-info {
+  margin-top: 14px;
+  background: #f4f6fa;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: #485067;
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+/* 3. Shelter Safe Route Map & Featured Shelter Sheet (shelter-responsive.html) */
+.shelter-hero-pane {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background: #dde2ea url("../assets/ui/shelter-map-bg.jpg") center 28% / cover no-repeat;
+  overflow: hidden;
+  flex: none;
+}
+
+.shelter-safe-badge {
+  position: absolute;
+  left: 44%;
+  top: 52%;
+  transform: translate(-50%, -50%);
+  background: var(--green);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(20, 120, 60, 0.35);
+  z-index: 3;
+}
+
+.shelter-featured-sheet {
+  background: #fff;
+  border-radius: 24px 24px 18px 18px;
+  margin: -18px 16px 8px;
+  padding: 18px;
+  box-shadow: 0 6px 24px rgba(16, 24, 40, 0.08);
+  border: 1px solid var(--line);
+  position: relative;
+  z-index: 4;
+}
+
+.shelter-featured-head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.shelter-featured-thumb {
+  width: 96px;
+  height: 68px;
+  border-radius: 10px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--line);
+}
+
+.shelter-feat-list {
+  list-style: none;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 6px;
+}
+
+.shelter-feat-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #1f2537;
+}
+
+.shelter-feat-list li + li {
+  border-top: 1px solid var(--line);
+}
+
+.btn-shelter-cta {
+  margin-top: 12px;
+  width: 100%;
+  background: var(--red);
+  color: #fff;
+  border: 0;
+  border-radius: 999px;
+  padding: 13px 20px;
+  font: 700 15px Inter, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(232, 25, 34, 0.32);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* 4. Official Alerts Chips & Prototype Cards (official-alerts.html) */
+.alerts-filter-chips {
+  display: flex;
+  gap: 8px;
+  padding: 0 0 14px;
+  overflow-x: auto;
+}
+
+.alert-filter-chip {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: 18px;
+  border: 0;
+  background: #eff1f5;
+  font: 600 14px Inter, sans-serif;
+  color: #3d4356;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.alert-filter-chip.on {
+  background: var(--red);
+  color: #fff;
+}
+
+.official-alert-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 15px 14px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #eceef3;
+  box-shadow: 0 2px 9px rgba(20,25,45,0.04);
+  margin-bottom: 12px;
+}
+
+.official-alert-tile {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #fde8e9;
+  color: var(--red);
+}
+
+.official-alert-tile.blue {
+  background: #e7f0fe;
+  color: #2563eb;
+}
+
+/* 5. Emergency Family Check-in Card (emergency.html) */
+.sos-fam-card {
+  margin-top: 18px;
+  background: #fff;
+  border: 1px solid #eceef3;
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  box-shadow: 0 3px 12px rgba(20,25,45,0.05);
+}
+
+.btn-sos-safe {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 20px;
+  border: 0;
+  background: var(--green-bg);
+  color: #15803d;
+  font: 700 14px Inter, sans-serif;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+/* 6. After-Flood Guide Prototype Cards (after-flood-guide.html) */
+.af-guide-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #fff;
+  border: 1px solid #eceef3;
+  box-shadow: 0 2px 8px rgba(20,25,45,0.04);
+  margin-bottom: 11px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.af-guide-item:hover {
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+.af-guide-tile {
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 13px;
+  background: #fdebec;
+  display: grid;
+  place-items: center;
+  color: var(--red);
+}
+
+/* 7. Alert Preferences Prototype Switches (alert-preferences.html) */
+.pref-proto-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.pref-proto-ic {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  color: var(--red);
+}
+
+.pref-proto-tx {
+  flex: 1;
+}
+
+.pref-proto-ti {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.pref-proto-sb {
+  font-size: 13px;
+  color: var(--mut);
+  margin-top: 2px;
+}
+
+/* 8. First-Run Onboarding Splash (app-shell.html) */
+.onboard-card {
+  position: relative;
+  border-radius: 26px;
+  overflow: hidden;
+  max-width: 410px;
+  width: 100%;
+  min-height: 620px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 24px 80px rgba(18,23,43,0.38);
+  background: #f5ebe6;
+}
+
+.onboard-bg {
+  position: absolute;
+  inset: 0;
+  background: url("../assets/ui/onboarding-bg.jpg") center 58% / cover no-repeat;
+  z-index: 1;
+}
+
+.onboard-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg,
+    rgba(253,242,235,0.92) 0%,
+    rgba(253,242,235,0.75) 28%,
+    rgba(253,242,235,0.18) 54%,
+    rgba(30,20,22,0.28) 100%);
+  z-index: 2;
+}
+
+.onboard-top, .onboard-bottom {
+  position: relative;
+  z-index: 3;
+}
+
 .district-btn {
   background: #f8fafc;
   border: 1px solid var(--line);

@@ -163,6 +163,7 @@
 
               <!-- Time-to-water arrival banner (F2) -->
               <div id="estimate-container"></div>
+              <div class="hills" aria-hidden="true"></div>
             </div>
 
             <!-- User Action Reporting Buttons (PRD 8.2) -->
@@ -299,6 +300,7 @@
 
       <!-- =========================================
            TAB 2: WATER & RISK MAP (F3, F10)
+           Matches risk-map.html + map-screen.html + Live MapLibre PMTiles
            ========================================= -->
       <section class="view-section" id="view-map">
         <div class="map-view-wrap">
@@ -329,8 +331,120 @@
             </div>
           </div>
 
-          <!-- Interactive Map Container -->
-          <div id="map-container">
+          <!-- 1. RISK MAP VISUAL STAGE (1-to-1 risk-map.html) -->
+          <div class="risk-map-stage" id="risk-map-stage">
+            <div class="map-bg"></div>
+            <div class="river-lbl" id="risk-map-river-label">Beas River</div>
+            <div class="you-pin" id="risk-map-you-pin" title="Your location"></div>
+
+            <!-- Interactive Map Markers (Shelter, Flood Warning, Hospital) -->
+            <div class="mk" id="mk-shelter-1" style="left:21%; top:43%;" title="Nearest Safe Shelter">
+              <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#16a34a" stroke="#fff" stroke-width="2"/><path d="M11 17l7-5.5 7 5.5v6.5h-4.5v-4.5h-5v4.5H11z" fill="#fff"/></svg>
+            </div>
+            <div class="mk" id="mk-warn-1" style="left:60%; top:31%;" title="River Gauge & Flood Risk">
+              <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#ea222a" stroke="#fff" stroke-width="2"/><path d="M18 9l8 14H10z" fill="#fff"/><path d="M18 14v4.5M18 21v.5" stroke="#ea222a" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+            <div class="mk" id="mk-hosp-1" style="left:65%; top:44.5%;" title="Civil Hospital & Emergency Care">
+              <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#2563eb" stroke="#fff" stroke-width="2"/><path d="M18 11v10M13 16h10" stroke="#fff" stroke-width="3" stroke-linecap="round"/></svg>
+            </div>
+            <div class="mk" id="mk-shelter-2" style="left:75.5%; top:56.5%;" title="Verified Relief Camp">
+              <svg viewBox="0 0 36 44"><path d="M18 1C9.7 1 3 7.6 3 15.8 3 26.5 18 42 18 42s15-15.5 15-26.2C33 7.6 26.3 1 18 1z" fill="#16a34a" stroke="#fff" stroke-width="2"/><path d="M11 17l7-5.5 7 5.5v6.5h-4.5v-4.5h-5v4.5H11z" fill="#fff"/></svg>
+            </div>
+
+            <!-- Top Segmented Pill Bar + Layers Toggle (risk-map.html) -->
+            <div class="risk-map-top">
+              <div class="risk-seg" role="tablist">
+                <button class="on" id="btn-seg-flood-risk" type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2zm1 14h-2v2h2v-2zm0-6h-2v4h2v-4z"/></svg>
+                  <span>Flood Risk</span>
+                </button>
+                <button id="btn-seg-shelters" type="button">Shelters</button>
+                <button id="btn-seg-hospitals" type="button">Hospitals</button>
+              </div>
+              <button class="risk-lay-btn" id="btn-toggle-live-vector-map" aria-label="Toggle Interactive Vector Map" title="Toggle Interactive Offline Vector Map">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 12l9 5 9-5"/><path d="M3 16.5l9 5 9-5"/></svg>
+              </button>
+            </div>
+
+            <!-- Bottom Risk Info Card (risk-map.html) -->
+            <div class="risk-bottom-card">
+              <div class="row1">
+                <div>
+                  <div class="loc">
+                    <svg width="16" height="19" viewBox="0 0 24 28"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="#eb1e26"/><circle cx="12" cy="10" r="3.5" fill="#fff"/></svg>
+                    <span id="risk-map-loc-name">Taman, Jalandhar</span>
+                  </div>
+                  <div class="risk">Current risk level: <b id="risk-map-level">Low</b></div>
+                </div>
+                <button class="btn-map-details" id="btn-map-view-details" type="button">
+                  <span>View details</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg>
+                </button>
+              </div>
+              <div class="risk-legend">
+                <span><i class="risk-sw hi"></i>High risk</span>
+                <span><i class="risk-sw md"></i>Moderate risk</span>
+                <span><i class="risk-sw lo"></i>Low risk</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. TIME-TO-WATER & DEPTH DETAIL PANEL (1-to-1 map-screen.html) -->
+          <div class="map-detail-panel" id="map-detail-panel">
+            <div class="map-detail-hero">
+              <button class="map-detail-back" id="btn-map-detail-back" aria-label="Back to Risk Map">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#141826" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <!-- Route & Markers Overlay SVG from map-screen.html -->
+              <svg viewBox="0 0 400 295" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
+                <path d="M355 58 C 290 120, 235 150, 148 168" fill="none" stroke="#e8141c" stroke-width="4" stroke-dasharray="1 9" stroke-linecap="round"/>
+                <circle cx="148" cy="168" r="24" fill="#2f6fed" fill-opacity=".22"/>
+                <circle cx="148" cy="168" r="9" fill="#2f6fed" stroke="#fff" stroke-width="3"/>
+                <g transform="translate(230 92)">
+                  <path d="M16 0C7.2 0 0 7.2 0 16c0 11 16 26 16 26s16-15 16-26C32 7.2 24.8 0 16 0z" fill="#e8141c"/>
+                  <path d="M16 7l7 12H9L16 7z" fill="#fff"/>
+                </g>
+                <g transform="translate(332 30)">
+                  <path d="M18 0C8 0 0 8 0 18c0 12 18 28 18 28s18-16 18-28C36 8 28 0 18 0z" fill="#18a957"/>
+                  <path d="M10 18l8-6 8 6v7h-5v-5h-6v5h-5v-7z" fill="#fff"/>
+                </g>
+              </svg>
+            </div>
+            <div class="map-detail-sheet">
+              <div class="map-detail-stats">
+                <div class="map-detail-stat">
+                  <div class="label">Estimated time-to-water</div>
+                  <div class="val" id="map-detail-ttw">16–24 hours</div>
+                  <div class="sub" id="map-detail-river">From Beas River</div>
+                </div>
+                <div class="map-detail-stat">
+                  <div class="label">Likely depth</div>
+                  <div class="val" id="map-detail-depth">0.5–1.2 m</div>
+                  <div class="sub" id="map-detail-loc">At your location</div>
+                </div>
+              </div>
+              <div class="map-timeline-wrap">
+                <div class="map-timeline-track">
+                  <div class="map-timeline-fill" id="map-timeline-fill"></div>
+                  <div class="map-timeline-knob" id="map-timeline-knob"></div>
+                </div>
+                <div class="map-timeline-ticks" id="map-timeline-ticks">
+                  <span data-hr="0" data-pct="5">Now</span>
+                  <span data-hr="12" data-pct="25">12h</span>
+                  <span class="active" data-hr="24" data-pct="45">24h</span>
+                  <span data-hr="48" data-pct="72">48h</span>
+                  <span data-hr="72" data-pct="95">72h</span>
+                </div>
+              </div>
+              <div class="map-detail-info">
+                <svg width="18" height="18" style="flex:none;margin-top:2px" viewBox="0 0 24 24" fill="none" stroke="#6c7388" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M12 11v5" stroke-linecap="round"/></svg>
+                <div id="map-detail-note">Water flow and depth estimates are based on current CWC river levels, upstream discharge, and 72h rainfall forecast.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Interactive MapLibre Vector Map Container (Toggled via Layers button or used on Desktop) -->
+          <div id="map-container" style="display:none;">
             <div style="display:grid; place-items:center; height:100%; color:var(--body); padding:20px; text-align:center;">
               <div>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.6"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
@@ -408,14 +522,17 @@
           <div class="chat-app">
             <div class="chat-header" style="display:flex; align-items:center; justify-content:space-between;">
               <div style="display:flex; align-items:center; gap:10px;">
-                <img src="./icons/icon.svg" alt="Saathi Logo" class="brand-icon">
+                <img src="./assets/ui/saathi-logo.png" alt="Saathi Logo" class="brand-icon" style="width:38px; height:38px; border-radius:11px; object-fit:cover;">
                 <div>
                   <h2 style="font-size: 16px; font-weight: 700;" data-i18n="ask.title">Ask Saathi</h2>
                   <p style="font-size: 12px; color: var(--muted);" data-i18n="ask.header_sub">Offline Disaster & Safety Guide</p>
                 </div>
               </div>
-              <div id="saathi-model-status-indicator">
+              <div id="saathi-model-status-indicator" style="display:flex; align-items:center; gap:8px;">
                 <span class="plugin-badge" id="saathi-mode-badge" style="font-size:11px;">M5 Offline Core</span>
+                <button class="risk-lay-btn" id="btn-saathi-header-download" title="Offline AI & Language Packs" aria-label="Download offline guide" style="width:36px; height:36px; border:1px solid var(--line); box-shadow:none;">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7.5 11.5L12 16l4.5-4.5M5 19h14"/></svg>
+                </button>
               </div>
             </div>
 
@@ -464,12 +581,21 @@
       </section>
 
       <!-- =========================================
-           TAB 4: OFFICIAL ALERTS (F4)
+           TAB 4: OFFICIAL ALERTS (F4 - official-alerts.html)
            ========================================= -->
       <section class="view-section" id="view-alerts">
         <div style="padding: 20px;">
           <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 4px;" data-i18n="alerts.heading">Official Bulletins</h2>
-          <p style="font-size: 14px; color: var(--mut); margin-bottom: 16px;" data-i18n="alerts.subheading">NDMA SACHET & Punjab State Disaster Management Bulletins (Verbatim)</p>
+          <p style="font-size: 14px; color: var(--mut); margin-bottom: 12px;" data-i18n="alerts.subheading">NDMA SACHET & Punjab State Disaster Management Bulletins (Verbatim)</p>
+
+          <!-- Filter Chips (1-to-1 official-alerts.html) -->
+          <div class="alerts-filter-chips" id="alerts-filter-chips">
+            <button class="alert-filter-chip on" data-filter="all" type="button">All</button>
+            <button class="alert-filter-chip" data-filter="flood" type="button">Flood</button>
+            <button class="alert-filter-chip" data-filter="dam" type="button">Dam Release</button>
+            <button class="alert-filter-chip" data-filter="rain" type="button">Rain</button>
+          </div>
+
           <div id="alerts-container">
             <p data-i18n="alerts.loading">Loading official bulletins...</p>
           </div>
@@ -539,6 +665,17 @@
                 <div style="font-size: 13px; color: var(--mut);" data-i18n="more.downloads_sub">Offline maps, AI model, language packs, python engine</div>
               </div>
             </button>
+
+            <!-- Language & Location Onboarding Splash Link (app-shell.html) -->
+            <button class="action-report-btn" style="flex-direction: row; justify-content: flex-start; padding: 16px;" id="nav-to-onboarding">
+              <div class="metric-icon" style="background:#fef3c7; color:#d97706; width:40px; height:40px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <div style="text-align: left; margin-left: 10px;">
+                <strong style="font-size: 16px;">Language & Location Setup</strong>
+                <div style="font-size: 13px; color: var(--mut);">Open FloodSaathi welcome splash & language selector</div>
+              </div>
+            </button>
           </div>
 
           <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 12px; color: var(--mut); line-height: 1.5;" data-i18n="more.attribution">
@@ -549,20 +686,67 @@
       </section>
 
       <!-- =========================================
-           SUB-VIEW: EVACUATION SHELTERS (F5)
+           SUB-VIEW: EVACUATION SHELTERS (F5 - shelter-responsive.html)
            ========================================= -->
       <section class="view-section" id="view-shelters">
-        <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
-          <button class="lang-btn" id="btn-back-from-shelters" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="shelters.title">Nearest Safe Shelters</h2>
+        <div style="padding: 12px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; justify-content:space-between; gap:12px;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <button class="lang-btn" id="btn-back-from-shelters" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
+            <h2 style="font-size: 18px; font-weight: 700;" data-i18n="shelters.title">Nearest Safe Shelters</h2>
+          </div>
+          <span class="plugin-badge active" style="font-size:11px;">Safe Route Active</span>
         </div>
+
+        <!-- Safe Route Map Hero (1-to-1 shelter-responsive.html) -->
+        <div class="shelter-hero-pane">
+          <svg viewBox="0 0 400 260" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;">
+            <polyline points="118,175 142,165 162,165 186,138 225,134 252,102 272,95 289,78"
+                      fill="none" stroke="#1e66f5" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" opacity=".28"/>
+            <polyline points="118,175 142,165 162,165 186,138 225,134 252,102 272,95 289,78"
+                      fill="none" stroke="#1e66f5" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="118" cy="175" r="9" fill="#1e66f5" stroke="#fff" stroke-width="3"/>
+          </svg>
+          <span class="shelter-safe-badge">Safe Route</span>
+        </div>
+
+        <!-- Featured Nearest Safe Shelter Sheet (1-to-1 shelter-responsive.html) -->
+        <div class="shelter-featured-sheet" id="featured-shelter-sheet">
+          <div style="font-size:13px; color:var(--mut); font-weight:600; margin-bottom:2px;">Nearest Safe Shelter</div>
+          <div class="shelter-featured-head">
+            <div>
+              <h3 id="featured-shelter-name" style="font-size:20px; font-weight:800; color:var(--navy); line-height:1.2;">Govt. Senior Secondary School, Taman</h3>
+              <div id="featured-shelter-dist" style="font-size:14px; color:var(--mut); font-weight:500; margin-top:4px;">2.1 km away &middot; 25 mins walk</div>
+            </div>
+            <img src="./assets/ui/shelter-thumb.jpg" alt="Shelter Building" class="shelter-featured-thumb">
+          </div>
+          <ul class="shelter-feat-list">
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.2"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 3-4.5 5.5-4.5s4.9 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.5"/><path d="M15 19c.4-2.2 2-3.5 4-3.5 1.2 0 2.3.5 3 1.4"/></svg>
+              <span>Capacity: <b id="featured-shelter-cap">350 people</b></span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="9" fill="#e8f7ee"/><path d="M8.5 12.3l2.4 2.4 4.8-5" stroke="#16a34a"/></svg>
+              <span id="featured-shelter-amenities">Drinking water, toilets, medical aid</span>
+            </li>
+            <li>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><circle cx="12" cy="12" r="9" fill="#e8f7ee"/><path d="M8.5 12.3l2.4 2.4 4.8-5" stroke="#16a34a"/></svg>
+              <span>Accessible for elderly</span>
+            </li>
+          </ul>
+          <a href="https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=30.901,75.857;31.326,75.576" target="_blank" rel="noopener" class="btn-shelter-cta" id="btn-featured-shelter-directions">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 2l7.5 18.5-7.5-4-7.5 4L12 2z"/></svg>
+            <span>Get Directions</span>
+          </a>
+        </div>
+
+        <div style="padding: 8px 20px 0; font-size: 13px; font-weight: 700; color: var(--mut); text-transform: uppercase;">All Verified Relief Centers Nearby</div>
         <div class="shelter-list-wrap" id="shelters-list-container">
           <p data-i18n="shelters.finding">Finding verified relief centers...</p>
         </div>
       </section>
 
       <!-- =========================================
-           SUB-VIEW: EMERGENCY SOS & CONTACTS (F7)
+           SUB-VIEW: EMERGENCY SOS & CONTACTS (F7 - emergency.html)
            ========================================= -->
       <section class="view-section" id="view-sos">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
@@ -582,6 +766,18 @@
           <div class="sos-quick-actions">
             <a href="tel:112" class="btn-sos-call" data-i18n="sos.call_112_btn">Call 112</a>
             <button class="btn-sos-sms" id="btn-sos-send-sms" data-i18n="sos.send_sms_btn">Send SMS</button>
+          </div>
+
+          <!-- Family Check-in Card (1-to-1 emergency.html) -->
+          <div class="sos-fam-card">
+            <div>
+              <div style="font-size:16px; font-weight:700; color:var(--navy);">Family Check-in</div>
+              <div style="font-size:13px; color:var(--mut); margin-top:2px;">Let your family know your status</div>
+            </div>
+            <button class="btn-sos-safe" id="btn-family-im-safe" type="button">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.2 4.2L19 7"/></svg>
+              <span>I'm Safe</span>
+            </button>
           </div>
 
           <div style="margin-top: 24px;">
@@ -618,28 +814,89 @@
       </section>
 
       <!-- =========================================
-           SUB-VIEW: ALERT PREFERENCES (F14)
+           SUB-VIEW: ALERT PREFERENCES (F14 - alert-preferences.html)
            ========================================= -->
       <section class="view-section" id="view-preferences">
         <div style="padding: 16px 20px 8px 20px; border-bottom: 1px solid var(--line); display:flex; align-items:center; gap:12px;">
           <button class="lang-btn" id="btn-back-from-preferences" style="width: auto; padding: 0 10px;" data-i18n="common.back">&larr; Back</button>
-          <h2 style="font-size: 18px; font-weight: 700;" data-i18n="preferences.title">Alert Preferences</h2>
+          <div>
+            <h2 style="font-size: 18px; font-weight: 700;" data-i18n="preferences.title">Alert Preferences</h2>
+            <p style="font-size: 12.5px; color: var(--mut);">Choose the alerts you want to receive.</p>
+          </div>
         </div>
-        <div style="padding: 20px; overflow-y: auto;">
-          <div style="display: flex; flex-direction: column; gap: 16px;">
-            <div>
-              <label style="font-size: 14px; font-weight: 600;"><span data-i18n="preferences.radius_label">Alert Distance Radius:</span> <span id="pref-radius-display">25 km</span></label>
-              <input type="range" id="pref-radius-slider" min="5" max="50" step="5" value="25" style="width: 100%; margin-top: 8px;">
+        <div style="padding: 16px 20px 24px; overflow-y: auto;">
+          <div style="display: flex; flex-direction: column;">
+            <!-- Row 1: Flood Warnings (alert-preferences.html) -->
+            <div class="pref-proto-row">
+              <div class="pref-proto-ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3.5L2.6 20h18.8L12 3.5z" stroke-linejoin="round"/><path d="M12 9.5v5M12 17.2v.4" stroke-linecap="round"/></svg>
+              </div>
+              <div class="pref-proto-tx">
+                <div class="pref-proto-ti">Flood Warnings</div>
+                <div class="pref-proto-sb">Rising water levels &amp; flood risk</div>
+              </div>
+              <input type="checkbox" id="pref-flood-warnings" checked style="width: 20px; height: 20px; accent-color: var(--red);">
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line);">
-              <span data-i18n="preferences.siren_label">Critical Audio Siren for Danger</span>
-              <input type="checkbox" id="pref-audio-siren" checked style="width: 20px; height: 20px;">
+            <!-- Row 2: Dam Release Updates (alert-preferences.html) -->
+            <div class="pref-proto-row">
+              <div class="pref-proto-ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 9c2-1.8 4-1.8 6 0s4 1.8 6 0 4-1.8 6 0"/><path d="M3 14c2-1.8 4-1.8 6 0s4 1.8 6 0 4-1.8 6 0"/><path d="M3 19c2-1.8 4-1.8 6 0s4 1.8 6 0 4-1.8 6 0"/></svg>
+              </div>
+              <div class="pref-proto-tx">
+                <div class="pref-proto-ti" data-i18n="preferences.dam_label">Dam Release Bulletins</div>
+                <div class="pref-proto-sb">Alerts on water release from dams</div>
+              </div>
+              <input type="checkbox" id="pref-dam-release" checked style="width: 20px; height: 20px; accent-color: var(--red);">
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line);">
-              <span data-i18n="preferences.dam_label">Dam Release Bulletins</span>
-              <input type="checkbox" id="pref-dam-release" checked style="width: 20px; height: 20px;">
+            <!-- Row 3: Heavy Rain Alerts (alert-preferences.html) -->
+            <div class="pref-proto-row">
+              <div class="pref-proto-ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M7 15.5a4 4 0 01-.4-8 5.2 5.2 0 019.9 1.5 3.3 3.3 0 01-.5 6.5H7z"/><path d="M8.5 18l-1 2.2M12.5 18l-1 2.2M16.5 18l-1 2.2"/></svg>
+              </div>
+              <div class="pref-proto-tx">
+                <div class="pref-proto-ti">Heavy Rain Alerts</div>
+                <div class="pref-proto-sb">Forecast of heavy rainfall</div>
+              </div>
+              <input type="checkbox" id="pref-heavy-rain" checked style="width: 20px; height: 20px; accent-color: var(--red);">
+            </div>
+
+            <!-- Row 4: Critical Audio Siren / Weather Warnings -->
+            <div class="pref-proto-row">
+              <div class="pref-proto-ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.3M12 19.2v2.3M2.5 12h2.3M19.2 12h2.3M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+              </div>
+              <div class="pref-proto-tx">
+                <div class="pref-proto-ti" data-i18n="preferences.siren_label">Critical Audio Siren for Danger</div>
+                <div class="pref-proto-sb">Storms, high winds &amp; danger alerts</div>
+              </div>
+              <input type="checkbox" id="pref-audio-siren" checked style="width: 20px; height: 20px; accent-color: var(--red);">
+            </div>
+
+            <!-- Row 5: Alert Radius Slider (alert-preferences.html) -->
+            <div style="padding: 16px 4px; border-bottom: 1px solid var(--line);">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                <label for="pref-radius-slider" style="font-size: 16px; font-weight: 700; color: var(--navy);" data-i18n="preferences.radius_label">Alert Distance Radius:</label>
+                <span id="pref-radius-display" style="font-size: 16px; font-weight: 700; color: var(--red);">25 km</span>
+              </div>
+              <div style="font-size: 13px; color: var(--mut); margin-top: 2px;">Get alerts within this distance</div>
+              <input type="range" id="pref-radius-slider" min="5" max="50" step="5" value="25" style="width: 100%; margin-top: 12px; accent-color: var(--red);">
+              <div style="display:flex; justify-content:space-between; font-size:12.5px; color:var(--mut); font-weight:600; margin-top:6px;">
+                <span>5 km</span><span>10 km</span><span>25 km</span><span>50 km</span>
+              </div>
+            </div>
+
+            <!-- Row 6: Quiet Hours (alert-preferences.html) -->
+            <div class="pref-proto-row">
+              <div class="pref-proto-ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="pref-proto-tx">
+                <div class="pref-proto-ti">Quiet Hours</div>
+                <div class="pref-proto-sb">Mute non-critical alerts at night (10:00 PM – 6:00 AM)</div>
+              </div>
+              <input type="checkbox" id="pref-quiet-hours" style="width: 20px; height: 20px; accent-color: var(--red);">
             </div>
 
             <!-- Google Cloud Translation API Configuration (R3) -->
@@ -949,96 +1206,127 @@ python relay/run.py --out app/data/latest/</pre>
   </div>
 
   <!-- =============================================
-       FIRST-RUN LANGUAGE PICKER MODAL (auto-shown)
+       FIRST-RUN ONBOARDING SPLASH MODAL (1-to-1 app-shell.html)
        ============================================= -->
   <div id="first-run-modal" role="dialog" aria-modal="true" aria-labelledby="frm-title" style="
     display:none; position:fixed; inset:0; z-index:9999;
     background:rgba(18,23,43,0.72); backdrop-filter:blur(4px);
-    justify-content:center; align-items:center; padding:20px;
+    justify-content:center; align-items:center; padding:16px;
   ">
-    <div style="
-      background:#fff; border-radius:24px; max-width:400px; width:100%;
-      box-shadow:0 24px 80px rgba(18,23,43,0.28); overflow:hidden;
-    ">
-      <!-- Header -->
-      <div style="background:var(--red); padding:24px 24px 20px; text-align:center;">
-        <img src="./icons/icon.svg" alt="FloodSaathi" style="width:52px; height:52px; border-radius:14px; box-shadow:0 4px 14px rgba(0,0,0,0.25); margin-bottom:12px;">
-        <div style="font-size:22px; font-weight:800; color:#fff; letter-spacing:-0.02em;" data-i18n="first_run.welcome">Welcome to FloodSaathi</div>
-        <div style="font-size:13px; color:rgba(255,255,255,0.82); margin-top:4px;">ਫਲੱਡਸਾਥੀ ਵਿੱਚ ਜੀ ਆਇਆਂ &nbsp;·&nbsp; फ्लडसाथी में आपका स्वागत है</div>
+    <div class="onboard-card">
+      <div class="onboard-bg"></div>
+      <div class="onboard-wash"></div>
+
+      <!-- Top Brand Hero (app-shell.html) -->
+      <div class="onboard-top" style="padding:32px 24px 12px; text-align:center;">
+        <img src="./assets/ui/saathi-logo.png" alt="FloodSaathi" style="width:68px; height:68px; border-radius:18px; box-shadow:0 8px 22px rgba(210,30,36,0.28); margin-bottom:10px; object-fit:cover;">
+        <div style="font-size:32px; font-weight:800; letter-spacing:-0.02em; color:#181c2e;">
+          Flood<span style="color:var(--red);">Saathi</span>
+        </div>
+        <div style="font-size:12px; color:#5a4d50; margin-top:2px;" data-i18n="first_run.welcome">Welcome to FloodSaathi</div>
+        <p style="margin-top:6px; font-size:14.5px; line-height:1.38; color:#2b2f42; font-weight:500;">
+          Early warnings. Safer families.<br>Stronger communities.
+        </p>
       </div>
 
-      <!-- Body -->
-      <div style="padding:24px;">
-        <p id="frm-title" style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:6px;" data-i18n="first_run.choose_lang">Choose your language</p>
-        <p style="font-size:12.5px; color:var(--mut); margin-bottom:18px; line-height:1.5;" data-i18n="first_run.desc">
-          Select your preferred language. Font and translation packs will be downloaded automatically if you're online.
-        </p>
+      <!-- Bottom Glass Card (app-shell.html) -->
+      <div class="onboard-bottom" style="padding:0 16px 18px;">
+        <div style="
+          background:rgba(255,255,255,0.94); backdrop-filter:blur(12px);
+          border-radius:22px; padding:18px 16px 16px;
+          box-shadow:0 12px 34px rgba(20,16,22,0.18); border:1px solid rgba(255,255,255,0.85);
+        ">
+          <p id="frm-title" style="font-size:15px; font-weight:700; color:var(--navy); text-align:center; margin-bottom:6px;" data-i18n="first_run.choose_lang">Select your language</p>
+          <p style="font-size:11.5px; color:var(--mut); text-align:center; margin-bottom:12px; line-height:1.4;" data-i18n="first_run.desc">
+            Select your preferred language. Font and translation packs will be downloaded automatically if you're online.
+          </p>
 
-        <!-- Language Options -->
-        <div style="display:flex; flex-direction:column; gap:10px;" id="frm-lang-options">
-          <!-- English -->
-          <label id="frm-lang-en" style="
-            display:flex; align-items:center; gap:14px; padding:14px 16px;
-            border:2px solid var(--red); border-radius:14px; cursor:pointer;
-            background:#fff9f9; transition:all 0.15s;
-          ">
-            <input type="radio" name="frm-lang" value="en" checked style="width:20px;height:20px;accent-color:var(--red);">
-            <div>
-              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇬🇧 English</div>
-              <div style="font-size:12px; color:var(--mut);" data-i18n="downloads.lang_en_sub">Built-in · No download needed</div>
-            </div>
-            <span style="margin-left:auto; font-size:11px; font-weight:700; background:var(--green); color:#fff; padding:3px 8px; border-radius:6px;" data-i18n="downloads.lang_en_badge">Default</span>
-          </label>
+          <!-- Language Options (3-pill row matching app-shell.html while keeping label IDs & radio inputs) -->
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;" id="frm-lang-options">
+            <!-- English -->
+            <label id="frm-lang-en" style="
+              display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:10px 6px;
+              border:2px solid var(--red); border-radius:16px; cursor:pointer;
+              background:#fff9f9; transition:all 0.15s; text-align:center;
+            ">
+              <input type="radio" name="frm-lang" value="en" checked style="display:none;">
+              <div style="font-size:13.5px; font-weight:700; color:var(--navy);">English</div>
+              <span style="font-size:10px; font-weight:700; color:var(--green);" data-i18n="downloads.lang_en_badge">Default</span>
+              <span style="display:none;" data-i18n="downloads.lang_en_sub">Built-in</span>
+            </label>
 
-          <!-- Hindi -->
-          <label id="frm-lang-hi" style="
-            display:flex; align-items:center; gap:14px; padding:14px 16px;
-            border:2px solid var(--line); border-radius:14px; cursor:pointer;
-            background:#f8fafc; transition:all 0.15s;
-          ">
-            <input type="radio" name="frm-lang" value="hi" style="width:20px;height:20px;accent-color:var(--red);">
-            <div>
-              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇮🇳 हिन्दी (Hindi)</div>
-              <div style="font-size:12px; color:var(--mut);">~3.9 MB · Noto Sans Devanagari</div>
-            </div>
-          </label>
+            <!-- Punjabi -->
+            <label id="frm-lang-pa" style="
+              display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:10px 6px;
+              border:2px solid var(--line); border-radius:16px; cursor:pointer;
+              background:#f8fafc; transition:all 0.15s; text-align:center;
+            ">
+              <input type="radio" name="frm-lang" value="pa" style="display:none;">
+              <div style="font-size:13.5px; font-weight:700; color:var(--navy);">ਪੰਜਾਬੀ</div>
+              <span style="font-size:10px; color:var(--mut);">Punjabi</span>
+            </label>
 
-          <!-- Punjabi -->
-          <label id="frm-lang-pa" style="
-            display:flex; align-items:center; gap:14px; padding:14px 16px;
-            border:2px solid var(--line); border-radius:14px; cursor:pointer;
-            background:#f8fafc; transition:all 0.15s;
-          ">
-            <input type="radio" name="frm-lang" value="pa" style="width:20px;height:20px;accent-color:var(--red);">
-            <div>
-              <div style="font-size:15px; font-weight:700; color:var(--navy);">🇮🇳 ਪੰਜਾਬੀ (Punjabi)</div>
-              <div style="font-size:12px; color:var(--mut);">~4.2 MB · Noto Sans Gurmukhi</div>
-            </div>
-          </label>
-        </div>
-
-        <!-- Download progress bar (shown during pack download) -->
-        <div id="frm-progress-wrap" style="display:none; margin-top:16px;">
-          <div style="background:#e9ecf1; border-radius:8px; height:8px; overflow:hidden;">
-            <div id="frm-progress-fill" style="background:var(--red); height:100%; width:0%; border-radius:8px; transition:width 0.3s;"></div>
+            <!-- Hindi -->
+            <label id="frm-lang-hi" style="
+              display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; padding:10px 6px;
+              border:2px solid var(--line); border-radius:16px; cursor:pointer;
+              background:#f8fafc; transition:all 0.15s; text-align:center;
+            ">
+              <input type="radio" name="frm-lang" value="hi" style="display:none;">
+              <div style="font-size:13.5px; font-weight:700; color:var(--navy);">हिन्दी</div>
+              <span style="font-size:10px; color:var(--mut);">Hindi</span>
+            </label>
           </div>
-          <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:12px; color:var(--mut);">
-            <span id="frm-progress-msg">Downloading language pack…</span>
-            <span id="frm-progress-pct">0%</span>
+
+          <!-- Location Choice (app-shell.html) -->
+          <div style="height:1px; background:#e8eaef; margin:14px 0 12px;"></div>
+          <div style="font-size:14.5px; font-weight:700; color:var(--navy); text-align:center; margin-bottom:10px;">Enable location for local alerts</div>
+
+          <button type="button" id="frm-use-gps-btn" style="
+            width:100%; display:flex; align-items:center; gap:11px; padding:11px 13px;
+            border-radius:14px; border:1px solid #e6e8ee; background:#fff; text-align:left; cursor:pointer;
+          ">
+            <div style="width:32px; height:32px; border-radius:50%; background:#fde8e9; display:grid; place-items:center; flex:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="var(--red)"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>
+            </div>
+            <div style="flex:1;">
+              <div style="font-size:13.5px; font-weight:700; color:var(--navy);">Use my current location</div>
+              <div style="font-size:11.5px; color:var(--mut);">Required for accurate flood alerts</div>
+            </div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa0b0" stroke-width="2.2"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+
+          <button type="button" id="frm-select-manual-btn" style="
+            margin-top:8px; width:100%; height:36px; border:0; background:transparent;
+            font:600 13px Inter, sans-serif; color:#2b3145; display:inline-flex; align-items:center; justify-content:center; gap:6px; cursor:pointer;
+          ">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            <span>Select manually</span>
+          </button>
+
+          <!-- Download progress bar (shown during pack download) -->
+          <div id="frm-progress-wrap" style="display:none; margin-top:10px;">
+            <div style="background:#e9ecf1; border-radius:8px; height:8px; overflow:hidden;">
+              <div id="frm-progress-fill" style="background:var(--red); height:100%; width:0%; border-radius:8px; transition:width 0.3s;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:12px; color:var(--mut);">
+              <span id="frm-progress-msg">Downloading language pack…</span>
+              <span id="frm-progress-pct">0%</span>
+            </div>
           </div>
+
+          <!-- Continue CTA Button -->
+          <button id="frm-continue-btn" style="
+            margin-top:12px; width:100%; min-height:48px; font-size:15.5px; font-weight:800;
+            background:var(--red); color:#fff; border:none; border-radius:24px;
+            cursor:pointer; letter-spacing:0.01em;
+            box-shadow:0 6px 18px rgba(235,28,36,0.38); transition:background 0.15s;
+          " data-i18n="first_run.get_started">Get Started →</button>
+
+          <p style="font-size:11px; color:var(--mut); text-align:center; margin-top:8px; line-height:1.3;" data-i18n="first_run.footer">
+            You can change language anytime in Settings. App works 100% offline after setup.
+          </p>
         </div>
-
-        <!-- CTA Button -->
-        <button id="frm-continue-btn" style="
-          margin-top:20px; width:100%; min-height:52px; font-size:16px; font-weight:800;
-          background:var(--red); color:#fff; border:none; border-radius:14px;
-          cursor:pointer; letter-spacing:0.01em;
-          box-shadow:0 4px 16px rgba(239,28,36,0.28); transition:background 0.15s;
-        " data-i18n="first_run.get_started">Get Started →</button>
-
-        <p style="font-size:11.5px; color:var(--mut); text-align:center; margin-top:10px; line-height:1.4;" data-i18n="first_run.footer">
-          You can change language anytime in Settings. App works 100% offline after setup.
-        </p>
       </div>
     </div>
   </div>

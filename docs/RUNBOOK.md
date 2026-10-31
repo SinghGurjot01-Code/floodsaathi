@@ -23,3 +23,4 @@
 - Cloudflare Pages (PWA): https://floodsaathi.pages.dev/
 - Relay Latest Data: https://floodsaathi.pages.dev/data/latest/punjab.json
 - GitHub Actions CI: https://github.com/SinghGurjot01-Code/floodsaathi/actions
+- Local Neural & Whisper STT Server: `.\.venv\Scripts\python.exe server.py` -> http://localhost:8080/

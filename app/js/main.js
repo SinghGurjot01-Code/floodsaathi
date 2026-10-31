@@ -168,6 +168,10 @@ function setupNavigation() {
   document.getElementById("nav-to-after-flood")?.addEventListener("click", () => switchTab("after-flood"));
   document.getElementById("nav-to-preferences")?.addEventListener("click", () => switchTab("preferences"));
   document.getElementById("nav-to-downloads")?.addEventListener("click", () => switchTab("downloads"));
+  document.getElementById("nav-to-onboarding")?.addEventListener("click", () => {
+    const modal = document.getElementById("first-run-modal");
+    if (modal) modal.style.display = "flex";
+  });
 
   // Back buttons on sub-views
   document.getElementById("btn-back-from-shelters")?.addEventListener("click", () => switchTab("more"));
@@ -175,6 +179,91 @@ function setupNavigation() {
   document.getElementById("btn-back-from-after-flood")?.addEventListener("click", () => switchTab("more"));
   document.getElementById("btn-back-from-preferences")?.addEventListener("click", () => switchTab("more"));
   document.getElementById("btn-back-from-downloads")?.addEventListener("click", () => switchTab("more"));
+
+  // Risk Map & Detail Map Interconnections (risk-map.html <-> map-screen.html <-> shelter-responsive.html)
+  const riskStage = document.getElementById("risk-map-stage");
+  const detailPanel = document.getElementById("map-detail-panel");
+  const mapContainer = document.getElementById("map-container");
+  const btnToggleVector = document.getElementById("btn-toggle-live-vector-map");
+
+  document.getElementById("btn-map-view-details")?.addEventListener("click", () => {
+    if (riskStage) riskStage.style.display = "none";
+    if (mapContainer) mapContainer.style.display = "none";
+    if (detailPanel) detailPanel.classList.add("active");
+    updateMapDetailScreen(currentSnapshot);
+  });
+
+  document.getElementById("btn-map-detail-back")?.addEventListener("click", () => {
+    if (detailPanel) detailPanel.classList.remove("active");
+    if (mapContainer) mapContainer.style.display = "none";
+    if (riskStage) riskStage.style.display = "flex";
+  });
+
+  // Segmented pills on Risk Map
+  document.getElementById("btn-seg-flood-risk")?.addEventListener("click", (e) => {
+    document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
+    e.currentTarget.classList.add("on");
+    document.getElementById("mk-warn-1")?.style.setProperty("display", "block");
+  });
+
+  document.getElementById("btn-seg-shelters")?.addEventListener("click", () => {
+    switchTab("shelters");
+  });
+
+  document.getElementById("btn-seg-hospitals")?.addEventListener("click", (e) => {
+    document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
+    e.currentTarget.classList.add("on");
+    const hospMk = document.getElementById("mk-hosp-1");
+    if (hospMk) {
+      hospMk.style.transform = "translate(-50%, -115%) scale(1.2)";
+      setTimeout(() => { hospMk.style.transform = ""; }, 1200);
+    }
+  });
+
+  // Markers on Risk Map
+  document.getElementById("mk-shelter-1")?.addEventListener("click", () => switchTab("shelters"));
+  document.getElementById("mk-shelter-2")?.addEventListener("click", () => switchTab("shelters"));
+  document.getElementById("mk-warn-1")?.addEventListener("click", () => {
+    document.getElementById("btn-map-view-details")?.click();
+  });
+  document.getElementById("mk-hosp-1")?.addEventListener("click", () => {
+    alert(`Civil Hospital Emergency Helpline (${userProfile.district || "Punjab"}): Dial 108 (Ambulance) or 112 (Emergency).`);
+  });
+
+  // Layers button toggles live MapLibre PMTiles vector map
+  btnToggleVector?.addEventListener("click", () => {
+    if (!mapContainer || !riskStage) return;
+    const isVectorShowing = mapContainer.style.display !== "none";
+    if (isVectorShowing) {
+      mapContainer.style.display = "none";
+      riskStage.style.display = "flex";
+      btnToggleVector.classList.remove("active");
+    } else {
+      riskStage.style.display = "none";
+      if (detailPanel) detailPanel.classList.remove("active");
+      mapContainer.style.display = "block";
+      btnToggleVector.classList.add("active");
+      renderMapView();
+    }
+  });
+
+  // Timeline ticks on Time-to-Water detail screen (map-screen.html)
+  const ticksWrap = document.getElementById("map-timeline-ticks");
+  if (ticksWrap) {
+    ticksWrap.querySelectorAll("span").forEach((tick) => {
+      tick.addEventListener("click", () => {
+        ticksWrap.querySelectorAll("span").forEach(s => s.classList.remove("active"));
+        tick.classList.add("active");
+        const pct = tick.getAttribute("data-pct") || "37";
+        const hr = Number(tick.getAttribute("data-hr") || 24);
+        const fill = document.getElementById("map-timeline-fill");
+        const knob = document.getElementById("map-timeline-knob");
+        if (fill) fill.style.width = `${pct}%`;
+        if (knob) knob.style.left = `${pct}%`;
+        updateMapDetailHorizon(hr);
+      });
+    });
+  }
 }
 
 export function switchTab(tab) {
@@ -492,6 +581,88 @@ function renderSnapshotData(snapshot) {
 
   // 8. Update arrival time estimate banner (F2)
   renderEstimateBanner(snapshot);
+
+  // 9. Update Risk Map & Time-to-Water Detail Map (risk-map.html & map-screen.html)
+  updateRiskMapAndDetailUI(snapshot, g, distKm, statusKey);
+}
+
+function updateRiskMapAndDetailUI(snapshot, g, distKm, statusKey) {
+  const locEl = document.getElementById("risk-map-loc-name");
+  const levelEl = document.getElementById("risk-map-level");
+  const riverLbl = document.getElementById("risk-map-river-label");
+
+  if (locEl) {
+    locEl.textContent = userProfile.village_name || `${userProfile.district || "Taman"}, Punjab`;
+  }
+  if (riverLbl && g?.river) {
+    riverLbl.textContent = g.river;
+  }
+  if (levelEl) {
+    if (statusKey === "danger") {
+      levelEl.textContent = "High";
+      levelEl.className = "danger";
+    } else if (statusKey === "warning" || statusKey === "watch") {
+      levelEl.textContent = "Moderate";
+      levelEl.className = "warn";
+    } else {
+      levelEl.textContent = "Low";
+      levelEl.className = "";
+    }
+  }
+  updateMapDetailScreen(snapshot);
+}
+
+function updateMapDetailScreen(snapshot) {
+  const ttwEl = document.getElementById("map-detail-ttw");
+  const riverEl = document.getElementById("map-detail-river");
+  const depthEl = document.getElementById("map-detail-depth");
+  const locEl = document.getElementById("map-detail-loc");
+
+  const gauges = snapshot?.gauges || [];
+  const nearestResult = findNearestGauge(userProfile.lat, userProfile.lon, gauges);
+  const g = nearestResult?.gauge || (gauges.length > 0 ? gauges[0] : null);
+  const distKm = nearestResult ? nearestResult.distanceKm : 15;
+
+  if (riverEl) {
+    riverEl.textContent = `From ${g?.river || "Beas River"} (${distKm.toFixed(1)} km)`;
+  }
+  if (locEl) {
+    locEl.textContent = `At ${userProfile.village_name || "your location"}`;
+  }
+
+  const curLvl = g ? (g.level_m ?? g.current_level_m ?? 0) : 0;
+  const warnLvl = g ? (g.warning_m ?? g.warning_level_m ?? 0) : 0;
+  const dangLvl = g ? (g.danger_m ?? g.danger_level_m ?? 0) : 0;
+
+  if (g && warnLvl > 0 && curLvl >= warnLvl) {
+    const lowH = Math.max(1, Math.round((distKm * 1.3) / 8.1));
+    const highH = Math.max(lowH + 2, Math.round((distKm * 1.3) / 4.5));
+    if (ttwEl) ttwEl.textContent = `${lowH}–${highH} hours`;
+    if (depthEl) depthEl.textContent = curLvl >= dangLvl ? "0.5–1.5 m" : "< 0.5 m";
+  } else {
+    const estH = Math.max(12, Math.round((distKm * 1.3) / 6.2));
+    if (ttwEl) ttwEl.textContent = `>${estH} hours`;
+    if (depthEl) depthEl.textContent = "Likely below ground";
+  }
+}
+
+function updateMapDetailHorizon(horizonHours) {
+  const noteEl = document.getElementById("map-detail-note");
+  const gauges = currentSnapshot?.gauges || [];
+  const nearestResult = findNearestGauge(userProfile.lat, userProfile.lon, gauges);
+  const g = nearestResult?.gauge || (gauges.length > 0 ? gauges[0] : null);
+  const stnName = g?.name || "Harike Barrage";
+  const curLvl = g ? (g.level_m ?? g.current_level_m ?? 0) : 208.4;
+  const trend = g ? (g.trend_m_per_h ?? g.trend_m_per_hr ?? 0) : 0;
+  const projected = (curLvl + trend * horizonHours).toFixed(2);
+
+  if (noteEl) {
+    if (horizonHours === 0) {
+      noteEl.textContent = `Live Now: ${stnName} is at ${curLvl} m (trend ${trend >= 0 ? "+" : ""}${trend} m/h). Water likely to stay below your ground level.`;
+    } else {
+      noteEl.textContent = `+${horizonHours}h Projection: Based on current trend (${trend >= 0 ? "+" : ""}${trend} m/h), ${stnName} projects to ~${projected} m (estimated).`;
+    }
+  }
 }
 
 function renderEstimateBanner(snapshot) {
@@ -674,8 +845,8 @@ function setupAskSaathi() {
     });
   });
 
-  // Download Model shortcut button on Ask Saathi warning bar
-  document.getElementById("btn-saathi-download-model")?.addEventListener("click", () => {
+  // Download Model shortcut button on Ask Saathi warning bar & header
+  const goToSlmDownload = () => {
     switchTab("downloads");
     setTimeout(() => {
       const slmCard = document.querySelector("#view-downloads .plugins-grid .plugin-card:nth-child(2)");
@@ -685,7 +856,9 @@ function setupAskSaathi() {
         setTimeout(() => { slmCard.style.outline = "none"; }, 2500);
       }
     }, 300);
-  });
+  };
+  document.getElementById("btn-saathi-download-model")?.addEventListener("click", goToSlmDownload);
+  document.getElementById("btn-saathi-header-download")?.addEventListener("click", goToSlmDownload);
 
   // Speech Recognition & Whisper Audio Recorder (STT)
   let isListening = false;
@@ -968,7 +1141,7 @@ async function submitChatQuery(query) {
 }
 
 // ==========================================
-// SHELTERS DIRECTORY VIEW (F5)
+// SHELTERS DIRECTORY VIEW (F5 - shelter-responsive.html)
 // ==========================================
 async function renderSheltersView() {
   const container = document.getElementById("shelters-list-container");
@@ -981,6 +1154,30 @@ async function renderSheltersView() {
   }
 
   const lang = getCurrentLanguage();
+
+  // Populate Featured Nearest Safe Shelter Sheet (shelter-responsive.html)
+  const nearest = shelters[0];
+  if (nearest) {
+    const featName = (nearest.name && nearest.name[lang]) || nearest.name?.en || nearest.name;
+    const featNameEl = document.getElementById("featured-shelter-name");
+    const featDistEl = document.getElementById("featured-shelter-dist");
+    const featCapEl = document.getElementById("featured-shelter-cap");
+    const featAmenEl = document.getElementById("featured-shelter-amenities");
+    const featDirBtn = document.getElementById("btn-featured-shelter-directions");
+
+    const walkMins = Math.max(5, Math.round((nearest.distanceKm || 2.1) * 12));
+    if (featNameEl) featNameEl.textContent = featName;
+    if (featDistEl) featDistEl.textContent = `${nearest.distanceFormatted} away · ${walkMins} mins walk`;
+    if (featCapEl) featCapEl.textContent = `${nearest.capacity || 350} people`;
+    if (featAmenEl) {
+      const amens = formatAmenities(nearest.amenities, lang);
+      featAmenEl.textContent = amens.length > 0 ? amens.join(", ") : "Drinking water, toilets, medical aid";
+    }
+    if (featDirBtn) {
+      featDirBtn.href = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${nearest.lat},${nearest.lon}`;
+    }
+  }
+
   container.innerHTML = shelters.map((s) => {
     const name = (s.name && s.name[lang]) || s.name?.en || s.name;
     const amenities = formatAmenities(s.amenities, lang);
@@ -1012,7 +1209,7 @@ async function renderSheltersView() {
 }
 
 // ==========================================
-// EMERGENCY SOS (F7)
+// EMERGENCY SOS (F7 - emergency.html)
 // ==========================================
 function setupSosView() {
   const sendSms = () => {
@@ -1027,6 +1224,13 @@ function setupSosView() {
   });
 
   document.getElementById("btn-sos-send-sms")?.addEventListener("click", sendSms);
+
+  // Family Check-in "I'm Safe" button (emergency.html)
+  document.getElementById("btn-family-im-safe")?.addEventListener("click", () => {
+    const loc = userProfile.village_name || "Punjab";
+    const msg = encodeURIComponent(`FloodSaathi Family Check-in: I am safe at ${loc} (GPS: ${userProfile.lat}, ${userProfile.lon}). Water is below ground level here.`);
+    window.location.href = `sms:?body=${msg}`;
+  });
 
   const form = document.getElementById("sos-add-contact-form");
   form?.addEventListener("submit", async (e) => {
@@ -1074,11 +1278,27 @@ async function renderSosContacts() {
 }
 
 // ==========================================
-// OFFICIAL ALERTS VIEW (F4)
+// OFFICIAL ALERTS VIEW (F4 - official-alerts.html)
 // ==========================================
+let activeAlertFilter = "all";
+
 function renderAlertsView() {
   const container = document.getElementById("alerts-container");
   if (!container) return;
+
+  // Bind filter chips once
+  const chipsWrap = document.getElementById("alerts-filter-chips");
+  if (chipsWrap && !chipsWrap.dataset.bound) {
+    chipsWrap.dataset.bound = "true";
+    chipsWrap.querySelectorAll(".alert-filter-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        chipsWrap.querySelectorAll(".alert-filter-chip").forEach(c => c.classList.remove("on"));
+        chip.classList.add("on");
+        activeAlertFilter = chip.getAttribute("data-filter") || "all";
+        renderAlertsView();
+      });
+    });
+  }
 
   const allAlerts = currentSnapshot?.alerts || [];
   if (allAlerts.length === 0) {
@@ -1086,9 +1306,21 @@ function renderAlertsView() {
     return;
   }
 
+  // Filter alerts by chip category
+  const filteredAlerts = allAlerts.filter((a) => {
+    if (activeAlertFilter === "all") return true;
+    const text = `${a.headline || ""} ${a.description || ""} ${a.event || ""}`.toLowerCase();
+    if (activeAlertFilter === "flood") return text.includes("flood") || text.includes("river") || text.includes("inundation") || text.includes("water");
+    if (activeAlertFilter === "dam") return text.includes("dam") || text.includes("barrage") || text.includes("release") || text.includes("cusecs");
+    if (activeAlertFilter === "rain") return text.includes("rain") || text.includes("shower") || text.includes("weather") || text.includes("monsoon");
+    return true;
+  });
+
+  const displayAlerts = filteredAlerts.length > 0 ? filteredAlerts : allAlerts;
+
   // Prioritize alerts matching the active district
   const districtLower = (userProfile.district || "").toLowerCase();
-  const sortedAlerts = [...allAlerts].sort((a, b) => {
+  const sortedAlerts = [...displayAlerts].sort((a, b) => {
     const aArea = (a.area || "").toLowerCase();
     const bArea = (b.area || "").toLowerCase();
     const aMatch = aArea.includes(districtLower) || (a.headline || "").toLowerCase().includes(districtLower);
@@ -1103,25 +1335,34 @@ function renderAlertsView() {
     const isLocal = (a.area || "").toLowerCase().includes(districtLower) || (a.headline || "").toLowerCase().includes(districtLower);
     const localBadge = isLocal ? `<span class="plugin-badge active" style="margin-left:6px; font-size:10.5px;">For Your Area (${userProfile.district})</span>` : "";
     const isSevere = a.severity?.toLowerCase() === "severe" || a.severity?.toLowerCase() === "extreme";
+    const textLower = `${a.headline || ""} ${a.description || ""}`.toLowerCase();
+    const isRain = textLower.includes("rain") || textLower.includes("shower");
+    const isDam = textLower.includes("dam") || textLower.includes("barrage") || textLower.includes("release");
+
+    const tileSvg = isRain
+      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 15a4 4 0 01-.5-8 5.3 5.3 0 0110 1.4 3.3 3.3 0 01-.5 6.6z"/><path d="M8.5 17.5l-1 2.3M12.5 17.5l-1 2.3M16.5 17.5l-1 2.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`
+      : isDam
+        ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><path d="M8 9a4 4 0 018 0M12 4v2"/><path d="M3 13.5c2-1.6 4-1.6 6 0s4 1.6 6 0 4-1.6 6 0M3 18c2-1.6 4-1.6 6 0s4 1.6 6 0 4-1.6 6 0"/></svg>`
+        : `<svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 2.5L2 20h20L12 2.5z" fill="currentColor"/><path d="M12 9v5M12 16.8v.4" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+
     return `
-      <div class="shelter-card" style="border-left: 5px solid ${isSevere ? 'var(--red)' : '#d97706'}; margin-bottom: 14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-          <div>
-            <span class="amenity-chip" style="background:${isSevere ? 'var(--red)' : '#d97706'}; color:#fff; font-weight:700;">${a.severity || 'WARNING'}</span>
-            ${localBadge}
+      <article class="official-alert-card shelter-card" style="border-left: 5px solid ${isSevere ? 'var(--red)' : '#d97706'};">
+        <div class="official-alert-tile ${isRain ? 'blue' : ''}">${tileSvg}</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;">
+            <h3 style="font-size:15.5px; font-weight:700; color:var(--navy);">${a.headline || 'Official Flood Advisory'} ${localBadge}</h3>
+            <span style="font-size:12px; color:var(--mut); white-space:nowrap;">${a.effective || 'Official'}</span>
           </div>
-          <span style="font-size:12px; color:var(--mut);">${a.effective || 'Official'}</span>
+          <p style="font-size:13.8px; line-height:1.42; color:var(--body); margin-bottom:8px;">${a.description || ''}</p>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:12.5px; color:var(--mut);">Source: ${a.sender || 'NDMA SACHET / Punjab SDMA'}</span>
+            <button class="tts-speaker-btn btn-read-alert" data-idx="${i}" aria-label="Listen">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+              <span>${t("actions.listen") || "Listen"}</span>
+            </button>
+          </div>
         </div>
-        <h3 style="font-size:16px; font-weight:700; margin-bottom:6px;">${a.headline || 'Official Flood Advisory'}</h3>
-        <p style="font-size:14px; line-height:1.5; color:var(--body); margin-bottom:10px;">${a.description || ''}</p>
-        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--line); padding-top:8px;">
-          <div style="font-size:12px; color:var(--mut);">Issued by: ${a.sender || 'NDMA SACHET / Punjab SDMA'}</div>
-          <button class="tts-speaker-btn btn-read-alert" data-idx="${i}" aria-label="Listen">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-            <span>${t("actions.listen") || "Listen"}</span>
-          </button>
-        </div>
-      </div>
+      </article>
     `;
   }).join("");
 
@@ -1234,12 +1475,36 @@ function renderAfterFloodContent(category = activeAfterFloodTab) {
   const lang = getCurrentLanguage();
   const langData = AFTER_FLOOD_DATA[lang] || AFTER_FLOOD_DATA.en;
   const items = (langData && langData[category]) || AFTER_FLOOD_DATA.en[category] || [];
+
+  const categoryIcon = category === "health"
+    ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5C9.5 7 5.5 11.2 5.5 15.2a6.5 6.5 0 0013 0C18.5 11.2 14.5 7 12 2.5z"/></svg>`
+    : category === "home"
+      ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 11.5L12 4l9 7.5v8.5h-6v-6h-6v6H3z"/></svg>`
+      : category === "claims"
+        ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M7 10h6M7 14h10" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>`
+        : `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 2L5 13.5h6L9.8 22 19 10h-6z"/></svg>`;
+
   container.innerHTML = items.map((item, idx) => `
-    <div class="shelter-card" style="margin-bottom: 10px;">
-      <h4 style="font-size:15px; font-weight:700; color:var(--navy); margin-bottom:4px;">${idx + 1}. ${item.title}</h4>
-      <p style="font-size:13.5px; color:var(--body); line-height:1.4;">${item.desc}</p>
+    <div class="af-guide-item shelter-card">
+      <div class="af-guide-tile">${categoryIcon}</div>
+      <div style="flex:1; min-width:0;">
+        <h4 style="font-size:15.5px; font-weight:700; color:var(--navy); margin-bottom:3px;">${idx + 1}. ${item.title}</h4>
+        <p style="font-size:13.5px; color:var(--body); line-height:1.45;">${item.desc}</p>
+      </div>
+      <button class="tts-speaker-btn btn-read-af" data-idx="${idx}" aria-label="Listen" style="flex:none;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      </button>
     </div>
   `).join("");
+
+  container.querySelectorAll(".btn-read-af").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.getAttribute("data-idx"), 10);
+      const item = items[idx];
+      if (item) speakText(`${item.title}. ${item.desc}`, lang);
+    });
+  });
 }
 
 // ==========================================
@@ -2419,6 +2684,23 @@ async function setupFirstRunModal() {
   };
   radios.forEach(r => r.addEventListener("change", highlightSelected));
   highlightSelected();
+
+  // Onboarding location buttons (app-shell.html)
+  document.getElementById("frm-use-gps-btn")?.addEventListener("click", () => {
+    const gpsBtn = document.getElementById("btn-resync-gps");
+    if (gpsBtn) gpsBtn.click();
+    const useBtn = document.getElementById("frm-use-gps-btn");
+    if (useBtn) {
+      useBtn.style.borderColor = "var(--green)";
+      useBtn.style.background = "#f0fdf4";
+    }
+  });
+
+  document.getElementById("frm-select-manual-btn")?.addEventListener("click", async () => {
+    await setSetting("first_run_complete", true);
+    modal.style.display = "none";
+    document.getElementById("btn-open-location-picker")?.click();
+  });
 
   const btn = document.getElementById("frm-continue-btn");
   const progressWrap = document.getElementById("frm-progress-wrap");
