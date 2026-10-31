@@ -229,7 +229,7 @@ test("Scenario 5: Cold-start offline device onboarding (No Network -> Offline In
   // Step 2: Verify all 4 plugin card headers in Downloads view
   const viewHtml = inspector.findElementById("view-downloads").content;
   assert.ok(viewHtml.includes("Punjab Offline Vector Map Pack"));
-  assert.ok(viewHtml.includes("FloodSaathi SLM (Qwen2.5-0.5B-Instruct)"));
+  assert.ok(viewHtml.includes("FloodSaathi SLM (0.5B On-Device)"));
   assert.ok(viewHtml.includes("Python Runtime &amp; Hydrologic Compute Bridge") || viewHtml.includes("Python Runtime"));
   assert.ok(viewHtml.includes("Regional Language Packs (Hindi &amp; Punjabi Gurmukhi)") || viewHtml.includes("Regional Language Packs"));
 

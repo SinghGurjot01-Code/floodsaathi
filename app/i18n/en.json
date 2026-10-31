@@ -26,6 +26,7 @@
     "watch": "Watch",
     "warning": "Warning",
     "danger": "Danger",
+    "monitoring": "Monitoring",
     "title": "Current Status",
     "data_age": "Data from {age} ago",
     "offline_notice": "Offline — running on saved snapshot ({age} ago)",
@@ -39,7 +40,10 @@
     "just_now": "Data from just now",
     "estimated_range": "Estimated Range",
     "loading_reason": "Loading live flood and hydrologic telemetry...",
-    "no_bulletins": "No active official disaster bulletins for your area."
+    "no_bulletins": "No active official disaster bulletins for {district}.",
+    "bulletin_active": "Official SDMA disaster bulletin in effect.",
+    "danger_exceeded": "Water level at {name} is {level}m (exceeded danger mark of {danger}m). Move to high ground.",
+    "warning_exceeded": "Water level at {name} is {level}m (exceeded warning mark of {warning}m). Flood monitoring active."
   },
   "estimator": {
     "arrival_range": "Water may reach your area in about {low} to {high}, most likely {likely}.",
@@ -56,7 +60,15 @@
     "danger_mark": "Danger mark: {level} m",
     "trend": "Trend: {trend} m/h",
     "projected_crossing": "Projected danger mark crossing in {hours} hours",
-    "stays_flat": "If level stays flat: will not cross danger mark"
+    "stays_flat": "If level stays flat: will not cross danger mark",
+    "normal_flow_title": "Water Level: Normal Basin Flow",
+    "normal_flow_detail": "Nearest gauge ({name}) is {level} (below warning mark of {warning}).",
+    "no_front_transit": "No upstream flood front in transit towards your location.",
+    "estimated_arrival_title": "Estimated Water Arrival: {hours}",
+    "confidence": "Confidence:",
+    "rough_estimate": "Rough Estimate",
+    "moderate_confidence": "Moderate",
+    "basis": "Basis:"
   },
   "actions": {
     "water_reached": "Water reached my street",
@@ -108,7 +120,17 @@
     "above_sea_level": "above sea level",
     "dist_to_river": "Distance to river",
     "checking": "Checking...",
-    "stable": "Stable"
+    "stable": "Stable",
+    "above_danger": "Above Danger Level",
+    "above_warning": "Above Warning Level",
+    "below_warning": "Below warning level",
+    "trend_stable": "Trend: Stable",
+    "trend_rising": "Trend: +{val} m/h",
+    "trend_falling": "Trend: {val} m/h",
+    "heavy_rain": "Heavy Rain Alert",
+    "moderate_rain": "Moderate Showers",
+    "light_rain": "Light Showers",
+    "no_rain": "No Rain Expected"
   },
   "quick": {
     "shelters_title": "Nearest Safe Shelters",
@@ -210,12 +232,14 @@
     "select_radius": "Select Area Radius:",
     "selected_size": "Selected Download Size:",
     "download_map_pack": "Download Map Pack",
-    "slm_title": "FloodSaathi SLM (Qwen2.5-0.5B-Instruct)",
+    "slm_title": "FloodSaathi SLM (0.5B On-Device)",
     "slm_desc": "On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.",
     "slm_hardware": "Hardware:",
     "slm_inference": "Inference Hook:",
     "slm_enable": "Enable Local SLM Model:",
     "download_model": "Download Model (~340 MB)",
+    "model_ready": "Model Downloaded & Ready",
+    "slm_active_gpu": "Active (Local Neural SLM)",
     "py_title": "Python Runtime & Hydrologic Compute Bridge",
     "py_desc": "Enables local execution for empirical reach lag distributions, wave propagation models, and telemetry backtesting.",
     "py_status": "Engine Status:",

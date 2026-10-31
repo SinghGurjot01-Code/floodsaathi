@@ -202,7 +202,8 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
 
         status_data = {
             "status": "ready" if (downloaded or loaded) else "weights_missing",
-            "model_id": MODEL_ID,
+            "model_id": "FloodSaathi-Neural-SLM",
+            "model_name": "FloodSaathi-0.5B-Instruct",
             "downloaded": downloaded,
             "loaded_in_memory": loaded,
             "parameter_count": 494032768,
@@ -325,11 +326,11 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
                     "tokens": token_count,
                     "duration_s": round(duration, 2),
                     "tok_per_sec": tok_per_sec,
-                    "model": "Qwen2.5-0.5B-Instruct",
+                    "model": "FloodSaathi-Neural-SLM",
                     "mode": "neural_slm"
                 },
                 "helplines": VERIFIED_HELPLINES,
-                "source": "Qwen2.5-0.5B Local Neural SLM",
+                "source": "FloodSaathi Local Neural SLM",
                 "verified": True
             }
 
@@ -442,7 +443,7 @@ def run_server(port=8080):
     print(f" Endpoints:")
     print(f" - GET  /api/model/status : Model weights & parameter detection")
     print(f" - POST /api/model/load   : Pre-load neural model into RAM")
-    print(f" - POST /api/chat         : Real Qwen2.5-0.5B Neural Inference")
+    print(f" - POST /api/chat         : Real FloodSaathi Neural SLM Inference")
     print("=" * 68)
     try:
         httpd.serve_forever()

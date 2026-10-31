@@ -11,6 +11,7 @@ import { computeRawStatus, resolveOfflineStatus, STATUS_COLORS, STATUS_ICONS } f
 import { buildSosSmsUri } from "./sos.js";
 import { fetchShelters, formatAmenities } from "./shelters.js";
 import { downloadMapPack, getDownloadedMapPacks, deleteOfflineMapPack, estimateDownloadSize, checkMapPackStatus, MAP_RADIUS_SIZES } from "./map_downloader.js";
+import { initWaterMap } from "./map.js";
 import { CardRetriever } from "./ask.js";
 import { AskSaathiAssistant } from "./ai_assistant.js";
 import { PUNJAB_DISTRICTS, findNearestDistrict } from "./districts.js";
@@ -201,6 +202,7 @@ export function switchTab(tab) {
   }
 
   // Trigger view-specific renderers
+  if (tab === "map") renderMapView();
   if (tab === "alerts") renderAlertsView();
   if (tab === "shelters") renderSheltersView();
   if (tab === "sos") renderSosContacts();
@@ -246,12 +248,30 @@ function setupLanguageSwitcher() {
       const allLangBtns = document.querySelectorAll(".lang-btn[data-lang]");
       allLangBtns.forEach((b) => b.classList.toggle("active", b.getAttribute("data-lang") === lang));
       applyTranslations();
+      updateLocationUI();
       recomputeOfflineView();
       await renderSheltersView();
       renderAfterFloodContent(activeAfterFloodTab);
       await renderDownloadsView();
       updateProximityBanner(currentSnapshot);
       updateChatWelcome();
+
+      // Refresh location picker modal districts if rendered
+      const districtList = document.getElementById("district-picker-list");
+      if (districtList) {
+        districtList.querySelectorAll(".district-btn").forEach((btn) => {
+          const dName = btn.getAttribute("data-name");
+          const d = PUNJAB_DISTRICTS.find((item) => item.name === dName);
+          if (d) {
+            const locName = lang === "pa" ? d.name_pa : lang === "hi" ? d.name_hi : d.name;
+            const subName = lang !== "en" ? d.name : (d.basin || "Punjab");
+            const strong = btn.querySelector("strong");
+            const span = btn.querySelector("span");
+            if (strong) strong.textContent = locName;
+            if (span) span.textContent = subName;
+          }
+        });
+      }
     }
   });
 }
@@ -319,19 +339,27 @@ function renderSnapshotData(snapshot) {
     if (lvlEl) lvlEl.textContent = `${curLevel} m`;
 
     const trendEl = document.getElementById("metric-gauge-trend");
-    if (trendEl) trendEl.textContent = `Trend: ${trendVal >= 0 ? "+" : ""}${trendVal} m/h`;
+    if (trendEl) {
+      if (trendVal === 0) {
+        trendEl.textContent = t("metrics.trend_stable") || "Trend: Stable";
+      } else if (trendVal > 0) {
+        trendEl.textContent = t("metrics.trend_rising", { val: trendVal }) || `Trend: +${trendVal} m/h`;
+      } else {
+        trendEl.textContent = t("metrics.trend_falling", { val: trendVal }) || `Trend: ${trendVal} m/h`;
+      }
+    }
 
     const statusEl = document.getElementById("metric-gauge-status");
     if (statusEl) {
       if (curLevel >= dangLevel && dangLevel > 0) {
         statusEl.className = "metric-status-warn";
-        statusEl.textContent = "Above Danger Level";
+        statusEl.textContent = t("metrics.above_danger") || "Above Danger Level";
       } else if (curLevel >= warnLevel && warnLevel > 0) {
         statusEl.className = "metric-status-warn";
-        statusEl.textContent = "Above Warning Level";
+        statusEl.textContent = t("metrics.above_warning") || "Above Warning Level";
       } else {
         statusEl.className = "metric-status-ok";
-        statusEl.textContent = "Below warning level";
+        statusEl.textContent = t("metrics.below_warning") || "Below warning level";
       }
     }
   }
@@ -352,16 +380,16 @@ function renderSnapshotData(snapshot) {
   if (rainStatusEl) {
     if (rain72h >= 50) {
       rainStatusEl.className = "metric-status-warn";
-      rainStatusEl.textContent = "Heavy Rain Alert";
+      rainStatusEl.textContent = t("metrics.heavy_rain") || "Heavy Rain Alert";
     } else if (rain72h >= 15) {
       rainStatusEl.className = "metric-status-warn";
-      rainStatusEl.textContent = "Moderate Showers";
+      rainStatusEl.textContent = t("metrics.moderate_rain") || "Moderate Showers";
     } else if (rain72h > 0) {
       rainStatusEl.className = "metric-status-ok";
-      rainStatusEl.textContent = "Light Showers";
+      rainStatusEl.textContent = t("metrics.light_rain") || "Light Showers";
     } else {
       rainStatusEl.className = "metric-status-ok";
-      rainStatusEl.textContent = "No Rain Expected";
+      rainStatusEl.textContent = t("metrics.no_rain") || "No Rain Expected";
     }
   }
 
@@ -400,19 +428,20 @@ function renderSnapshotData(snapshot) {
     activeWarning = relevantAlerts[0];
     if (alertIcon) alertIcon.className = "alert-check-icon active-alert";
     if (alertSummary) {
-      alertSummary.innerHTML = `<strong>${activeWarning.headline || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${activeWarning.description || ""}</span>`;
+      alertSummary.innerHTML = `<strong>${activeWarning.headline || t("alerts.heading") || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${activeWarning.description || ""}</span>`;
     }
   } else {
     if (alertIcon) alertIcon.className = "alert-check-icon";
     if (alertSummary) {
-      alertSummary.textContent = `No active official disaster bulletins for ${userProfile.district || "your area"}.`;
+      const locName = getLocalizedDistrictName(userProfile.district || "your area");
+      alertSummary.textContent = t("status.no_bulletins", { district: locName });
     }
   }
 
   // 6. Dynamic Hero Status Word & Grounded Reason (NO hardcoding)
-  let statusWordText = "MONITORING";
+  let statusKey = "monitoring";
   let statusClass = "safe";
-  let reasonText = "All river gauges below warning level. Water likely to stay below your ground level.";
+  let reasonText = t("status.ground_safe") || "Water likely to stay below your ground level.";
 
   const curLvl = g ? (g.level_m ?? g.current_level_m ?? 0) : 0;
   const warnLvl = g ? (g.warning_m ?? g.warning_level_m ?? 0) : 0;
@@ -420,31 +449,38 @@ function renderSnapshotData(snapshot) {
 
   if (activeWarning) {
     const sev = (activeWarning.severity || "").toLowerCase();
-    statusWordText = sev === "severe" || sev === "extreme" ? "WARNING" : "WATCH";
-    statusClass = statusWordText.toLowerCase();
-    reasonText = activeWarning.headline || activeWarning.description || "Official SDMA disaster bulletin in effect.";
+    statusKey = (sev === "severe" || sev === "extreme") ? "warning" : "watch";
+    statusClass = statusKey;
+    reasonText = activeWarning.headline || activeWarning.description || t("status.bulletin_active") || "Official SDMA disaster bulletin in effect.";
   } else if (dangLvl > 0 && curLvl >= dangLvl) {
-    statusWordText = "DANGER";
+    statusKey = "danger";
     statusClass = "danger";
-    reasonText = `Water level at ${g.name} is ${curLvl}m (exceeded danger mark of ${dangLvl}m). Move to high ground.`;
+    reasonText = t("status.danger_exceeded", { name: g.name, level: curLvl, danger: dangLvl });
   } else if (warnLvl > 0 && curLvl >= warnLvl) {
-    statusWordText = "WARNING";
+    statusKey = "warning";
     statusClass = "warning";
-    reasonText = `Water level at ${g.name} is ${curLvl}m (exceeded warning mark of ${warnLvl}m). Flood monitoring active.`;
+    reasonText = t("status.warning_exceeded", { name: g.name, level: curLvl, warning: warnLvl });
   }
 
   const hero = document.getElementById("home-hero");
   if (hero) hero.className = `home-hero ${statusClass}`;
 
   const statusWord = document.getElementById("status-word");
-  if (statusWord) statusWord.textContent = statusWordText;
+  if (statusWord) {
+    const wordTranslated = t(`status.${statusKey}`);
+    statusWord.textContent = (wordTranslated && wordTranslated !== `status.${statusKey}`)
+      ? wordTranslated.toUpperCase()
+      : statusKey.toUpperCase();
+  }
 
   const statusReasonEl = document.getElementById("status-reason");
   if (statusReasonEl) statusReasonEl.textContent = reasonText;
 
   const age = getSnapshotAge(snapshot.saved_at);
   const ageBadge = document.getElementById("status-age-badge");
-  if (ageBadge) ageBadge.textContent = `Data: ${age.display}`;
+  if (ageBadge) {
+    ageBadge.textContent = t("status.data_age", { age: age.display });
+  }
 
   const offlineBadge = document.getElementById("status-offline-badge");
   if (offlineBadge) {
@@ -503,16 +539,20 @@ function renderEstimateBanner(snapshot) {
 
   if (front && estimate.arrival) {
     const arr = estimate.arrival;
-    const hoursDisplay = `${formatHours(arr.low_hours)} to ${formatHours(arr.high_hours)} (likely ${formatHours(arr.likely_hours)})`;
+    const hoursDisplay = `${formatHours(arr.low_hours)} to ${formatHours(arr.high_hours)} (${t("status.watch") || "likely"} ${formatHours(arr.likely_hours)})`;
     const isUrgent = arr.low_hours <= 6;
     const bannerClass = isUrgent ? "arrival-banner" : "arrival-banner safe";
+    const titleText = t("estimator.estimated_arrival_title", { hours: hoursDisplay }) || `Estimated Water Arrival: ${hoursDisplay}`;
+    const confLabel = t("estimator.confidence") || "Confidence:";
+    const confValue = arr.is_rough ? (t("estimator.rough_estimate") || "Rough Estimate") : (t("estimator.moderate_confidence") || "Moderate");
+    const basisLabel = t("estimator.basis") || "Basis:";
 
     container.innerHTML = `
       <div class="${bannerClass}">
-        <div class="arrival-title">Estimated Water Arrival: ${hoursDisplay}</div>
+        <div class="arrival-title">${titleText}</div>
         <div class="arrival-detail">
-          Confidence: <strong>${arr.is_rough ? "Rough Estimate" : "Moderate"}</strong> &bull;
-          Basis: <strong>${arr.basis}</strong> (${(arr.km_to_user || distKm).toFixed(1)} km transit).
+          ${confLabel} <strong>${confValue}</strong> &bull;
+          ${basisLabel} <strong>${arr.basis}</strong> (${(arr.km_to_user || distKm).toFixed(1)} km transit).
           <div style="font-size: 11.5px; color: var(--mut); margin-top: 3px;">
             ${arr.summary_text}
           </div>
@@ -521,14 +561,21 @@ function renderEstimateBanner(snapshot) {
     `;
   } else {
     // Normal / below warning state
+    const titleText = t("estimator.normal_flow_title") || "Water Level: Normal Basin Flow";
+    const stnName = g?.name || "CWC Station";
+    const curLevelDisplay = currentLvl > 0 ? `${currentLvl} m` : (t("metrics.stable") || "Normal");
+    const warnMarkDisplay = warningLvl > 0 ? `${warningLvl} m` : "-- m";
+    const detailText = t("estimator.normal_flow_detail", { name: stnName, level: curLevelDisplay, warning: warnMarkDisplay }) ||
+      `Nearest gauge (${stnName}) is ${curLevelDisplay} (below warning mark of ${warnMarkDisplay}).`;
+    const subText = t("estimator.no_front_transit") || "No upstream flood front in transit towards your location.";
+
     container.innerHTML = `
       <div class="arrival-banner safe" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-        <div class="arrival-title" style="color:#15803d;">Water Level: Normal Basin Flow</div>
+        <div class="arrival-title" style="color:#15803d;">${titleText}</div>
         <div class="arrival-detail" style="color:#166534;">
-          Nearest gauge (${g?.name || "CWC Station"}) is <strong>${currentLvl > 0 ? currentLvl + " m" : "Normal"}</strong>
-          (below warning mark of ${warningLvl > 0 ? warningLvl + " m" : "-- m"}).
+          ${detailText}
           <div style="font-size: 11.5px; color: #15803d; margin-top: 3px;">
-            No upstream flood front in transit towards your location.
+            ${subText}
           </div>
         </div>
       </div>
@@ -835,7 +882,7 @@ async function submitChatQuery(query) {
   if (response) {
     const neuralBadgeHtml = response.isNeural ? `
       <div style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:12px; font-size:11.5px; font-weight:700; margin-bottom:8px; border:1px solid #bfdbfe;">
-        <span>⚡ Real Neural SLM (Qwen2.5-0.5B)</span>
+        <span>⚡ Real Neural SLM (FloodSaathi-0.5B)</span>
         ${response.stats?.tokens ? `<span>· ${response.stats.tokens} tokens</span>` : ""}
         ${response.stats?.tok_per_sec ? `<span>· ${response.stats.tok_per_sec} tok/s</span>` : ""}
       </div>
@@ -1273,6 +1320,13 @@ function renderPreferencesView() {
 }
 
 // ==========================================
+// INTERACTIVE WATER & RISK MAP VIEW (F3)
+// ==========================================
+export async function renderMapView() {
+  await initWaterMap("map-container", userProfile, currentSnapshot || {});
+}
+
+// ==========================================
 // OFFLINE MAP DOWNLOADER (F10)
 // ==========================================
 function setupMapDownloader() {
@@ -1295,6 +1349,7 @@ function setupMapDownloader() {
         if (progressPct) progressPct.textContent = `${p.percent}% (${p.currentMB} / ${p.totalMB} MB)`;
       });
       if (info) info.textContent = `Cached Punjab vector tiles (${radius} km radius ready offline)`;
+      renderMapView();
       alert(`Success: ${radius} km offline map pack downloaded to your device!`);
     } catch (err) {
       alert(`Download failed: ${err.message}`);
@@ -1352,19 +1407,53 @@ export function determineFlowDirection(gaugeLat, userLat) {
   return gaugeLat >= userLat ? "upstream" : "downstream";
 }
 
-export function formatProximityText(profile, nearestGauge, distKm, direction, isStaleGps = false) {
-  const village = profile?.village_name || profile?.district || "Taman, Jalandhar";
-  const gpsSuffix = isStaleGps ? " [GPS Stale / Cached]" : "";
+export function getLocalizedDistrictName(districtIdOrName) {
+  if (!districtIdOrName) return "Punjab";
+  const lang = getCurrentLanguage();
+  const lower = districtIdOrName.toLowerCase();
+  const match = PUNJAB_DISTRICTS.find(
+    (d) => d.id === lower || d.name.toLowerCase() === lower || d.name_pa === districtIdOrName || d.name_hi === districtIdOrName
+  );
+  if (!match) return districtIdOrName;
+  if (lang === "pa") return match.name_pa || match.name;
+  if (lang === "hi") return match.name_hi || match.name;
+  return match.name;
+}
 
-  if (!nearestGauge) {
-    return `Your location: ${village}${gpsSuffix} · Hydrologic telemetry: Feeds currently offline`;
+export function formatProximityText(profile, nearestGauge, distKm, direction, isStaleGps = false) {
+  const lang = getCurrentLanguage();
+  const rawVillage = profile?.village_name || profile?.district || "Taman, Jalandhar";
+  const gpsSuffix = isStaleGps ? (lang === "pa" ? " [GPS ਪੁਰਾਣਾ / ਕੈਸ਼]" : lang === "hi" ? " [GPS पुराना / कैश]" : " [GPS Stale / Cached]") : "";
+
+  // Exact canonical format for English (tested in unit & e2e suites)
+  if (lang === "en" || !["pa", "hi"].includes(lang)) {
+    if (!nearestGauge) {
+      return `Your location: ${rawVillage}${gpsSuffix} · Hydrologic telemetry: Feeds currently offline`;
+    }
+    const distFormatted = distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`;
+    const gaugeName = nearestGauge.name || nearestGauge.station_name || nearestGauge.id || "CWC Gauge";
+    const riverName = nearestGauge.river ? ` (${nearestGauge.river})` : "";
+    return `Your location: ${rawVillage}${gpsSuffix} · Hydrologic telemetry from: ${gaugeName}${riverName} (${distFormatted} ${direction})`;
   }
 
-  const distFormatted = distKm < 1 ? `${Math.round(distKm * 1000)} m` : `${distKm.toFixed(1)} km`;
+  // Localized for Punjabi or Hindi
+  const localizedVillage = getLocalizedDistrictName(rawVillage);
+  if (!nearestGauge) {
+    return lang === "pa"
+      ? `ਤੁਹਾਡਾ ਸਥਾਨ: ${localizedVillage}${gpsSuffix} · ਹਾਈਡ੍ਰੋਲੋਜਿਕ ਟੈਲੀਮੈਟਰੀ: ਫੀਡਜ਼ ਫਿਲਹਾਲ ਆਫ਼ਲਾਈਨ ਹਨ`
+      : `आपका स्थान: ${localizedVillage}${gpsSuffix} · जलवैज्ञानिक टेलीमेट्री: फीड वर्तमान में ऑफ़लाइन है`;
+  }
+
+  const distFormatted = distKm < 1 ? `${Math.round(distKm * 1000)} ${t("common.meters") || "m"}` : `${distKm.toFixed(1)} ${t("common.km") || "km"}`;
   const gaugeName = nearestGauge.name || nearestGauge.station_name || nearestGauge.id || "CWC Gauge";
   const riverName = nearestGauge.river ? ` (${nearestGauge.river})` : "";
+  const dirText = direction === "upstream"
+    ? (lang === "pa" ? "ਚੜ੍ਹਦੇ ਪਾਸੇ (ਅੱਪਸਟ੍ਰੀਮ)" : "अपस्ट्रीम")
+    : (lang === "pa" ? "ਲਹਿੰਦੇ ਪਾਸੇ (ਡਾਊਨਸਟ੍ਰੀਮ)" : "डाउनस्ट्रीम");
 
-  return `Your location: ${village}${gpsSuffix} · Hydrologic telemetry from: ${gaugeName}${riverName} (${distFormatted} ${direction})`;
+  return lang === "pa"
+    ? `ਤੁਹਾਡਾ ਸਥਾਨ: ${localizedVillage}${gpsSuffix} · ਹਾਈਡ੍ਰੋਲੋਜਿਕ ਟੈਲੀਮੈਟਰੀ: ${gaugeName}${riverName} (${distFormatted} ${dirText})`
+    : `आपका स्थान: ${localizedVillage}${gpsSuffix} · जलवैज्ञानिक टेलीमेट्री: ${gaugeName}${riverName} (${distFormatted} ${dirText})`;
 }
 
 export function updateProximityBanner(snapshot, isStaleGps = false) {
@@ -1393,16 +1482,19 @@ export function updateLocationUI() {
   const nameEl = document.getElementById("loc-village-name");
   const subEl = document.getElementById("loc-state-name");
   const modalActiveEl = document.getElementById("loc-modal-active-name");
+  const lang = getCurrentLanguage();
 
-  const displayName = userProfile.village_name || `${userProfile.district || "Ludhiana"}, Punjab`;
+  const stateName = lang === "pa" ? "ਪੰਜਾਬ" : lang === "hi" ? "पंजाब" : "Punjab";
+  const localizedDistrict = getLocalizedDistrictName(userProfile.district || "Taman, Jalandhar");
+  const displayName = userProfile.village_name || (userProfile.district ? `${localizedDistrict}, ${stateName}` : "Taman, Jalandhar");
   const accText = userProfile.accuracy_m > 0 ? ` (±${userProfile.accuracy_m}m)` : "";
-  const basin = userProfile.basin || "Punjab";
+  const basin = userProfile.basin || stateName;
 
   if (nameEl) {
     nameEl.innerHTML = `<span>${displayName}${accText}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>`;
   }
   if (subEl) {
-    subEl.innerHTML = `Punjab (${basin}) · <span style="text-decoration:underline;">${t("location.tap_to_change") || "Tap to change"}</span>`;
+    subEl.innerHTML = `${stateName} (${basin}) · <span style="text-decoration:underline;">${t("location.tap_to_change") || "Tap to change"}</span>`;
   }
   if (modalActiveEl) {
     modalActiveEl.textContent = `${displayName}${accText}`;
@@ -1815,16 +1907,35 @@ export async function renderDownloadsView() {
       : `<strong>Hardware:</strong> <span style="color:var(--mut);">CPU / WebAssembly Execution (Standard Fallback)</span>`;
   }
 
-  const slmDownloaded = await getSetting("slm_model_downloaded", false);
-  const slmEnabled = await getSetting("slm_model_enabled", false);
+  let slmDownloaded = await getSetting("slm_model_downloaded", false);
+  let slmEnabled = await getSetting("slm_model_enabled", false);
+
+  // Auto-detect if model is already downloaded on disk or running in backend
+  if (!slmDownloaded && typeof fetch === "function") {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 1500);
+      const statusRes = await fetch("/api/model/status", { signal: controller.signal });
+      clearTimeout(timeoutId);
+      if (statusRes.ok) {
+        const info = await statusRes.json();
+        if (info.downloaded || info.status === "ready" || info.loaded_in_memory) {
+          slmDownloaded = true;
+          slmEnabled = true;
+          await setSetting("slm_model_downloaded", true);
+          await setSetting("slm_model_enabled", true);
+        }
+      }
+    } catch {}
+  }
 
   if (slmDownloadBadge) {
     if (slmDownloaded) {
       slmDownloadBadge.className = "plugin-badge active";
-      slmDownloadBadge.textContent = "Downloaded";
+      slmDownloadBadge.textContent = t("downloads.downloaded") || "Downloaded";
     } else {
       slmDownloadBadge.className = "plugin-badge";
-      slmDownloadBadge.textContent = "Not Downloaded";
+      slmDownloadBadge.textContent = t("downloads.not_downloaded") || "Not Downloaded";
     }
   }
 
@@ -1836,11 +1947,11 @@ export async function renderDownloadsView() {
   if (slmActiveBadge) {
     if (slmDownloaded && slmEnabled) {
       slmActiveBadge.className = "plugin-badge active";
-      slmActiveBadge.textContent = "Active (WebGPU / SLM)";
+      slmActiveBadge.textContent = t("downloads.slm_active_gpu") || "Active (Local Neural SLM)";
       if (aiAssistant) aiAssistant.setMode("webgpu_slm");
     } else {
       slmActiveBadge.className = "plugin-badge";
-      slmActiveBadge.textContent = "Standby (M5 Fallback)";
+      slmActiveBadge.textContent = "Standby (Deterministic Core)";
       if (aiAssistant) aiAssistant.setMode("deterministic_m5");
     }
   }
@@ -1848,10 +1959,10 @@ export async function renderDownloadsView() {
   if (slmBtn) {
     const slmBtnSpan = slmBtn.querySelector("span");
     if (slmDownloaded) {
-      if (slmBtnSpan) slmBtnSpan.textContent = "Model Downloaded (ONNX Int4 Cached)";
+      if (slmBtnSpan) slmBtnSpan.textContent = t("downloads.model_ready") || "Model Downloaded & Ready";
       slmBtn.classList.add("sec");
     } else {
-      if (slmBtnSpan) slmBtnSpan.textContent = "Download Model (~340 MB)";
+      if (slmBtnSpan) slmBtnSpan.textContent = t("downloads.download_model") || "Download Model (~340 MB)";
       slmBtn.classList.remove("sec");
     }
   }
@@ -2050,7 +2161,7 @@ export function setupDownloadsView() {
           if (aiAssistant) aiAssistant.setMode("webgpu_slm");
           window.dispatchEvent(new CustomEvent("floodsaathi:slm_mode_changed", { detail: { mode: "webgpu_slm" } }));
         } else {
-          throw new Error("Model weights not yet found on disk. Run: python scripts/download_qwen.py");
+          throw new Error("Model weights not yet found on disk. Run model setup.");
         }
       } else {
         throw new Error(`Server returned HTTP ${statusRes.status}`);
@@ -2400,7 +2511,23 @@ async function setupSlmToast() {
 
   window.addEventListener("floodsaathi:tab_changed", async (e) => {
     if (e.detail?.tab !== "saathi") return;
-    const downloaded = await getSetting("slm_model_downloaded", false);
+    let downloaded = await getSetting("slm_model_downloaded", false);
+    if (!downloaded && typeof fetch === "function") {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1200);
+        const res = await fetch("/api/model/status", { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (res.ok) {
+          const info = await res.json();
+          if (info.downloaded || info.status === "ready" || info.loaded_in_memory) {
+            downloaded = true;
+            await setSetting("slm_model_downloaded", true);
+            await setSetting("slm_model_enabled", true);
+          }
+        }
+      } catch {}
+    }
     if (downloaded) return;
     if (sessionStorage.getItem("slm_toast_dismissed")) return;
     toast.style.display = "block";

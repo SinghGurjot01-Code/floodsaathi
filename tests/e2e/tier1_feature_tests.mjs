@@ -147,9 +147,9 @@ test("F2.5: Map pack downloader caches pack metadata and registers into storage"
 // FEATURE 3 (F3): FloodSaathi SLM AI Model Card
 // ============================================================================
 
-test("F3.1: SLM AI Model card renders with Qwen2.5-0.5B-Instruct Int4 (~340 MB) specs", () => {
+test("F3.1: SLM AI Model card renders with FloodSaathi Neural SLM Int4 (~340 MB) specs", () => {
   const viewHtml = inspector.findElementById("view-downloads").content;
-  assert.ok(viewHtml.includes("Qwen2.5-0.5B-Instruct"), "Qwen model name missing from downloads card");
+  assert.ok(viewHtml.includes("FloodSaathi SLM"), "Model name missing from downloads card");
   assert.ok(viewHtml.includes("~340 MB"), "Model size ~340 MB missing");
   assert.ok(viewHtml.includes("Int4"), "Int4 quantization note missing");
 });

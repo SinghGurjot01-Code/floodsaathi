@@ -178,7 +178,7 @@ def generate_response(tokenizer, model, conversation_history, user_query: str, m
 
 def run_interactive(tokenizer, model):
     print("=" * 72)
-    print("    FloodSaathi Neural AI Assistant (Local SLM: Qwen2.5-0.5B-Instruct)")
+    print("    FloodSaathi Neural AI Assistant (FloodSaathi Neural SLM)")
     print("    Live Neural Token Generation | Grounded Safety RAG | Offline")
     print("    Commands: 'exit' to quit | 'clear' to reset conversation")
     print("=" * 72 + "\n")

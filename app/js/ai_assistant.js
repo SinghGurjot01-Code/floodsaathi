@@ -142,7 +142,7 @@ export class AskSaathiAssistant {
   }
 
   /**
-   * Queries the local real neural backend (Qwen2.5-0.5B-Instruct SLM).
+   * Queries the local real neural backend (FloodSaathi Neural SLM).
    * @param {string} query
    * @param {Object} context
    * @returns {Promise<Object|null>}
@@ -183,9 +183,9 @@ export class AskSaathiAssistant {
               title: "Saathi Neural AI (Real On-Device SLM)",
               text: data.text,
               steps: data.text.split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+[\.\)]\s*/, "")),
-              stats: data.stats || { tokens: 0, duration_s: 0, tok_per_sec: 0, model: "Qwen2.5-0.5B" },
+              stats: data.stats || { tokens: 0, duration_s: 0, tok_per_sec: 0, model: "FloodSaathi-0.5B" },
               helplines: data.helplines || AUTHORIZED_HELPLINES,
-              source: data.source || "Qwen2.5-0.5B Local Neural SLM",
+              source: data.source || "FloodSaathi Local Neural SLM",
               reviewStatus: "verified",
               isNeural: true
             };
@@ -236,7 +236,30 @@ export class AskSaathiAssistant {
     }
 
     // =========================================================================
-    // REAL NEURAL MODEL INFERENCE (Qwen2.5-0.5B Local SLM)
+    // SAFETY INVARIANT: ELECTRICAL WIRE / VOLTAGE HAZARD (Priority before retrieval)
+    // =========================================================================
+    const isElectricalQuery = [
+      "wire", "electric", "power line", "current", "transformer", "shock", "breaker",
+      "बिजली", "तार", "करंट", "ਬਿਜਲੀ", "ਤਾਰ", "ਕਰੰਟ"
+    ].some((w) => qLower.includes(w));
+    if (isElectricalQuery) {
+      return this._formatElectricalResponse(lang);
+    }
+
+    // =========================================================================
+    // SAFETY INVARIANT: WATER ENTERING HOUSE / RESIDENCE
+    // =========================================================================
+    const isHouseEnteringQuery = [
+      "entering my house", "entering house", "entering home", "water entering",
+      "water inside", "water in house", "flood entering home", "flood water is entering",
+      "ਘਰ ਵਿੱਚ ਪਾਣੀ", "घर में पानी"
+    ].some((w) => qLower.includes(w));
+    if (isHouseEnteringQuery) {
+      return this._formatHouseEnteringResponse(lang);
+    }
+
+    // =========================================================================
+    // REAL NEURAL MODEL INFERENCE (FloodSaathi Local SLM)
     // Connects to local server when in neural mode
     // =========================================================================
     if (this.mode === "webgpu_slm" || this.mode === "neural_slm" || this.mode === "real_neural" || context.useNeural) {
@@ -515,6 +538,56 @@ export class AskSaathiAssistant {
         { number: "112", name: "Emergency Response (ERSS)" }
       ],
       source: "Punjab State Power Corporation Limited & NDMA Electrical Guidelines",
+      verified: true,
+      badge: "verified",
+      cardId: "card-electrical-safety"
+    };
+  }
+
+  _formatHouseEnteringResponse(lang) {
+    const titles = {
+      en: "Flood Water Entering Home: Immediate Safety Protocol",
+      hi: "घर में बाढ़ का पानी घुसने पर तत्काल सुरक्षा निर्देश",
+      pa: "ਘਰ ਵਿੱਚ ਹੜ੍ਹ ਦਾ ਪਾਣੀ ਵੜਨ 'ਤੇ ਤੁਰੰਤ ਸੁਰੱਖਿਆ ਨਿਰਦੇਸ਼"
+    };
+
+    const steps = {
+      en: [
+        "Turn off the main electrical breaker immediately if you can reach the panel safely without standing in water.",
+        "Move your family and vulnerable individuals to higher ground, upper floors, or roof immediately.",
+        "Take essential survival kit: clean drinking water, dry food, medicines, ID documents, and mobile phone.",
+        "Never touch electrical switches, wall sockets, or appliances if flood water has reached flooring.",
+        "Call 112 (National Emergency) or 1078 (NDMA Disaster Helpline) if water is rising rapidly and paths are submerged."
+      ],
+      hi: [
+        "यदि आप पानी में खड़े हुए बिना सुरक्षित रूप से पहुंच सकते हैं, तो तुरंत मुख्य बिजली ब्रेकर (मेन स्विच) बंद करें।",
+        "अपने परिवार और बच्चों को तुरंत ऊंचे स्थान, ऊपरी मंजिल या छत पर ले जाएं।",
+        "जरूरी सामान साथ लें: पीने का पानी, सूखा भोजन, दवाएं, पहचान पत्र और मोबाइल फोन।",
+        "यदि फर्श पर पानी आ चुका है तो किसी भी बिजली के स्विच या उपकरण को न छुएं।",
+        "यदि पानी तेजी से बढ़ रहा है तो तत्काल 112 या 1078 पर राहत और बचाव के लिए कॉल करें।"
+      ],
+      pa: [
+        "ਜੇਕਰ ਤੁਸੀਂ ਪਾਣੀ ਵਿੱਚ ਖੜ੍ਹੇ ਬਿਨਾਂ ਸੁਰੱਖਿਅਤ ਪਹੁੰਚ ਸਕਦੇ ਹੋ ਤਾਂ ਤੁਰੰਤ ਮੇਨ ਬਿਜਲੀ ਬ੍ਰੇਕਰ ਬੰਦ ਕਰ ਦਿਓ।",
+        "ਆਪਣੇ ਪਰਿਵਾਰ ਨੂੰ ਤੁਰੰਤ ਉੱਚੀ ਜਗ੍ਹਾ, ਉੱਪਰਲੀ ਮੰਜ਼ਿਲ ਜਾਂ ਛੱਤ 'ਤੇ ਲੈ ਜਾਓ।",
+        "ਜ਼ਰੂਰੀ ਸਮਾਨ ਨਾਲ ਲਓ: ਪੀਣ ਵਾਲਾ ਸਾਫ਼ ਪਾਣੀ, ਸੁੱਕਾ ਰਾਸ਼ਨ, ਦਵਾਈਆਂ, ਸ਼ਨਾਖਤੀ ਕਾਰਡ ਅਤੇ ਮੋਬਾਈਲ ਫ਼ੋਨ।",
+        "ਜੇਕਰ ਫ਼ਰਸ਼ 'ਤੇ ਪਾਣੀ ਆ ਚੁੱਕਾ ਹੈ ਤਾਂ ਕਿਸੇ ਵੀ ਬਿਜਲੀ ਦੇ ਸਵਿੱਚ ਜਾਂ ਉਪਕਰਨ ਨੂੰ ਹੱਥ ਨਾ ਲਾਓ।",
+        "ਜੇਕਰ ਪਾਣੀ ਤੇਜ਼ੀ ਨਾਲ ਚੜ੍ਹ ਰਿਹਾ ਹੈ ਤਾਂ ਤੁਰੰਤ 112 ਜਾਂ 1078 'ਤੇ ਕਾਲ ਕਰਕੇ ਮਦਦ ਮੰਗੋ।"
+      ]
+    };
+
+    return {
+      query: "flood_entering_home",
+      intent: "evacuation_safety",
+      mode: "deterministic_m5",
+      title: titles[lang] || titles.en,
+      summary: "Shut off electrical breaker if safe, move to higher ground, and dial 112 for rescue.",
+      steps: steps[lang] || steps.en,
+      helplines: [
+        { number: "112", name: "Emergency Rescue (ERSS)" },
+        { number: "1078", name: "NDMA National Flood Control" },
+        { number: "1912", name: "PSPCL Electricity Emergency" }
+      ],
+      source: "National Disaster Management Authority (NDMA) Household Flood Protocols",
       verified: true,
       badge: "verified",
       cardId: "card-electrical-safety"

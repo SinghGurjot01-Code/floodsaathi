@@ -247,7 +247,7 @@ test("HTML DOM: #view-downloads section is populated with all four plugin cards"
   assert.ok(viewDownloads.includes('id="map-plugin-progress-wrap"'));
 
   // 3. Card 2: SLM AI Model
-  assert.ok(viewDownloads.includes("FloodSaathi SLM (Qwen2.5-0.5B-Instruct)"));
+  assert.ok(viewDownloads.includes("FloodSaathi SLM (0.5B On-Device)"));
   assert.ok(viewDownloads.includes('id="slm-download-status-badge"'));
   assert.ok(viewDownloads.includes('id="slm-active-status-badge"'));
   assert.ok(viewDownloads.includes('id="toggle-slm-model"'));

@@ -1,7 +1,7 @@
 {
   "schema": "floodsaathi.exported_model.v1",
   "base_model": "Qwen/Qwen2.5-0.5B-Instruct",
-  "lora_adapter_dir": "C:\\Users\\Gurjotpal Singh\\AppData\\Local\\Temp\\pytest-of-Gurjotpal Singh\\pytest-192\\test_export_spec_generation0\\lora_test",
+  "lora_adapter_dir": "C:\\Users\\Gurjotpal Singh\\AppData\\Local\\Temp\\pytest-of-Gurjotpal Singh\\pytest-203\\test_export_spec_generation0\\lora_test",
   "quantization": "int4",
   "exported_formats": [
     "onnx",

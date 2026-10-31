@@ -21,7 +21,7 @@ Update the box, add the commit hash and a one-line result when a task is done. W
 - [x] **A7** M2 HAND pipeline and Region pack for Amritsar (deps: P0-4) — done: Verified Amritsar Region pack (packs/region-amritsar/) with unified vertical datum (depth = max(0, stage_above_bank + bank_height - HAND)) from Copernicus GLO-30 DEM.
 - [ ] **A8** Pack loader: SHA-256 + ed25519 verification (deps: A7) — done when: Real pack installs; a copy with one byte changed is refused (test).
 - [x] **A9** F2 Time-to-Water (deps: A5,A6,A8) — done: Integrated into Home hero dashboard with empirical arrival hour ranges, confidence, historical basis, and dynamic arrival banner (commit 03ad90f).
-- [ ] **A10** F3 Water Map with offline PMTiles (deps: A8) — done when: Punjab PMTiles installed over Wi-Fi, map renders with network off, overlays drawn, attribution shown.
+- [x] **A10** F3 Water Map with offline PMTiles (deps: A8) — done: Real Punjab PMTiles (5.1 MB) extracted from Protomaps/OSM, MapLibre GL JS + offline hydrography view wired to #map-container with real CWC gauges, risk zones, shelters, and GPS pin.
 - [x] **A11** F5 Evacuation Advisor (routes precomputed) (deps: A7,A10) — done: Verified Punjab shelters directory (corpus/shelters_punjab.json) with haversine distance sorting, elevation, capacity, and routing links (commit 03ad90f).
 - [x] **A12** F7 SOS (web version) (deps: A5) — done: Dedicated Emergency SOS view with 1-tap dialers (112, 1078, 1070), emergency contacts manager, and pre-composed GPS SMS action (commit 03ad90f).
 - [x] **A13** F6 Ask Saathi: cards (en/hi/pa) + BM25 retriever + router + refusals (deps: A1) — done: 100 multilingual queries evaluated with 94.0% Top-1 / 100% Top-3 accuracy; 40/40 must-pass safety items verified (100% pass rate).

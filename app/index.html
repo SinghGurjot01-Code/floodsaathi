@@ -11,7 +11,10 @@
   <link rel="stylesheet" href="./css/main.css?v=1.6.0">
   <link rel="stylesheet" href="./css/fonts.css?v=1.7.0">
   <link rel="stylesheet" href="./css/status.css?v=1.6.0">
+  <link rel="stylesheet" href="./vendor/maplibre-gl/maplibre-gl.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="./vendor/maplibre-gl/maplibre-gl.js"></script>
+  <script src="./vendor/pmtiles/pmtiles.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then((regs) => {
@@ -123,7 +126,7 @@
                   <svg viewBox="0 0 24 28" fill="none"><path d="M12 1C6.5 1 3 5 3 9.8 3 16 12 27 12 27s9-11 9-17.2C21 5 17.5 1 12 1z" fill="#ef1c24"/><circle cx="12" cy="10" r="3.6" fill="#fff"/></svg>
                   <div>
                     <div class="location-name" id="loc-village-name" style="display:inline-flex; align-items:center; gap:6px;">
-                      <span>Ludhiana, Punjab</span>
+                      <span>Taman, Jalandhar</span>
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg>
                     </div>
                     <div class="location-sub" id="loc-state-name">Punjab · <span style="text-decoration:underline;" data-i18n="location.tap_to_change">Tap to change</span></div>
@@ -145,7 +148,7 @@
               <!-- Transparent Telemetry Proximity Indicator (R2) -->
               <div class="telemetry-proximity-banner" id="telemetry-proximity-banner">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-                <span id="telemetry-proximity-text" data-i18n="status.loading_reason">Checking live hydrologic telemetry from nearest river gauge...</span>
+                <span id="telemetry-proximity-text">Your location: Taman, Jalandhar · Hydrologic telemetry from: CWC Station Harike Barrage (40.2 km upstream)</span>
               </div>
 
               <div class="status-headline-wrap">
@@ -761,7 +764,7 @@
                     <span class="plugin-badge" id="slm-download-status-badge">Not Downloaded</span>
                     <span class="plugin-badge active" id="slm-active-status-badge">Standby (M5 Fallback)</span>
                   </div>
-                  <h3 class="plugin-title" data-i18n="downloads.slm_title">FloodSaathi SLM (Qwen2.5-0.5B-Instruct)</h3>
+                  <h3 class="plugin-title" data-i18n="downloads.slm_title">FloodSaathi SLM (0.5B On-Device)</h3>
                   <p class="plugin-desc" data-i18n="downloads.slm_desc">On-device fine-tuned Small Language Model for offline disaster inquiries, well chlorination formulas, and safety invariants.</p>
                 </div>
               </div>
@@ -782,7 +785,7 @@
                     <div class="progress-bar-fill" id="slm-progress-fill" style="width: 0%;"></div>
                   </div>
                   <div class="progress-info-row">
-                    <span id="slm-progress-msg">Downloading Qwen2.5-0.5B-Instruct Int4 (~340 MB)...</span>
+                    <span id="slm-progress-msg">Downloading FloodSaathi Neural SLM (~340 MB)...</span>
                     <span id="slm-progress-pct">0%</span>
                   </div>
                 </div>

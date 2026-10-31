@@ -25,6 +25,8 @@ const PRECACHE_URLS = [
   "./js/ai_assistant.js",
   "./js/shelters.js",
   "./js/map_downloader.js",
+  "./js/map.js",
+  "./data/punjab.pmtiles",
   "./corpus/cards/cards.json",
   "./corpus/helplines.json",
   "./corpus/shelters_punjab.json",
