@@ -39,10 +39,17 @@ if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("./sw.js")
       .then((reg) => {
-        console.log("Service Worker registered:", reg.scope);
         reg.update();
       })
       .catch((err) => console.warn("SW registration failed:", err));
+
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   });
 }
 
@@ -207,30 +214,36 @@ function setupNavigation() {
   document.getElementById("btn-seg-flood-risk")?.addEventListener("click", (e) => {
     document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
     e.currentTarget.classList.add("on");
-    document.getElementById("mk-warn-1")?.style.setProperty("display", "block");
-    document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
-    document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
-    document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    if (!riskStage?.classList.contains("vector-map-active")) {
+      document.getElementById("mk-warn-1")?.style.setProperty("display", "block");
+      document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
+      document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
+      document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    }
     setMapLayerFilter("all");
   });
 
   document.getElementById("btn-seg-shelters")?.addEventListener("click", (e) => {
     document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
     e.currentTarget.classList.add("on");
-    document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
-    document.getElementById("mk-hosp-1")?.style.setProperty("display", "none");
-    document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
-    document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
+    if (!riskStage?.classList.contains("vector-map-active")) {
+      document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
+      document.getElementById("mk-hosp-1")?.style.setProperty("display", "none");
+      document.getElementById("mk-shelter-1")?.style.setProperty("display", "block");
+      document.getElementById("mk-shelter-2")?.style.setProperty("display", "block");
+    }
     setMapLayerFilter("shelters");
   });
 
   document.getElementById("btn-seg-hospitals")?.addEventListener("click", (e) => {
     document.querySelectorAll(".risk-seg button").forEach(b => b.classList.remove("on"));
     e.currentTarget.classList.add("on");
-    document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
-    document.getElementById("mk-shelter-1")?.style.setProperty("display", "none");
-    document.getElementById("mk-shelter-2")?.style.setProperty("display", "none");
-    document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    if (!riskStage?.classList.contains("vector-map-active")) {
+      document.getElementById("mk-warn-1")?.style.setProperty("display", "none");
+      document.getElementById("mk-shelter-1")?.style.setProperty("display", "none");
+      document.getElementById("mk-shelter-2")?.style.setProperty("display", "none");
+      document.getElementById("mk-hosp-1")?.style.setProperty("display", "block");
+    }
     setMapLayerFilter("hospitals");
     const hospMk = document.getElementById("mk-hosp-1");
     if (hospMk) {

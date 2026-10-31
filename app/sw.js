@@ -1,7 +1,7 @@
 // Service Worker for FloodSaathi
 // Provides offline capability for PWA shell and cached data snapshots.
 
-const CACHE_NAME = "floodsaathi-v2.0.0";
+const CACHE_NAME = "floodsaathi-v2.2.0";
 
 const PRECACHE_URLS = [
   "./",
@@ -84,8 +84,14 @@ self.addEventListener("activate", (event) => {
 });
 
 
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.action === "skipWaiting") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") {
+  if (event.request.method !== "GET" || !event.request.url.startsWith("http")) {
     return;
   }
   const url = new URL(event.request.url);
@@ -115,7 +121,7 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
           }
           return response;
         })
@@ -131,7 +137,7 @@ self.addEventListener("fetch", (event) => {
         .then((response) => {
           if (response && response.status === 200) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
           }
           return response;
         })
@@ -149,7 +155,7 @@ self.addEventListener("fetch", (event) => {
       return fetch(event.request).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === "basic") {
           const clone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone)).catch(() => {});
         }
         return networkResponse;
       });
