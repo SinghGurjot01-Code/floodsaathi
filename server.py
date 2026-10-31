@@ -297,10 +297,13 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
             inputs = tokenizer([prompt_text], return_tensors="pt").to(device)
 
             streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+            is_stream = req.get("stream", False)
+            max_tokens = min(int(req.get("max_tokens", 90)), 160)
+
             gen_kwargs = dict(
                 **inputs,
                 streamer=streamer,
-                max_new_tokens=140,
+                max_new_tokens=max_tokens,
                 temperature=0.6,
                 top_p=0.9,
                 do_sample=True,
@@ -311,6 +314,49 @@ class FloodSaathiRequestHandler(SimpleHTTPRequestHandler):
             thread.start()
 
             chunks = []
+            if is_stream:
+                self.send_response(200)
+                self.send_header("Content-Type", "text/event-stream; charset=utf-8")
+                self.send_header("Cache-Control", "no-cache")
+                self.send_header("Connection", "keep-alive")
+                self._send_cors_headers()
+                self.end_headers()
+
+                for token_text in streamer:
+                    chunks.append(token_text)
+                    try:
+                        evt_bytes = f"data: {json.dumps({'token': token_text})}\n\n".encode("utf-8")
+                        self.wfile.write(evt_bytes)
+                        self.wfile.flush()
+                    except (BrokenPipeError, ConnectionResetError):
+                        break
+
+                thread.join()
+                t1 = time.time()
+                duration = max(t1 - t0, 0.05)
+                token_count = len(chunks)
+                tok_per_sec = round(token_count / duration, 1)
+
+                try:
+                    done_payload = {
+                        "done": True,
+                        "stats": {
+                            "tokens": token_count,
+                            "duration_s": round(duration, 2),
+                            "tok_per_sec": tok_per_sec,
+                            "model": "FloodSaathi-Neural-SLM",
+                            "mode": "neural_slm"
+                        },
+                        "helplines": VERIFIED_HELPLINES,
+                        "source": "FloodSaathi Live Neural SLM",
+                        "verified": True
+                    }
+                    self.wfile.write(f"data: {json.dumps(done_payload)}\n\n".encode("utf-8"))
+                    self.wfile.flush()
+                except Exception:
+                    pass
+                return
+
             for token_text in streamer:
                 chunks.append(token_text)
             thread.join()

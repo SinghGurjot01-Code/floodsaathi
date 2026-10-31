@@ -1108,6 +1108,110 @@ async function submitChatQuery(query) {
   const botDiv = document.createElement("div");
   botDiv.className = "msg-bot-wrap";
 
+  // 1. Try real-time streaming first (instant token-by-token response on GPU)
+  try {
+    const streamController = new AbortController();
+    const streamTimeout = setTimeout(() => streamController.abort(), 25000);
+    const streamRes = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query,
+        lang,
+        stream: true,
+        max_tokens: 85
+      }),
+      signal: streamController.signal
+    });
+
+    if (streamRes.ok && streamRes.headers.get("content-type")?.includes("text/event-stream")) {
+      typingDiv.remove();
+
+      botDiv.innerHTML = `
+        <div class="bot-avatar" style="overflow:hidden; padding:0;">
+          <img src="./assets/ui/saathi-logo.png" alt="Saathi" style="width:100%; height:100%; object-fit:cover; display:block;">
+        </div>
+        <article class="bot-card">
+          <div style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:12px; font-size:11.5px; font-weight:700; margin-bottom:8px; border:1px solid #bfdbfe;">
+            <span>⚡ FloodSaathi Live AI</span>
+            <span class="stream-cursor" style="display:inline-block; width:6px; height:12px; background:#1d4ed8; animation:pulse 1s infinite;"></span>
+          </div>
+          <h3 id="stream-bot-title">${lang === "pa" ? "ਫਲੱਡ-ਸਾਥੀ AI ਸਲਾਹ" : lang === "hi" ? "फ्लड-साथी AI सलाह" : "FloodSaathi Neural AI"}</h3>
+          <div id="stream-bot-body" style="font-size:14px; line-height:1.55; color:var(--ink2); white-space:pre-wrap; margin-bottom:10px;"></div>
+          <div id="stream-bot-footer" style="display:none;"></div>
+        </article>
+      `;
+      thread.appendChild(botDiv);
+      thread.scrollTop = thread.scrollHeight;
+
+      const bodyEl = botDiv.querySelector("#stream-bot-body");
+      const footerEl = botDiv.querySelector("#stream-bot-footer");
+
+      const reader = streamRes.body.getReader();
+      const decoder = new TextDecoder();
+      let streamedText = "";
+      let finalStats = null;
+      let finalHelplines = [];
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        clearTimeout(streamTimeout);
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              if (data.token) {
+                streamedText += data.token;
+                bodyEl.textContent = streamedText;
+                thread.scrollTop = thread.scrollHeight;
+              }
+              if (data.done) {
+                finalStats = data.stats;
+                finalHelplines = data.helplines;
+              }
+            } catch {}
+          }
+        }
+      }
+
+      // Finalize formatted card into clean numbered steps
+      const steps = streamedText.split("\n").filter(l => l.trim().length > 0).map(l => l.replace(/^\d+[\.\)]\s*/, ""));
+      const stepItems = steps.map((s, idx) => `<li><span class="step-num">${idx + 1}</span><span>${s}</span></li>`).join("");
+      bodyEl.innerHTML = `<ol class="bot-steps">${stepItems}</ol>`;
+
+      const helplinesHtml = (finalHelplines && finalHelplines.length > 0) ? `
+        <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">
+          ${finalHelplines.slice(0, 3).map(h => `<a href="tel:${h.number}" class="helpline-btn" style="padding:4px 10px; font-size:12px;">📞 ${h.number} (${h.name.split(" ")[0]})</a>`).join("")}
+        </div>
+      ` : "";
+
+      footerEl.style.display = "block";
+      footerEl.innerHTML = `
+        ${helplinesHtml}
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; margin-bottom:4px;">
+          <button class="tts-speaker-btn btn-read-card" aria-label="Listen to answer">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+            <span data-i18n="actions.listen">${t("actions.listen") || "Listen"}</span>
+          </button>
+        </div>
+        <div class="card-source-link">
+          <span>Source: FloodSaathi Live Neural SLM · ${finalStats?.tok_per_sec || 10} tok/s</span>
+          <span style="color:var(--green); font-weight:700;">Verified &check;</span>
+        </div>
+      `;
+
+      botDiv.querySelector(".btn-read-card")?.addEventListener("click", () => {
+        speakText(`FloodSaathi Neural AI. ${streamedText}`, lang);
+      });
+      return;
+    }
+  } catch (streamErr) {
+    // If streaming failed or offline, fall back to standard offline core
+  }
+
   let response = null;
   try {
     const slmDownloaded = await getSetting("slm_model_downloaded", false);
