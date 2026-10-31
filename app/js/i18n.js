@@ -15,15 +15,7 @@ export async function initI18n() {
   if (saved && SUPPORTED_LANGS.includes(saved)) {
     currentLang = saved;
   } else {
-    // Detect browser language if Hindi or Punjabi
-    const navLangs = (typeof navigator !== "undefined" && (navigator.languages || [navigator.language || "en"])) || ["en"];
-    for (const l of navLangs) {
-      const code = l.toLowerCase().split("-")[0];
-      if (SUPPORTED_LANGS.includes(code)) {
-        currentLang = code;
-        break;
-      }
-    }
+    currentLang = DEFAULT_LANG;
   }
 
   await loadTranslations(currentLang);

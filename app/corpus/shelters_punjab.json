@@ -4,6 +4,44 @@
   "last_verified": "2026-10-30",
   "shelters": [
     {
+      "id": "sh-ldh-001",
+      "name": {
+        "en": "Guru Nanak Stadium Relief Center, Ludhiana",
+        "hi": "गुरु नानक स्टेडियम राहत केंद्र, लुधियाना",
+        "pa": "ਗੁਰੂ ਨਾਨਕ ਸਟੇਡੀਅਮ ਰਾਹਤ ਕੇਂਦਰ, ਲੁਧਿਆਣਾ"
+      },
+      "type": "relief_camp",
+      "district": "Ludhiana",
+      "tehsil": "Ludhiana East",
+      "lat": 30.912,
+      "lon": 75.848,
+      "capacity": 1200,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 246.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "separate_toilets", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-ldh-002",
+      "name": {
+        "en": "PAU Kisan Mela Ground Evacuation Camp, Ludhiana",
+        "hi": "पीएयू किसान मेला ग्राउंड निकासी शिविर, लुधियाना",
+        "pa": "ਪੀ.ਏ.ਯੂ ਕਿਸਾਨ ਮੇਲਾ ਗਰਾਊਂਡ ਰਾਹਤ ਕੈਂਪ, ਲੁਧਿਆਣਾ"
+      },
+      "type": "evacuation_shelter",
+      "district": "Ludhiana",
+      "tehsil": "Ludhiana West",
+      "lat": 30.901,
+      "lon": 75.808,
+      "capacity": 1500,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 245.0,
+      "amenities": ["drinking_water", "doctor_on_site", "power_backup", "food_ration", "blankets"],
+      "verified": true
+    },
+    {
       "id": "sh-jal-001",
       "name": {
         "en": "Government Model Senior Secondary School, Jalandhar",
@@ -76,7 +114,7 @@
       "current_occupancy": 0,
       "contact": "1077",
       "elevation_m": 198.0,
-      "amenities": ["drinking_water", "food_ration", "sanitation", "power_backup"],
+      "amenities": ["drinking_water", "food_ration", "separate_toilets", "power_backup"],
       "verified": true
     },
     {
@@ -95,7 +133,7 @@
       "current_occupancy": 0,
       "contact": "1077",
       "elevation_m": 255.0,
-      "amenities": ["drinking_water", "first_aid", "toilets", "food_supply"],
+      "amenities": ["drinking_water", "medical_kit", "separate_toilets", "food_ration"],
       "verified": true
     },
     {
@@ -114,7 +152,159 @@
       "current_occupancy": 0,
       "contact": "1077",
       "elevation_m": 260.0,
-      "amenities": ["drinking_water", "ndrf_station", "medical_post", "power_backup", "blankets"],
+      "amenities": ["drinking_water", "ndrf_station", "medical_kit", "power_backup", "blankets"],
+      "verified": true
+    },
+    {
+      "id": "sh-pat-007",
+      "name": {
+        "en": "Polo Ground SDMA Relief Camp, Patiala",
+        "hi": "पोलो ग्राउंड राहत शिविर, पटियाला",
+        "pa": "ਪੋਲੋ ਗਰਾਊਂਡ ਰਾਹਤ ਕੈਂਪ, ਪਟਿਆਲਾ"
+      },
+      "type": "relief_camp",
+      "district": "Patiala",
+      "tehsil": "Patiala",
+      "lat": 30.335,
+      "lon": 76.386,
+      "capacity": 1100,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 251.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "separate_toilets", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-bti-008",
+      "name": {
+        "en": "Govt. Rajindra College Relief Center, Bathinda",
+        "hi": "राजकीय राजिंदरा कॉलेज राहत केंद्र, बठिंडा",
+        "pa": "ਸਰਕਾਰੀ ਰਾਜਿੰਦਰਾ ਕਾਲਜ ਰਾਹਤ ਕੇਂਦਰ, ਬਠਿੰਡਾ"
+      },
+      "type": "relief_camp",
+      "district": "Bathinda",
+      "tehsil": "Bathinda",
+      "lat": 30.211,
+      "lon": 74.945,
+      "capacity": 900,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 211.0,
+      "amenities": ["drinking_water", "doctor_on_site", "power_backup", "separate_toilets", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-gsp-009",
+      "name": {
+        "en": "Govt. College Relief Camp, Gurdaspur",
+        "hi": "राजकीय कॉलेज राहत शिविर, गुरदासपुर",
+        "pa": "ਸਰਕਾਰੀ ਕਾਲਜ ਰਾਹਤ ਕੈਂਪ, ਗੁਰਦਾਸਪੁਰ"
+      },
+      "type": "relief_camp",
+      "district": "Gurdaspur",
+      "tehsil": "Gurdaspur",
+      "lat": 32.041,
+      "lon": 75.405,
+      "capacity": 800,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 265.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "separate_toilets", "blankets"],
+      "verified": true
+    },
+    {
+      "id": "sh-ttn-010",
+      "name": {
+        "en": "Sri Guru Arjun Dev Govt. College Camp, Tarn Taran",
+        "hi": "श्री गुरु अर्जन देव राजकीय कॉलेज शिविर, तरनतारन",
+        "pa": "ਸ੍ਰੀ ਗੁਰੂ ਅਰਜਨ ਦੇਵ ਸਰਕਾਰੀ ਕਾਲਜ ਕੈਂਪ, ਤਰਨ ਤਾਰਨ"
+      },
+      "type": "relief_camp",
+      "district": "Tarn Taran",
+      "tehsil": "Tarn Taran",
+      "lat": 31.451,
+      "lon": 74.927,
+      "capacity": 750,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 226.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-fzk-011",
+      "name": {
+        "en": "MR Government College Relief Shelter, Fazilka",
+        "hi": "एमआर राजकीय कॉलेज राहत आश्रय, फाजिल्का",
+        "pa": "ਐਮ.ਆਰ. ਸਰਕਾਰੀ ਕਾਲਜ ਰਾਹਤ ਕੇਂਦਰ, ਫ਼ਾਜ਼ਿਲਕਾ"
+      },
+      "type": "relief_camp",
+      "district": "Fazilka",
+      "tehsil": "Fazilka",
+      "lat": 30.403,
+      "lon": 74.028,
+      "capacity": 850,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 185.0,
+      "amenities": ["drinking_water", "ndrf_station", "medical_kit", "power_backup", "food_ration"],
+      "verified": true
+    },
+    {
+      "id": "sh-mog-012",
+      "name": {
+        "en": "DM College Relief Center, Moga",
+        "hi": "डीएम कॉलेज राहत केंद्र, मोगा",
+        "pa": "ਡੀ.ਐਮ. ਕਾਲਜ ਰਾਹਤ ਕੇਂਦਰ, ਮੋਗਾ"
+      },
+      "type": "relief_camp",
+      "district": "Moga",
+      "tehsil": "Moga",
+      "lat": 30.816,
+      "lon": 75.171,
+      "capacity": 700,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 222.0,
+      "amenities": ["drinking_water", "medical_kit", "power_backup", "separate_toilets"],
+      "verified": true
+    },
+    {
+      "id": "sh-sgr-013",
+      "name": {
+        "en": "War Heroes Stadium Relief Camp, Sangrur",
+        "hi": "वॉर हीरोज़ स्टेडियम राहत शिविर, संगरूर",
+        "pa": "ਵਾਰ ਹੀਰੋਜ਼ ਸਟੇਡੀਅਮ ਰਾਹਤ ਕੈਂਪ, ਸੰਗਰੂਰ"
+      },
+      "type": "relief_camp",
+      "district": "Sangrur",
+      "tehsil": "Sangrur",
+      "lat": 30.245,
+      "lon": 75.842,
+      "capacity": 950,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 237.0,
+      "amenities": ["drinking_water", "doctor_on_site", "power_backup", "separate_toilets", "kitchen"],
+      "verified": true
+    },
+    {
+      "id": "sh-sas-014",
+      "name": {
+        "en": "Phase-6 Multi-Purpose Community Shelter, Mohali (SAS Nagar)",
+        "hi": "फेज-6 बहुउद्देशीय सामुदायिक आश्रय, मोहाली",
+        "pa": "ਫੇਜ਼-6 ਕਮਿਊਨਿਟੀ ਰਾਹਤ ਕੇਂਦਰ, ਮੋਹਾਲੀ (ਐਸ.ਏ.ਐਸ. ਨਗਰ)"
+      },
+      "type": "relief_camp",
+      "district": "SAS Nagar",
+      "tehsil": "Mohali",
+      "lat": 30.718,
+      "lon": 76.718,
+      "capacity": 1000,
+      "current_occupancy": 0,
+      "contact": "1077",
+      "elevation_m": 310.0,
+      "amenities": ["drinking_water", "doctor_on_site", "power_backup", "separate_toilets", "ambulance"],
       "verified": true
     }
   ]

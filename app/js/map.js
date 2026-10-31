@@ -207,20 +207,34 @@ export async function initWaterMap(containerId = "map-container", userProfile = 
   const lon = userProfile.lon || 75.576;
   const gauges = snapshot.gauges || [];
 
-  // Probe WebGL and MapLibre availability
-  const hasMapLibre = typeof window !== "undefined" && window.maplibregl;
-  const isWebGLSupported = hasMapLibre && window.maplibregl.supported && window.maplibregl.supported();
+  // Probe WebGL and MapLibre v4 availability
+  const hasMapLibre = typeof window !== "undefined" && window.maplibregl && typeof window.maplibregl.Map === "function";
+  const isWebGLSupported = hasMapLibre && typeof window.WebGLRenderingContext !== "undefined";
 
   // If MapLibre GL is available with WebGL support, build full vector map
   if (isWebGLSupported) {
     try {
+      const stage = typeof document !== "undefined" ? document.getElementById("risk-map-stage") : null;
+      if (stage) stage.classList.add("vector-map-active");
       return await renderMapLibreInstance(container, lat, lon, gauges, userProfile, snapshot);
     } catch (err) {
-      console.warn("MapLibre GL initialization error, falling back to interactive SVG view:", err);
+      console.warn("MapLibre GL initialization error, falling back to FloodSaathi-UI stage:", err);
+      const stage = typeof document !== "undefined" ? document.getElementById("risk-map-stage") : null;
+      if (stage) {
+        stage.classList.remove("vector-map-active");
+        container.style.display = "none";
+        return { container, isFallback: true };
+      }
     }
   }
 
-  // Graceful high-contrast interactive hydrography map fallback (always works offline)
+  // In browser with #risk-map-stage, keep the 1-to-1 FloodSaathi-UI stage clean instead of overlaying text cards
+  if (typeof window !== "undefined" && typeof document !== "undefined" && document.getElementById("risk-map-stage")) {
+    container.style.display = "none";
+    return { container, isFallback: true };
+  }
+
+  // Graceful high-contrast interactive hydrography map fallback for headless/Node test runner
   return renderFallbackHydrographyMap(container, lat, lon, gauges, userProfile);
 }
 
@@ -257,28 +271,56 @@ async function renderMapLibreInstance(container, centerLat, centerLon, gauges, u
       {
         id: "background",
         type: "background",
-        paint: { "background-color": "#f1f5f9" }
+        paint: { "background-color": "#e8eef5" }
+      },
+      {
+        id: "earth",
+        type: "fill",
+        source: "protomaps",
+        "source-layer": "earth",
+        paint: { "fill-color": "#f1f5f9" }
+      },
+      {
+        id: "landuse-park",
+        type: "fill",
+        source: "protomaps",
+        "source-layer": "landuse",
+        paint: { "fill-color": "#dcfce7", "fill-opacity": 0.55 }
       },
       {
         id: "water",
         type: "fill",
         source: "protomaps",
         "source-layer": "water",
-        paint: { "fill-color": "#93c5fd" }
+        paint: { "fill-color": "#60a5fa" }
+      },
+      {
+        id: "buildings",
+        type: "fill",
+        source: "protomaps",
+        "source-layer": "buildings",
+        paint: { "fill-color": "#dde4ed", "fill-opacity": 0.7 }
+      },
+      {
+        id: "roads-casing",
+        type: "line",
+        source: "protomaps",
+        "source-layer": "roads",
+        paint: { "line-color": "#cbd5e1", "line-width": 2.4 }
       },
       {
         id: "roads",
         type: "line",
         source: "protomaps",
         "source-layer": "roads",
-        paint: { "line-color": "#cbd5e1", "line-width": 1 }
+        paint: { "line-color": "#ffffff", "line-width": 1.3 }
       },
       {
         id: "boundaries",
         type: "line",
         source: "protomaps",
         "source-layer": "boundaries",
-        paint: { "line-color": "#94a3b8", "line-width": 1.2, "line-dasharray": [2, 2] }
+        paint: { "line-color": "#94a3b8", "line-width": 1.2, "line-dasharray": [3, 2] }
       }
     ]
   };
@@ -293,9 +335,8 @@ async function renderMapLibreInstance(container, centerLat, centerLon, gauges, u
     attributionControl: false
   });
 
-  // Add standard navigation controls and attribution
-  map.addControl(new window.maplibregl.NavigationControl({ showCompass: true }), "top-right");
-  map.addControl(new window.maplibregl.AttributionControl({ compact: true }), "bottom-right");
+  // Add navigation controls at bottom-right above card so they never overlap the top segmented pill bar
+  map.addControl(new window.maplibregl.NavigationControl({ showCompass: true }), "bottom-right");
 
   mapInstance = map;
   isMapLibreInitialized = true;
@@ -479,8 +520,8 @@ export async function initShelterRouteMap(containerId, userProfile = {}, targetS
   const container = typeof document !== "undefined" ? document.getElementById(containerId) : null;
   if (!container) return null;
 
-  const hasMapLibre = typeof window !== "undefined" && window.maplibregl;
-  const isWebGLSupported = hasMapLibre && window.maplibregl.supported && window.maplibregl.supported();
+  const hasMapLibre = typeof window !== "undefined" && window.maplibregl && typeof window.maplibregl.Map === "function";
+  const isWebGLSupported = hasMapLibre && typeof window.WebGLRenderingContext !== "undefined";
   if (!isWebGLSupported || !targetShelter) return null;
 
   try {

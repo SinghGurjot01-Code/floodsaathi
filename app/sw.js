@@ -1,7 +1,7 @@
 // Service Worker for FloodSaathi
 // Provides offline capability for PWA shell and cached data snapshots.
 
-const CACHE_NAME = "floodsaathi-v1.7.0";
+const CACHE_NAME = "floodsaathi-v1.9.0";
 
 const PRECACHE_URLS = [
   "./",
@@ -79,6 +79,9 @@ self.addEventListener("activate", (event) => {
 
 
 self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") {
+    return;
+  }
   const url = new URL(event.request.url);
 
   // Network-first for dynamic live relay data (punjab.json)

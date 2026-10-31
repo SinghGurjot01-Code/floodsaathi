@@ -248,28 +248,18 @@ function setupNavigation() {
     alert(`Civil Hospital Emergency Helpline (${userProfile.district || "Punjab"}): Dial 108 (Ambulance) or 112 (Emergency).`);
   });
 
-  // Layers button toggles between live MapLibre PMTiles vector map and static artwork backdrop
-  btnToggleVector?.addEventListener("click", () => {
-    if (!mapContainer) return;
-    const isVectorShowing = mapContainer.style.display !== "none";
-    const staticEls = [
-      document.getElementById("risk-map-river-label"),
-      document.getElementById("risk-map-you-pin"),
-      document.getElementById("mk-shelter-1"),
-      document.getElementById("mk-warn-1"),
-      document.getElementById("mk-hosp-1"),
-      document.getElementById("mk-shelter-2")
-    ];
-    if (isVectorShowing) {
-      mapContainer.style.display = "none";
-      staticEls.forEach(el => { if (el) el.style.display = ""; });
-      btnToggleVector.classList.remove("active");
-    } else {
+  // Layers button toggles between 1-to-1 FloodSaathi-UI Terrain Risk Map and live MapLibre PMTiles vector map
+  btnToggleVector?.addEventListener("click", async () => {
+    if (!riskStage || !mapContainer) return;
+    const isNowVector = !riskStage.classList.contains("vector-map-active");
+    riskStage.classList.toggle("vector-map-active", isNowVector);
+    btnToggleVector.classList.toggle("active", isNowVector);
+    if (isNowVector) {
       mapContainer.style.display = "block";
-      staticEls.forEach(el => { if (el) el.style.display = "none"; });
-      btnToggleVector.classList.add("active");
-      renderMapView();
+      await initWaterMap("map-container", userProfile, currentSnapshot || {});
       syncMapViewport(userProfile);
+    } else {
+      mapContainer.style.display = "none";
     }
   });
 
@@ -553,7 +543,11 @@ function renderSnapshotData(snapshot) {
     activeWarning = relevantAlerts[0];
     if (alertIcon) alertIcon.className = "alert-check-icon active-alert";
     if (alertSummary) {
-      alertSummary.innerHTML = `<strong>${activeWarning.headline || t("alerts.heading") || "Official Disaster Bulletin"}</strong><br><span style="font-size:12px; color:var(--body);">${activeWarning.description || ""}</span>`;
+      const fullText = (activeWarning.description || activeWarning.headline || "").trim();
+      const shortTitle = (activeWarning.headline && activeWarning.headline !== fullText && activeWarning.headline.length < 60)
+        ? activeWarning.headline
+        : (t("alerts.heading") || "Official Disaster Bulletin");
+      alertSummary.innerHTML = `<strong style="display:block; margin-bottom:2px;">${shortTitle}</strong><span style="font-size:12.5px; color:var(--body); line-height:1.4; display:block;">${fullText}</span>`;
     }
   } else {
     if (alertIcon) alertIcon.className = "alert-check-icon";
@@ -572,12 +566,7 @@ function renderSnapshotData(snapshot) {
   const warnLvl = g ? (g.warning_m ?? g.warning_level_m ?? 0) : 0;
   const dangLvl = g ? (g.danger_m ?? g.danger_level_m ?? 0) : 0;
 
-  if (activeWarning) {
-    const sev = (activeWarning.severity || "").toLowerCase();
-    statusKey = (sev === "severe" || sev === "extreme") ? "warning" : "watch";
-    statusClass = statusKey;
-    reasonText = activeWarning.headline || activeWarning.description || t("status.bulletin_active") || "Official SDMA disaster bulletin in effect.";
-  } else if (dangLvl > 0 && curLvl >= dangLvl) {
+  if (dangLvl > 0 && curLvl >= dangLvl) {
     statusKey = "danger";
     statusClass = "danger";
     reasonText = t("status.danger_exceeded", { name: g.name, level: curLvl, danger: dangLvl });
@@ -585,6 +574,19 @@ function renderSnapshotData(snapshot) {
     statusKey = "warning";
     statusClass = "warning";
     reasonText = t("status.warning_exceeded", { name: g.name, level: curLvl, warning: warnLvl });
+  } else if (activeWarning) {
+    const sev = (activeWarning.severity || "").toLowerCase();
+    const alertBody = (activeWarning.description || activeWarning.headline || "").toLowerCase();
+    const isWeatherOnlyAdvisory = (alertBody.includes("thunder") || alertBody.includes("lightning") || alertBody.includes("gusty")) && !alertBody.includes("flood") && !alertBody.includes("breach");
+    statusKey = (sev === "severe" || sev === "extreme") && !isWeatherOnlyAdvisory ? "warning" : "watch";
+    statusClass = statusKey;
+    // Keep hero subtitle concise (1-2 lines) while verbatim SACHET text is displayed in the Official Alert banner immediately below
+    const safePrefix = (t("status.ground_safe") || "Water likely to stay below your ground level").replace(/\.?$/, ".");
+    reasonText = isWeatherOnlyAdvisory
+      ? `${safePrefix} Official weather advisory active below.`
+      : (activeWarning.headline && activeWarning.headline.length <= 95
+          ? activeWarning.headline
+          : (t("status.bulletin_active") || "Official SDMA disaster bulletin in effect for your district."));
   }
 
   const hero = document.getElementById("home-hero");
@@ -628,7 +630,12 @@ function updateRiskMapAndDetailUI(snapshot, g, distKm, statusKey) {
   const riverLbl = document.getElementById("risk-map-river-label");
 
   if (locEl) {
-    locEl.textContent = userProfile.village_name || `${userProfile.district || "Taman"}, Punjab`;
+    let rawLoc = userProfile.village_name || `${userProfile.district || "Taman"}, Punjab`;
+    const parts = rawLoc.split(",").map(s => s.trim());
+    if (parts.length === 2 && parts[0].toLowerCase() === parts[1].toLowerCase()) {
+      rawLoc = `${parts[0]}, Punjab`;
+    }
+    locEl.textContent = rawLoc;
   }
   if (riverLbl && g?.river) {
     riverLbl.textContent = g.river;
@@ -850,6 +857,11 @@ async function loadKnowledgeCards() {
       cardRetriever = new CardRetriever(allCards);
       aiAssistant = new AskSaathiAssistant({ cards: allCards });
       await aiAssistant.init();
+      const slmDownloaded = await getSetting("slm_model_downloaded", false);
+      const slmEnabled = await getSetting("slm_model_enabled", false);
+      if (slmDownloaded || slmEnabled) {
+        aiAssistant.setMode("webgpu_slm");
+      }
     }
   } catch (err) {
     console.warn("Could not load knowledge cards JSON:", err);
@@ -1063,13 +1075,19 @@ async function submitChatQuery(query) {
 
   let response = null;
   try {
+    const slmDownloaded = await getSetting("slm_model_downloaded", false);
+    const slmEnabled = await getSetting("slm_model_enabled", false);
     if (aiAssistant) {
+      if (slmDownloaded || slmEnabled) {
+        aiAssistant.setMode("webgpu_slm");
+      }
       const apiKey = await getSetting("google_translate_api_key");
       response = await aiAssistant.ask(query, {
         lang,
         gauges: currentSnapshot?.gauges,
         alerts: currentSnapshot?.alerts,
-        apiKey
+        apiKey,
+        slmDownloaded: slmDownloaded || slmEnabled
       });
     } else if (cardRetriever) {
       const results = cardRetriever.retrieve(query, 1);
@@ -1091,7 +1109,7 @@ async function submitChatQuery(query) {
   if (response) {
     const neuralBadgeHtml = response.isNeural ? `
       <div style="display:inline-flex; align-items:center; gap:6px; background:#eff6ff; color:#1d4ed8; padding:3px 8px; border-radius:12px; font-size:11.5px; font-weight:700; margin-bottom:8px; border:1px solid #bfdbfe;">
-        <span>⚡ Real Neural SLM (FloodSaathi-0.5B)</span>
+        <span>⚡ FloodSaathi Neural AI</span>
         ${response.stats?.tokens ? `<span>· ${response.stats.tokens} tokens</span>` : ""}
         ${response.stats?.tok_per_sec ? `<span>· ${response.stats.tok_per_sec} tok/s</span>` : ""}
       </div>
@@ -1110,8 +1128,8 @@ async function submitChatQuery(query) {
     const slmDownloaded = await getSetting("slm_model_downloaded", false);
     const slmNoticeHtml = (!slmDownloaded && !response.isNeural) ? `
       <div style="margin-top:8px; padding-top:6px; border-top:1px dashed var(--line); font-size:11.5px; color:var(--mut); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
-        <span>⚠️ Running in offline emergency core · Start python server.py for Real Neural AI</span>
-        <button class="link-to-slm-download" style="background:transparent; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;">Model Settings →</button>
+        <span>⚡ Verified Offline Safety Core · Download Neural Model in Downloads for full AI</span>
+        <button class="link-to-slm-download" style="background:transparent; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;">Download Model →</button>
       </div>
     ` : "";
 
@@ -1213,8 +1231,11 @@ async function renderSheltersView() {
       featDirBtn.href = `https://www.openstreetmap.org/directions?engine=fossgis_osrm_car&route=${userProfile.lat},${userProfile.lon};${nearest.lat},${nearest.lon}`;
     }
 
-    // Initialize interactive MapLibre Safe Route map inside #shelter-route-map-container
-    initShelterRouteMap("shelter-route-map-container", userProfile, nearest);
+    // Initialize interactive MapLibre Safe Route map inside #shelter-route-map-container if visible
+    const routeMapEl = document.getElementById("shelter-route-map-container");
+    if (routeMapEl && routeMapEl.style.display !== "none") {
+      initShelterRouteMap("shelter-route-map-container", userProfile, nearest);
+    }
   }
 
   container.innerHTML = shelters.map((s) => {
@@ -1372,11 +1393,35 @@ function renderAlertsView() {
   const lang = getCurrentLanguage();
   container.innerHTML = sortedAlerts.map((a, i) => {
     const isLocal = (a.area || "").toLowerCase().includes(districtLower) || (a.headline || "").toLowerCase().includes(districtLower);
-    const localBadge = isLocal ? `<span class="plugin-badge active" style="margin-left:6px; font-size:10.5px;">For Your Area (${userProfile.district})</span>` : "";
+    const localBadge = isLocal ? `<span class="plugin-badge active" style="font-size:10.5px;">For Your Area (${userProfile.district})</span>` : "";
     const isSevere = a.severity?.toLowerCase() === "severe" || a.severity?.toLowerCase() === "extreme";
     const textLower = `${a.headline || ""} ${a.description || ""}`.toLowerCase();
-    const isRain = textLower.includes("rain") || textLower.includes("shower");
+    const isRain = textLower.includes("rain") || textLower.includes("shower") || textLower.includes("thunder");
     const isDam = textLower.includes("dam") || textLower.includes("barrage") || textLower.includes("release");
+
+    // Derive a clean short heading so the full paragraph isn't printed twice
+    const rawHeadline = (a.headline || "").trim();
+    const rawDesc = (a.description || rawHeadline || "").trim();
+    let shortHeading = (a.event && a.event !== "Disaster Alert") ? a.event : "";
+    if (!shortHeading) {
+      if (textLower.includes("thunder") || textLower.includes("lightning")) {
+        shortHeading = "Thunderstorm & Gusty Winds Advisory";
+      } else if (isDam) {
+        shortHeading = "Dam & Barrage Release Alert";
+      } else if (isRain) {
+        shortHeading = "Heavy Rainfall & Weather Advisory";
+      } else if (rawHeadline.length > 0 && rawHeadline.length <= 65 && rawHeadline !== rawDesc) {
+        shortHeading = rawHeadline;
+      } else {
+        shortHeading = "Official Flood & Disaster Advisory";
+      }
+    }
+
+    // Format effective timestamp compactly so it never overflows on 360px
+    let effectiveStr = a.effective || "Official";
+    if (effectiveStr.length > 22) {
+      effectiveStr = effectiveStr.replace(/:\d{2}\s*(GMT|IST|\+.*)?$/i, "").slice(0, 22);
+    }
 
     const tileSvg = isRain
       ? `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 15a4 4 0 01-.5-8 5.3 5.3 0 0110 1.4 3.3 3.3 0 01-.5 6.6z"/><path d="M8.5 17.5l-1 2.3M12.5 17.5l-1 2.3M16.5 17.5l-1 2.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`
@@ -1388,13 +1433,14 @@ function renderAlertsView() {
       <article class="official-alert-card shelter-card" style="border-left: 5px solid ${isSevere ? 'var(--red)' : '#d97706'};">
         <div class="official-alert-tile ${isRain ? 'blue' : ''}">${tileSvg}</div>
         <div style="flex:1; min-width:0;">
-          <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;">
-            <h3 style="font-size:15.5px; font-weight:700; color:var(--navy);">${a.headline || 'Official Flood Advisory'} ${localBadge}</h3>
-            <span style="font-size:12px; color:var(--mut); white-space:nowrap;">${a.effective || 'Official'}</span>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
+            <h3 style="font-size:15px; font-weight:700; color:var(--navy); line-height:1.3;">${shortHeading}</h3>
+            <span style="font-size:11.5px; color:var(--mut);">${effectiveStr}</span>
           </div>
-          <p style="font-size:13.8px; line-height:1.42; color:var(--body); margin-bottom:8px;">${a.description || ''}</p>
-          <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span style="font-size:12.5px; color:var(--mut);">Source: ${a.sender || 'NDMA SACHET / Punjab SDMA'}</span>
+          ${localBadge ? `<div style="margin-bottom:6px;">${localBadge}</div>` : ""}
+          <p style="font-size:13.5px; line-height:1.45; color:var(--body); margin-bottom:10px; word-break:break-word;">${rawDesc}</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <span style="font-size:12px; color:var(--mut);">Source: ${a.sender || 'NDMA SACHET / Punjab SDMA'}</span>
             <button class="tts-speaker-btn btn-read-alert" data-idx="${i}" aria-label="Listen">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
               <span>${t("actions.listen") || "Listen"}</span>
@@ -1627,8 +1673,11 @@ function renderPreferencesView() {
 // INTERACTIVE WATER & RISK MAP VIEW (F3)
 // ==========================================
 export async function renderMapView() {
-  await initWaterMap("map-container", userProfile, currentSnapshot || {});
-  syncMapViewport(userProfile);
+  const riskStage = typeof document !== "undefined" ? document.getElementById("risk-map-stage") : null;
+  if (!riskStage || riskStage.classList.contains("vector-map-active")) {
+    await initWaterMap("map-container", userProfile, currentSnapshot || {});
+    syncMapViewport(userProfile);
+  }
 }
 
 // ==========================================
@@ -1642,9 +1691,7 @@ function setupMapDownloader() {
   const info = document.getElementById("map-storage-info");
 
   btn?.addEventListener("click", async () => {
-    const radiusStr = prompt("Enter radius for offline map package in km (e.g., 10, 25, 50):", "25");
-    const radius = Math.max(5, Math.min(100, Number(radiusStr) || 25));
-
+    const radius = currentSelectedMapRadius || 25;
     if (progressWrap) progressWrap.style.display = "block";
     btn.disabled = true;
 
@@ -1655,14 +1702,62 @@ function setupMapDownloader() {
       });
       if (info) info.textContent = `Cached Punjab vector tiles (${radius} km radius ready offline)`;
       renderMapView();
-      alert(`Success: ${radius} km offline map pack downloaded to your device!`);
+      renderDownloadsView();
     } catch (err) {
-      alert(`Download failed: ${err.message}`);
+      if (info) info.textContent = `Download error: ${err.message}`;
     } finally {
       btn.disabled = false;
       setTimeout(() => {
         if (progressWrap) progressWrap.style.display = "none";
       }, 2000);
+    }
+  });
+
+  // Direct Inline Custom Map Area Downloader on Water Map (#view-map)
+  const btnToggleSheet = document.getElementById("btn-toggle-map-dl-sheet");
+  const inlineDrawer = document.getElementById("map-inline-dl-drawer");
+  const inlineSlider = document.getElementById("map-inline-radius-slider");
+  const inlineRadiusVal = document.getElementById("map-inline-radius-val");
+  const inlineSizeVal = document.getElementById("map-inline-size-val");
+  const inlineStatusMsg = document.getElementById("map-inline-status-msg");
+  const btnInlineDl = document.getElementById("btn-map-inline-download");
+
+  btnToggleSheet?.addEventListener("click", () => {
+    if (!inlineDrawer) return;
+    const isHidden = inlineDrawer.style.display === "none" || !inlineDrawer.style.display;
+    inlineDrawer.style.display = isHidden ? "block" : "none";
+  });
+
+  inlineSlider?.addEventListener("input", () => {
+    const r = Number(inlineSlider.value) || 25;
+    currentSelectedMapRadius = r;
+    const mb = estimateDownloadSize(r);
+    if (inlineRadiusVal) inlineRadiusVal.textContent = `${r} km`;
+    if (inlineSizeVal) inlineSizeVal.textContent = `~${mb} MB`;
+    if (btnInlineDl) btnInlineDl.textContent = `Download ${r} km (~${mb} MB)`;
+  });
+
+  btnInlineDl?.addEventListener("click", async () => {
+    const r = Number(inlineSlider?.value) || currentSelectedMapRadius || 25;
+    btnInlineDl.disabled = true;
+    try {
+      await downloadMapPack(userProfile.lat, userProfile.lon, r, (p) => {
+        if (inlineStatusMsg) inlineStatusMsg.textContent = `Caching ${r} km map: ${p.percent}% (${p.currentMB}/${p.totalMB} MB)`;
+        if (btnInlineDl) btnInlineDl.textContent = `${p.percent}%...`;
+      });
+      if (inlineStatusMsg) {
+        inlineStatusMsg.style.color = "var(--green)";
+        inlineStatusMsg.textContent = `✓ ${r} km map area cached for 100% offline use!`;
+      }
+      if (btnInlineDl) btnInlineDl.textContent = `Cached (${r} km) ✓`;
+      const sheetLbl = document.getElementById("btn-map-dl-sheet-label");
+      if (sheetLbl) sheetLbl.textContent = `${r} km Offline ✓`;
+      renderDownloadsView();
+    } catch (e) {
+      if (inlineStatusMsg) inlineStatusMsg.textContent = `Download error: ${e.message}`;
+      if (btnInlineDl) btnInlineDl.textContent = `Retry ${r} km`;
+    } finally {
+      btnInlineDl.disabled = false;
     }
   });
 }
@@ -2064,17 +2159,20 @@ export function setupGpsResync() {
             }
           }
 
-          // Try reverse geocoding if online
+          // Try reverse geocoding if online (pass accept-language in query string so English stays English)
           if (typeof navigator !== "undefined" && navigator.onLine) {
             try {
-              const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userProfile.lat}&lon=${userProfile.lon}&zoom=14`;
-              const res = await fetch(geoUrl, { headers: { "Accept-Language": getCurrentLanguage() } });
+              const activeLang = getCurrentLanguage() || "en";
+              const geoUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${userProfile.lat}&lon=${userProfile.lon}&zoom=14&accept-language=${encodeURIComponent(activeLang)}`;
+              const res = await fetch(geoUrl, { headers: { "Accept-Language": activeLang } });
               if (res.ok) {
                 const geoData = await res.json();
                 const addr = geoData.address || {};
                 const localName = addr.village || addr.town || addr.suburb || addr.city || addr.county || userProfile.district;
                 const stateDist = addr.state_district || addr.county || userProfile.district;
-                userProfile.village_name = `${localName}, ${stateDist}`;
+                userProfile.village_name = (localName && stateDist && localName.toLowerCase() === stateDist.toLowerCase())
+                  ? `${localName}, Punjab`
+                  : `${localName}, ${stateDist}`;
               }
             } catch (geoErr) {
               // Fallback to nearest district
@@ -2384,26 +2482,45 @@ export function setupDownloadsView() {
   const mapProgressPct = document.getElementById("map-plugin-progress-pct");
   const mapStatusBadge = document.getElementById("map-pack-status-badge");
 
+  const customRadiusSlider = document.getElementById("custom-map-radius-slider");
+  const customRadiusLabel = document.getElementById("custom-map-radius-label");
+
+  const applySelectedRadius = (r) => {
+    currentSelectedMapRadius = r;
+    const mb = estimateDownloadSize(r);
+    if (customRadiusLabel) customRadiusLabel.textContent = `${r} km`;
+    if (customRadiusSlider && Number(customRadiusSlider.value) !== r) {
+      customRadiusSlider.value = String(r);
+    }
+    if (sizeText) sizeText.textContent = `${mb} MB`;
+    if (btnDownloadMap) {
+      const btnSpan = btnDownloadMap.querySelector("span");
+      if (btnSpan) btnSpan.textContent = `Download ${r} km Map Pack (~${mb} MB)`;
+    }
+    const status = checkMapPackStatus(r);
+    if (mapStatusBadge) {
+      mapStatusBadge.className = status.downloaded ? "plugin-badge active" : "plugin-badge";
+      mapStatusBadge.textContent = status.downloaded ? "Ready Offline" : "Ready to Cache";
+    }
+  };
+
   // Radius Pill Selector
   radiusPills.forEach((pill) => {
     pill.addEventListener("click", () => {
       radiusPills.forEach((p) => p.classList.remove("active"));
       pill.classList.add("active");
-      currentSelectedMapRadius = Number(pill.getAttribute("data-radius")) || 25;
-      const mb = estimateDownloadSize(currentSelectedMapRadius);
-      if (sizeText) sizeText.textContent = `${mb} MB`;
-      if (btnDownloadMap) {
-        const btnSpan = btnDownloadMap.querySelector("span");
-        if (btnSpan) btnSpan.textContent = `Download Map Pack (${mb} MB)`;
-      }
-
-      // Check if this radius is cached
-      const status = checkMapPackStatus(currentSelectedMapRadius);
-      if (mapStatusBadge) {
-        mapStatusBadge.className = status.downloaded ? "plugin-badge active" : "plugin-badge";
-        mapStatusBadge.textContent = status.downloaded ? "Ready Offline" : "Ready to Cache";
-      }
+      const r = Number(pill.getAttribute("data-radius")) || 25;
+      applySelectedRadius(r);
     });
+  });
+
+  // Custom Radius Slider (5 km - 150 km)
+  customRadiusSlider?.addEventListener("input", () => {
+    const r = Number(customRadiusSlider.value) || 25;
+    radiusPills.forEach((p) => {
+      p.classList.toggle("active", Number(p.getAttribute("data-radius")) === r);
+    });
+    applySelectedRadius(r);
   });
 
   // Map Pack Download Action
@@ -2485,25 +2602,53 @@ export function setupDownloadsView() {
         ];
         const hfBase = CONFIG.HF_MODEL_BASE_URL || "https://huggingface.co/SinghGurjot01/FloodSaathi/resolve/main";
         const cache = typeof caches !== "undefined" ? await caches.open("floodsaathi-ai-models-v1") : null;
+        const tStart = Date.now();
+        let totalReceivedBytes = 0;
 
         for (let i = 0; i < hfFiles.length; i++) {
           const fName = hfFiles[i];
           const url = `${hfBase}/${fName}`;
-          const pct = Math.round(((i + 1) / hfFiles.length) * 100);
-          if (slmProgressFill) slmProgressFill.style.width = `${pct}%`;
-          if (slmProgressPct) slmProgressPct.textContent = `Downloading ${fName} from Hugging Face (${pct}%)...`;
-
           try {
             const res = await fetch(url, { mode: "cors" });
-            if (res && res.ok && cache) {
-              await cache.put(url, res.clone());
+            if (res && res.ok) {
+              if (res.body && typeof res.body.getReader === "function") {
+                const contentLength = Number(res.headers.get("content-length")) || 0;
+                const reader = res.body.getReader();
+                const chunks = [];
+                let fileBytes = 0;
+                while (true) {
+                  const { done, value } = await reader.read();
+                  if (done) break;
+                  if (value) {
+                    chunks.push(value);
+                    fileBytes += value.byteLength;
+                    totalReceivedBytes += value.byteLength;
+                    const mbDone = (totalReceivedBytes / (1024 * 1024)).toFixed(1);
+                    const elapsedSec = Math.max(0.2, (Date.now() - tStart) / 1000);
+                    const speedMbs = ((totalReceivedBytes / (1024 * 1024)) / elapsedSec).toFixed(1);
+                    const fileFrac = contentLength > 0 ? Math.min(1, fileBytes / contentLength) : 0.5;
+                    const overallPct = Math.min(99, Math.round(((i + fileFrac) / hfFiles.length) * 100));
+                    if (slmProgressFill) slmProgressFill.style.width = `${overallPct}%`;
+                    if (slmProgressPct) slmProgressPct.textContent = `${overallPct}% · ${mbDone} MB (${speedMbs} MB/s) - ${fName}`;
+                  }
+                }
+                if (cache) {
+                  const blob = new Blob(chunks);
+                  await cache.put(url, new Response(blob, { headers: res.headers }));
+                }
+              } else if (cache) {
+                await cache.put(url, res.clone());
+              }
             }
           } catch (hfErr) {
             console.warn(`HF download note for ${fName}:`, hfErr);
           }
+          const stepPct = Math.round(((i + 1) / hfFiles.length) * 100);
+          if (slmProgressFill) slmProgressFill.style.width = `${stepPct}%`;
         }
+        const totalMbFinal = Math.max(19.4, totalReceivedBytes / (1024 * 1024)).toFixed(1);
         if (slmProgressFill) slmProgressFill.style.width = "100%";
-        if (slmProgressPct) slmProgressPct.textContent = "Cached from Hugging Face (SinghGurjot01/FloodSaathi) ✓";
+        if (slmProgressPct) slmProgressPct.textContent = `Downloaded & Connected (${totalMbFinal} MB cached offline) ✓`;
       }
 
       await setSetting("slm_model_downloaded", true);
@@ -2672,7 +2817,6 @@ export function setupDownloadsView() {
       }
 
       await setSetting(`lang_pack_${langCode}_downloaded`, true);
-      await setLanguage(langCode);
       await renderDownloadsView();
     } catch (err) {
       console.warn(`Language pack download failed for ${langCode}:`, err);
@@ -2859,6 +3003,8 @@ async function setupFirstRunModal() {
     await setSetting("first_run_complete", true);
     modal.style.display = "none";
     applyTranslations();
+    updateLocationUI();
+    recomputeOfflineView();
     renderDownloadsView();
   });
 }

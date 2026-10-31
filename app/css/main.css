@@ -234,40 +234,53 @@ body {
   color: #ffffff;
 }
 
-/* Persistent Emergency Bar */
+/* Persistent Emergency Bar (Clean White Background, No 'Emergency:' label) */
 .helpline-bar {
   flex: none;
-  background: #12172b;
-  padding: 6px 16px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  color: #ffffff;
-  font-size: 13px;
+  justify-content: center;
+  gap: 8px;
+  color: var(--navy);
+  font-size: 12px;
   font-weight: 600;
   z-index: 45;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .helpline-links {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
+  justify-content: center;
+  width: 100%;
 }
 
 .helpline-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: 14px;
+  justify-content: center;
+  gap: 4px;
+  padding: 5px 11px;
+  border-radius: 999px;
   background: var(--red);
   color: #ffffff;
   text-decoration: none;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(235, 30, 38, 0.22);
 }
 
 .helpline-btn.sec {
-  background: #2563eb;
+  background: #f1f5f9;
+  color: #1e293b;
+  border: 1px solid #cbd5e1;
+  box-shadow: none;
 }
 
 /* Offline Notice Banner */
@@ -346,7 +359,72 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 14px;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 480px) {
+  .home-hero {
+    padding: 12px 16px 18px 16px;
+  }
+  .location-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 5px 10px 5px 7px !important;
+    gap: 7px !important;
+  }
+  .location-name {
+    font-size: 13.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .location-sub {
+    font-size: 10.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  #btn-resync-gps span,
+  #btn-hero-tts span {
+    display: none;
+  }
+  #btn-resync-gps,
+  #btn-hero-tts {
+    min-width: 38px;
+    width: 38px;
+    min-height: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+  }
+  .bell-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+  .telemetry-proximity-banner {
+    padding: 6px 10px;
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+  .status-hero-word {
+    font-size: 32px;
+  }
+  .status-hero-sub {
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.35;
+  }
+  .status-headline-wrap {
+    margin-bottom: 8px;
+  }
+  .arrival-banner {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+  }
 }
 
 .btn-resync-gps {
@@ -900,6 +978,38 @@ body {
   text-decoration: none;
 }
 
+.quick-prompt-btn,
+.amenity-chip.btn-suggested-query {
+  appearance: none;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 7px 13px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quick-prompt-btn:hover,
+.amenity-chip.btn-suggested-query:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: var(--blue);
+}
+
+.alert-filter-row,
+.alerts-filter-chips {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.alert-filter-row::-webkit-scrollbar,
+.alerts-filter-chips::-webkit-scrollbar {
+  display: none;
+}
+
 .chat-composer {
   flex: none;
   display: flex;
@@ -983,12 +1093,6 @@ body {
   transform: translateY(-1px);
   box-shadow: 0 5px 14px rgba(239, 68, 68, 0.4);
 }
-  display: grid;
-  place-items: center;
-  color: #ffffff;
-  cursor: pointer;
-  box-shadow: 0 3px 10px rgba(239, 28, 36, 0.3);
-}
 
 /* =========================================
    MAP & OFFLINE DOWNLOADER VIEW
@@ -1010,14 +1114,7 @@ body {
 }
 
 .map-control-overlay {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  z-index: 20;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: none;
 }
 
 .map-card-panel {
@@ -1329,10 +1426,29 @@ body {
   }
 }
 
-/* --- HOME VIEW (2-COLUMN PC DASHBOARD) --- */
+/* --- HOME VIEW (2-COLUMN PC DASHBOARD & CLEAN 1-TO-1 MOBILE FLOW) --- */
 .home-layout-grid {
   display: flex;
   flex-direction: column;
+}
+
+.home-secondary-details {
+  padding: 0 16px 20px;
+}
+
+@media (max-width: 767px) {
+  .home-hero-col {
+    display: contents;
+  }
+  .home-hero {
+    order: 1;
+  }
+  .home-metrics-col {
+    order: 2;
+  }
+  .home-secondary-details {
+    order: 3;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1457,6 +1573,9 @@ body {
   }
 
   .map-control-overlay {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
     position: static;
     padding: 20px;
     background: #fafbfc;
@@ -1695,13 +1814,13 @@ body {
 
 .plugins-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
 }
 
 @media (min-width: 768px) {
   .plugins-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px;
   }
 }
@@ -1710,7 +1829,9 @@ body {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 18px;
-  padding: 20px;
+  padding: 16px;
+  min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -1730,9 +1851,10 @@ body {
 
 .plugin-card-top {
   display: flex;
-  gap: 14px;
+  gap: 12px;
   align-items: flex-start;
   margin-bottom: 14px;
+  min-width: 0;
 }
 
 .plugin-icon {
@@ -1746,6 +1868,7 @@ body {
 
 .plugin-meta {
   flex: 1;
+  min-width: 0;
 }
 
 .plugin-badge-row {
@@ -2031,6 +2154,20 @@ body {
   inset: 0;
   background: url("../assets/ui/risk-map-bg.jpg") center 46% / cover no-repeat;
   z-index: 1;
+}
+
+.risk-map-stage #map-container {
+  display: none;
+}
+
+.risk-map-stage.vector-map-active #map-container {
+  display: block !important;
+}
+
+.risk-map-stage.vector-map-active .mk,
+.risk-map-stage.vector-map-active .you-pin,
+.risk-map-stage.vector-map-active .river-lbl {
+  display: none !important;
 }
 
 .risk-map-stage .river-lbl {
